@@ -1,0 +1,251 @@
+{
+  "id": "urn:contentEntry:6ab9ae5093574c5950ddf855",
+  "title": "Build a Customer-Facing AI FAQ Bot",
+  "resourceType": "TUTORIAL",
+  "description": "Train a chatbot on your own content, a website, PDF, or doc, and publish a live, shareable link customers can use, in about an hour.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5093574c5950ddf855",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "meta": {
+      "mins_total": 60
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "outcomes",
+        "children": [
+          {
+            "text": "Led by **Ami F.**",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Built a working, deployable AI FAQ chatbot trained on their own content, a website URL, PDF, or doc they brought to the session.",
+              "Used Claude to write a tailored system prompt that defines who the bot is, what it knows, how it should respond, and what to do when it doesn't know an answer.",
+              "Tested the bot against real customer questions, then used Claude to iteratively strengthen any answer that came back wrong or vague.",
+              "Published the bot and walked away with a live shareable link and an embeddable iframe snippet, no code or engineering required."
+            ],
+            "title": "What you'll build",
+            "variant": "check"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "intro",
+        "title": "Session intro",
+        "subtitle": "What you need before we start and what this session covers.",
+        "children": [
+          {
+            "text": "**What to have ready before we start**",
+            "type": "prose"
+          },
+          {
+            "text": "A few minutes of prep before the session keeps the build moving.",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "A paid Claude account ([claude.ai](http://claude.ai))",
+              "A piece of content to train your bot on: a website URL, a PDF, or a Google Doc",
+              "A use case in mind (examples: customer support FAQ, product documentation, onboarding guide, service menu)",
+              "No content ready? Use a public website URL instead, your company site, a product page, or a competitor's page"
+            ],
+            "variant": "check"
+          },
+          {
+            "text": "**What you'll build today**",
+            "type": "prose"
+          },
+          {
+            "text": "By the end of this session, you'll have a live, deployable chatbot trained on your own content:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "A **customer-facing FAQ chatbot** trained on the website, PDF, or doc you bring, with a system prompt Claude writes and tailors to your use case.",
+              "A **live, shareable link** and an **embeddable iframe snippet** you can send to customers or drop onto a website today."
+            ]
+          },
+          {
+            "text": "No code. No engineering. Just a real product you built yourself in about an hour.",
+            "type": "prose",
+            "variant": "footnote"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-1",
+        "title": "1. Build your customer-facing FAQ bot",
+        "subtitle": "Chatbase trains on your content, Claude writes the system prompt that makes it sound right.",
+        "children": [
+          {
+            "text": "**The system prompt is what actually determines bot quality**",
+            "type": "prose"
+          },
+          {
+            "text": "Every chatbot builder markets the training step, point it at a URL or a PDF and it \"knows\" your content. That part is genuinely fast. What separates a bot that sounds like a real support rep from one that sounds like a generic search box is the system prompt: the instructions that tell the model who it is, what it's allowed to talk about, what tone to use, and what to say when it doesn't know something.\n\nMost people skip this step or leave it to the platform's default, then wonder why the bot's answers feel flat or occasionally make something up. The fix isn't a better platform, it's a better prompt. And you don't have to write it cold: describe your business, your content, the questions customers actually ask, and the tone you want, then have Claude turn that into a structured system prompt. It will cover things you'd forget on your own, like an explicit fallback instruction for questions outside the bot's knowledge.\n\nThis is also why testing and refining matters more than the initial setup. The first system prompt is a draft. Feeding a bad or vague answer back to Claude and asking it to tighten the prompt is how you go from \"technically works\" to \"actually good.\"",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Create a free Chatbase account.** Go to [chatbase.co](http://chatbase.co), click \"Get Started for Free,\" and sign up with Google or email. No credit card required for the free tier.",
+                    "type": "prose"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Create a new chatbot.** Click \"New Chatbot\" from the dashboard, then select your data source: Website (paste a URL to crawl), Files (upload a PDF, .txt, or .docx), or Text (paste content directly). Click \"Create Chatbot\" and wait 30–60 seconds for it to train.",
+                    "type": "prose"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Use Claude to write your system prompt.** Open Claude and paste this prompt, filling in the brackets with your own details:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "I am building a customer-facing FAQ chatbot for [describe your business or product]. The bot will be trained on [describe your content, e.g., our help center articles / our product documentation / our service menu]. Our customers typically ask questions about [list 2 to 3 common questions]. The tone should be [e.g., friendly and concise / professional / conversational]. Write a system prompt for this chatbot that tells it who it is, what it knows, how to respond, and what to do if it does not know the answer."
+                  },
+                  {
+                    "text": "_Copy the system prompt Claude generates, you'll paste it into Chatbase next._",
+                    "type": "callout"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Paste the system prompt into Chatbase.** Go to Settings → AI, paste the Claude-generated prompt into the Instructions field, set the model to GPT-4o (recommended for accuracy), and click Save.",
+                    "type": "prose"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Customize your bot.** Go to Settings → General to set the bot name. Then go to Deploy → Channels, click \"Manage\" next to Chat Widget, and open the Content tab to set the welcome message and placeholder text/questions.",
+                    "type": "prose"
+                  },
+                  {
+                    "text": "_The free plan has no fallback-message field in the UI, bake the fallback behavior into the system prompt instead (recommended: \"I don't have that information, but you can reach us at [email or link].\")_",
+                    "type": "callout"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Test your bot.** Click Playground and ask it 3–5 questions your customers would actually ask. If an answer is wrong or vague, go back to Claude and refine the system prompt:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "The bot gave this answer: [paste answer]. How should I improve the system prompt to make this more accurate?",
+                    "prompt_note": "Feed Claude the exact wrong or vague answer, not just a description of the problem, so it can see precisely where the prompt let the bot down and fix that specific gap."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Publish and share.** Go to Deploy in Chatbase (this tab was previously called Connect) and click Setup (next to Help Page). Then click Deploy to get the public chatbot link. To embed on a website, copy the iframe snippet and paste it into any HTML page. The bot is now live and accessible to anyone with the link.",
+                    "type": "prose"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "title": "Hitting the free-tier message limit",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "Chatbase's free tier supports up to 20 message credits per month, which is enough for the workshop session itself. If you need higher limits afterward, paid plans start at $32/month.\n\nIf Chatbase has a service interruption, Botpress (free tier, similar workflow) is a solid backup.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "label": "Level 1",
+            "title": "Iteratively strengthen weak answers",
+            "variant": "go-further",
+            "children": [
+              {
+                "text": "After testing, paste any wrong or vague bot answer back into Claude and ask how to improve the system prompt. Update the system prompt in Chatbase with Claude's revision and re-test until the bot handles your hardest customer questions correctly.",
+                "type": "prose"
+              },
+              {
+                "type": "prompt",
+                "prompt": "The bot gave this answer: [paste answer]. How should I improve the system prompt to make this more accurate?"
+              }
+            ]
+          },
+          {
+            "tags": [
+              {
+                "text": "Model: Claude"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "share",
+        "title": "Share what you built",
+        "children": [
+          {
+            "text": "Share your live chatbot link so others can test it, and post your embeddable iframe snippet if you plan to add it to a website.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "wrap",
+        "title": "Summary & next steps",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "A live, deployed AI FAQ chatbot trained on your own content",
+              "A shareable public link you can send immediately",
+              "An embeddable iframe snippet for your website",
+              "A reusable Claude prompt template for building better bots in the future"
+            ],
+            "title": "What you built today"
+          },
+          {
+            "text": "**Where to go next**\n\n1. Refine your system prompt further using the \"improve this answer\" pattern from the build.\n2. Upgrade to a paid Chatbase plan ($32/month+) if you need more than 20 message credits/month.\n3. Try Botpress as an alternate platform if you want to compare workflows.",
+            "type": "prose"
+          }
+        ]
+      }
+    ]
+  }
+}

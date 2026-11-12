@@ -1,0 +1,221 @@
+{
+  "id": "urn:contentEntry:6ab9ae4336554a317a0287a6",
+  "title": "Build a bot to answer common HR questions",
+  "resourceType": "TUTORIAL",
+  "description": "A system that answers employee HR questions from your own policy documents and escalates whatever it shouldn't guess at.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4336554a317a0287a6",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "slack": {
+        "title": "Slack",
+        "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "deploy": {
+        "title": "Deploy / Deployment",
+        "content": "Taking code that works on your computer and making it live on a server so others can access it via the internet. When Claude 'deploys' a site, it's publishing it to the web."
+      },
+      "notion": {
+        "title": "Notion",
+        "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      },
+      "personal-knowledge-base": {
+        "title": "Personal Knowledge Base",
+        "content": "A store of your own accumulated knowledge — notes, decisions, references — organized so an AI can search and use it. The difference from a pile of documents: structure and maintenance. Level 2 builds one as a wiki."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "HR & Recruiting"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "Employees ask the same PTO, benefits, and policy questions on repeat, and a small HR team answering them one at a time has less room left for the judgment-heavy work only a person can do. Employee-facing Q&A is one of the most common entry points for agentic AI in HR, and 82% of HR leaders plan to [deploy](#tooltip-deploy) some form of it within the next 12 months, per [Gartner's May 2025 survey, as reported by HR Executive](https://hrexecutive.com/agentic-ai-in-hr-unpacking-the-hype-and-addressing-the-uncertainty/).",
+            "type": "prose"
+          },
+          {
+            "text": "This system answers from your actual policy documents. It quotes the specific policy line where it can, and escalates anything it can't confidently answer instead of guessing, which matters most on the topics that create real liability if it gets them wrong.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a paste-in [prompt](#tooltip-prompt) for a single question, a saved skill an HR generalist reaches for daily, or a scheduled [agent](#tooltip-agent) connected to [Slack](#tooltip-slack) or Microsoft Teams so employees can ask it directly.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your source policy documents, the topics that always escalate, and where employees will ask.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that answers common employee HR questions and knows when to hand off to a person. Ask me questions, one at a time, about which questions come up most often, where the source-of-truth policy docs actually live, what topics should always escalate to a human no matter what, and where employees would actually go to ask. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: naming your escalation topics up front means the bot has a rule to follow before a real employee question ever tests it."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Where policy documentation currently lives, and how current it is.",
+              "What channel employees already use to ask HR questions, whether that's Slack, email, or an intranet.",
+              "Who owns keeping the source documents up to date."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common connectors are your HR [knowledge base](#tooltip-personal-knowledge-base) ([Notion](#tooltip-notion), an intranet, a shared drive), your messaging platform (Slack, Microsoft Teams), and your HRIS for anything needing employee-specific data (Workday, Rippling, Gusto). The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Build and test the system on your actual policy documents. The prompt below is one example; your scope document has the full version.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Answer employee questions about PTO, benefits, and company policy using only the documents provided, and escalate anything outside that scope.\n\nContext: [Paste or link your policy source documents.] Escalation contact: [name/channel]. Topics that must always escalate: [e.g. terminations, leave-of-absence disputes, harassment complaints].\n\nRules:\n- Answer only from the provided policy documents, quoting the specific policy line when possible.\n- Never answer a question about compensation, discipline, or legal matters; escalate those immediately with a note on why.\n- State clearly when a question falls outside current documentation instead of guessing.\n- Log every escalation with the question and the employee's name for HR follow-up.",
+            "prompt_note": "How this prompt works: quoting the source line forces every answer back to a real document instead of a plausible-sounding guess."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. Answers quote the actual policy, comp and legal questions escalate, nothing outside the docs gets a confident guess?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what went wrong (\"that topic should escalate too\") and fold each correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Add a weekly digest of the most-asked unanswered questions so HR knows what documentation is missing.",
+              "Connect the HRIS through a [tool connector](#tooltip-tool-connectors) so it can answer employee-specific questions like how many PTO days someone has left.",
+              "Extend escalations into a ticketing flow instead of a raw notification.",
+              "Pair it with a new hire onboarding assistant so new hires get the same bot from day one."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft the rubric and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each employee answer, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, question asked, answer given, whether it escalated, and whether that escalation call was right. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: the escalation column turns a nervous judgment call into a countable trend once you have a few weeks of entries."
+          },
+          {
+            "text": "**Log** every run. Note the date, which rubric checks passed or failed, and what changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the rubric passes a few weeks straight, package the prompt and corrected rules into a skill, so every run starts from your defaults. A repeated failure earns its own skill. [Claude](#tooltip-claude)'s skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. A bot that sounds confident but answers from stale policy docs is worse than no bot at all. Whoever owns this needs a standing job to keep the source documents current.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Gartner, Agentic AI in HR: Unpacking the Hype and Addressing the Uncertainty (via HR Executive)](https://hrexecutive.com/agentic-ai-in-hr-unpacking-the-hype-and-addressing-the-uncertainty/) — The 82% agentic-AI adoption figure."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Build a Q&A bot for your internal docs](/content/item/urn:contentEntry:6ab9ae3dcc4fa070a0e5e4bc) · Operations",
+              "[Build an NDA triage system](/content/item/urn:contentEntry:6ab9ae4525fb79a9419eb330) · Legal & Compliance",
+              "[SOP Creator](/content/item/urn:contentEntry:6ab9ae5e6dea06cc86f4baa1) and [Email Manager](/content/item/urn:contentEntry:6ab9ae5254bac698edfe450a) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

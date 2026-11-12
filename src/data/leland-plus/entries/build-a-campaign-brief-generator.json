@@ -1,0 +1,217 @@
+{
+  "id": "urn:contentEntry:6ab9ae3a8b11aa5e2169e785",
+  "title": "Build a campaign brief generator",
+  "resourceType": "TUTORIAL",
+  "description": "A system that turns one master campaign brief into ready-to-post versions for each channel and region while the offer and CTA stay fixed.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae3a8b11aa5e2169e785",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "notion": {
+        "title": "Notion",
+        "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "anthropic": {
+        "title": "Anthropic",
+        "content": "The company that created Claude. An AI safety company focused on building reliable, interpretable AI systems."
+      },
+      "main-branch": {
+        "title": "Main Branch",
+        "content": "The default, live branch of your repo — the version of your project that's considered done and working. Other branches eventually merge into main once the work is approved. (Older repos sometimes call it 'master' instead.)"
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Marketing"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "A campaign brief written once for the whole team tends to run unchanged across every channel, so every version reads like the same sentence with different margins. This system takes one [master](#tooltip-main-branch) creative brief and produces a version for each channel and region you run campaigns in, holding the offer, the claim, and the CTA fixed while the format adapts. [Anthropic](#tooltip-anthropic)'s product marketing team saved 5 to 10 hours per launch after building a reusable version of this pattern instead of writing each channel's copy from scratch, per [Anthropic's account of how the team uses Claude in marketing](https://claude.com/blog/how-anthropic-uses-claude-marketing).",
+            "type": "prose"
+          },
+          {
+            "text": "Gartner's 2026 CMO Spend Survey found CMOs now allocate 15.3% of marketing budget to AI, but only 30% report their organization has mature, scalable AI capability to match. A brief-expansion system is the repeatable process most teams are missing.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a one-off paste-in [prompt](#tooltip-prompt) whenever a new campaign kicks off, a saved [skill](#tooltip-skill) for your team's regular channel list, or a scheduled [agent](#tooltip-agent) tied to the campaign calendar.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming where your master brief template lives, which channels and regions you expand into, what has to stay fixed across every version, and who reviews before launch.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that takes one master campaign brief and expands it into versions for each channel and region we run campaigns in. Ask me questions, one at a time, about what a typical master brief includes, which channels and regions we actually need versions for, what has to stay identical across every version (the offer, the claim, the CTA) versus what should adapt, and who reviews the expanded versions before launch. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: fixing what must stay identical before you build keeps every channel version anchored to the same offer instead of drifting into five different campaigns."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Where the master brief template lives and who owns edits to it.",
+              "How many channel and region combinations to support at first.",
+              "What must stay fixed across every version versus what can adapt for the channel."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first in a fresh session or a different [model](#tooltip-model). Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are wherever your brief template lives ([Notion](#tooltip-notion), Google Docs, a shared drive), a campaign management tool if you use one (Asana, Monday, a marketing calendar), and your regional marketing contacts for review. The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Build your system and test it on a real master brief. The prompt below is an example. Your scope document gives a version for your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Expand this master campaign brief into a version for [channel, e.g., paid social] targeting [region or audience].\n\nContext: Here is the master brief: [paste it, including offer, audience, key message, and CTA]. This channel's norms are [length, tone, and format conventions].\n\nRules:\n- The core offer, claim, and CTA must not change across versions.\n- Do not add new claims or numbers not in the master brief.\n- Flag anything in the brief that's ambiguous instead of guessing at intent.\n- Output format: the channel-specific copy, plus a short list of what was adapted and what stayed fixed.",
+            "prompt_note": "How this prompt works: naming what must not change up front stops the model from quietly rewriting the offer while it adapts tone."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. Offer and CTA untouched, no new claims added, format fitted to the channel?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what drifted (\"the CTA changed wording, keep it verbatim\") and fold each correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Add an automatic claims check against legal or compliance guidelines.",
+              "Generate an A/B hypothesis alongside each channel variant.",
+              "Build a library of past expanded briefs to speed up the next campaign's first draft."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft the rubric and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each expanded channel version, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, campaign name, channels expanded, whether the core offer stayed fixed, and what I changed in the rules. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call on whether a version held the line, and the log makes recurring drift visible across campaigns."
+          },
+          {
+            "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the system passes the rubric a few campaigns straight, package the prompt and your corrected rules into a reusable AI skill. A check that fails again and again is a candidate for a skill of its own. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write the skill for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. A vague master brief produces five confidently wrong expansions, so tighten the source brief before leaning on this system.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Anthropic, How Anthropic Uses Claude in Marketing](https://claude.com/blog/how-anthropic-uses-claude-marketing) — The per-launch time-savings figure.",
+              "Gartner, 2026 CMO Spend Survey — The AI budget-versus-readiness gap."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Build a content repurposing pipeline](/content/item/urn:contentEntry:6ab9ae3b8f20eb5acfa340ce) · Marketing",
+              "[Build a landing page generator](/content/item/urn:contentEntry:6ab9ae4888b15b8d44d92975) · Entrepreneurship",
+              "[Copy Frameworks](/content/item/urn:contentEntry:6ab9ae51b2b07de7af3c181b), [Persona Development](/content/item/urn:contentEntry:6ab9ae58aca57d1134405bf1), and [Marketing Psychology](/content/item/urn:contentEntry:6ab9ae56c6466536c2e817eb) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

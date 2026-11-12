@@ -1,0 +1,225 @@
+{
+  "id": "urn:contentEntry:6ab9ae49a7b97d0e8799f7c5",
+  "title": "Automate support ticket triage",
+  "resourceType": "TUTORIAL",
+  "description": "A system that reads each incoming support ticket, tags its urgency, and drafts a first response for a human to review before it goes out.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae49a7b97d0e8799f7c5",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "slack": {
+        "title": "Slack",
+        "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "triage": {
+        "title": "Triage",
+        "content": "Sorting items by urgency or importance to decide what gets attention first. Your email-manager skill triages your inbox — it separates messages that need a real reply from noise you can ignore."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "context": {
+        "title": "Context",
+        "content": "Everything Claude can 'see' in a given session — your messages, files you've shared, instructions, and conversation history. The more relevant context you give Claude, the better its output."
+      },
+      "batch-api": {
+        "title": "Batch API",
+        "content": "A way to send a big pile of requests to Claude at once and get the results back later (usually within 24 hours) at a discount. Good for one-time bulk jobs like classifying 10,000 customer support tickets."
+      },
+      "routing-pattern": {
+        "title": "Routing (Orchestration Pattern)",
+        "content": "An orchestration pattern where a classifier looks at the input and sends it down a specialized path — support tickets to the refund flow, bug reports to the triage flow. Each path stays simple because it only handles its own kind of input."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Entrepreneurship"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "Customers rank response speed as the single most important part of a support experience, ahead of resolution speed itself, and most expect a reply within an hour, per [Zendesk's CX Trends 2026 research](https://cxtrends.zendesk.com/). This system reads each incoming support message, tags its urgency, suggests where it should route, and drafts a first response for a human to review and send.",
+            "type": "prose"
+          },
+          {
+            "text": "[Routing](#tooltip-routing-pattern) a ticket correctly on the first touch measurably improves satisfaction, per the same research, so accuracy matters here as much as speed. A founder handling their own support can only sustain fast response times if most tickets already have a drafted answer waiting for a quick check.",
+            "type": "prose"
+          },
+          {
+            "text": "It runs as a paste-in [prompt](#tooltip-prompt) against a [batch](#tooltip-batch-api) of tickets, a saved skill, or a scheduled [agent](#tooltip-agent) watching the queue as messages arrive. No draft goes out without a human approving it first.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming where your tickets arrive, what counts as urgent for your product, your usual response tone, and how much review each draft needs before sending.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that reads incoming support messages, tags them by urgency, and drafts a first response for me to review before sending. Ask me questions, one at a time, about where support messages come in today, what counts as urgent for my product specifically, what a good first response usually looks like, and how much I want to review before something goes out. When you have what you need, write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: naming your own definition of urgent up front stops the system from applying a generic standard that doesn't match what breaks for your product."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Where support messages land today, a shared inbox, a helpdesk tool, or a form.",
+              "What counts as urgent for your specific product, not a generic definition.",
+              "Whether one person reviews every draft or low-urgency tickets get a lighter pass."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your helpdesk or support inbox (Zendesk, Intercom, Help Scout, a shared Gmail inbox), your billing system for account context (Stripe, your app's admin panel), and your team chat for urgent flags ([Slack](#tooltip-slack)). The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Start building the system your scope document describes, and test it on a real ticket, or a batch of them. The prompt below is an example. Your scope document will give you a version shaped to your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Read each new support message, assign an urgency tag and a routing category, and draft a first response for human review.\n\nContext: [Paste the support message or a batch of them. Note where they arrive, e.g. \"shared Gmail inbox\" or \"Zendesk,\" what urgent means for your product specifically, e.g. \"can't log in\" or \"billed incorrectly,\" and your usual response tone.]\n\nRules:\n- State the specific reason behind every urgency tag, not just the label.\n- Never send a drafted response automatically; every draft waits in a queue for a human to approve or edit.\n- If a message doesn't clearly fit an existing category, flag it as \"needs a human look\" rather than forcing it into the closest category.\n- Draft responses using only what the message actually says; never guess at account details not mentioned.",
+            "prompt_note": "How this prompt works: requiring a stated reason behind each tag, plus an escape hatch for anything unclear, keeps a confident wrong guess from looking the same as a correct one."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. Reasons stated, nothing sent automatically, unclear tickets flagged instead of forced?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what went wrong (\"this isn't urgent, only billing and login issues are\") and fold the correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Track how often drafts go out unedited versus getting a heavy rewrite.",
+              "Build a lightweight FAQ from the most common ticket types the [triage](#tooltip-triage) surfaces.",
+              "Add a weekly digest of ticket volume by category to spot a new problem early.",
+              "Auto-draft a canned response for the single most repeated issue type."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft the rubric and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each triage decision, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, tickets triaged, urgency tags that turned out to be right, drafts sent with no edits, and drafts that needed a heavy rewrite. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make a drifting urgency threshold or a weak draft pattern visible after a week of entries."
+          },
+          {
+            "text": "**Log** every run against the rubric, noting date and change. A single miss is noise; a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from the log. Once the rubric passes a week straight, package the prompt and rules into a reusable skill. [Claude](#tooltip-claude)'s skill-creator skill interviews you and writes it; a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. A mislabeled emergency sitting in the wrong queue delays exactly the response that mattered most. Give it the same account [context](#tooltip-context) a human agent would check first, or its drafts read fine and get the facts wrong.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Zendesk, CX Trends 2026](https://cxtrends.zendesk.com/) — The response-speed-priority and first-touch-routing claims."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Build a reply sorter for your outbound inbox](/content/item/urn:contentEntry:6ab9ae3ceb6e5f2dcd8f2e0a) · Sales",
+              "[Build an NDA triage system](/content/item/urn:contentEntry:6ab9ae4525fb79a9419eb330) · Legal & Compliance",
+              "[Email Manager](/content/item/urn:contentEntry:6ab9ae5254bac698edfe450a) and [SOP Creator](/content/item/urn:contentEntry:6ab9ae5e6dea06cc86f4baa1) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

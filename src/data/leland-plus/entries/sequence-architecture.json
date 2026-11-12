@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae5d8244948130b2a06f",
+  "title": "Sequence Architecture",
+  "resourceType": "SKILL",
+  "description": "Design a complete multi-touch outreach sequence with timing, channel, purpose, and escalation logic for any audience and goal",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5d8244948130b2a06f",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Product"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Design a complete multi-touch outreach sequence with timing and escalation logic. Output covers every touch from first contact to breakup, with two subject line options per touch.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-define-sequence-parameters",
+      "title": "Step 1: Define Sequence Parameters",
+      "children": [
+        {
+          "text": "From the user's input, determine:\n- **Audience**: who receives this? (cold, warm, previously engaged, reactivation)\n- **Goal**: what action should they take by the end?\n- **Touches**: how many emails or messages?\n- **Channels**: email only, or a mix with SMS or calls?\n\nIf any parameter is missing and cannot be inferred, ask before proceeding.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-design-the-sequence",
+      "title": "Step 2: Design the Sequence",
+      "children": [
+        {
+          "text": "Each touch must:\n- Have a specific purpose (introduce, follow up, add value, create urgency, break up)\n- Use a different angle than the prior touch\n- Escalate appropriately without repeating itself\n\n### Default Sequence Structure\n\n| Touch | Day | Channel | Purpose | Angle |\n|-------|-----|---------|---------|-------|\n| 1 | 0 | Email | Introduce offer | Value and relevance |\n| 2 | 3 | Email | Follow up | Social proof or urgency |\n| 3 | 7 | Email | Add value | New angle or objection address |\n| 4 | 12 | Email/SMS | Soft urgency | Deadline or limited availability |\n| 5 | 18 | Email | Breakup | Permission to close, final ask |\n\nAdjust timing and touch count based on audience warmth. Colder audiences may need more value touches before urgency.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-write-subject-line-variants",
+      "title": "Step 3: Write Subject Line Variants",
+      "children": [
+        {
+          "text": "For each touch, provide 2 subject line options. Good subject lines:\n- Are specific (mention the recipient's name, situation, or context)\n- Create curiosity without being clickbait\n- Are under 8 words",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# [Sequence Name], [N]-Touch Sequence\n\n## Overview\nAudience: [who] | Goal: [action] | Duration: [N days]\n\n## Sequence\n\n### Touch 1, Day 0\n**Channel:** Email\n**Purpose:** [goal of this touch]\n**Subject options:**\n- [option 1]\n- [option 2]\n**Angle:** [what makes this touch different]\n\n### Touch 2, Day [N]\n[same structure]\n\n...\n\n## Escalation Logic\n- If reply received: [what to do]\n- If no reply after touch 3: [adjustment]\n- If they say \"not now\": [move to reactivation]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

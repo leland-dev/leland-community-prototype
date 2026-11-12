@@ -1,0 +1,23 @@
+{
+  "id": "urn:contentEntry:6ab9ae4c602320c1b6a41fbe",
+  "title": "Designing AI Systems That People Actually Trust and Use",
+  "resourceType": "TUTORIAL",
+  "description": "Learn how to design AI systems for adoption, trust, and real-world reliability.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4c602320c1b6a41fbe",
+  "viewableFile": "andrewleland.mp4",
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "outcomes",
+      "children": [
+        {
+          "text": "Led by **Andrew Q.**",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

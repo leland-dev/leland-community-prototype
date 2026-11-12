@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae58e4404b72d58b5e65",
+  "title": "Objection Mining",
+  "resourceType": "SKILL",
+  "description": "Catalog objections from deals, emails, or calls into a six-category taxonomy and build a response playbook to handle each one.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae58e4404b72d58b5e65",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Research"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Turn raw objections into a structured playbook.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "six-category-taxonomy",
+      "title": "Six-Category Taxonomy",
+      "children": [
+        {
+          "text": "### 1. Price / Value\n\"It's too expensive.\" \"I can't afford it right now.\"\nRoot fear: Wasting money on something that won't work.\n\n### 2. Timing\n\"Not the right time.\" \"Maybe in a few months.\"\nRoot fear: Can't commit to the schedule or pace right now.\n\n### 3. Credibility / Risk\n\"I'm not sure this will actually work for me.\" \"How do I know it's legit?\"\nRoot fear: Fear of being misled or setting themselves up to fail.\n\n### 4. Comparison / Alternatives\n\"I'm looking at other options.\" \"Why this over a competitor?\"\nRoot fear: Making a suboptimal choice.\n\n### 5. Internal / External Blockers\n\"I need to talk to my spouse.\" \"I need to check my finances.\"\nRoot fear: Conflict with someone else or a practical constraint.\n\n### 6. Disinterest / Not a Fit\n\"I'm not sure this is for me.\" \"I've changed my mind about this.\"\nRoot fear: Goal or motivation has shifted.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-categorize-the-objections",
+      "title": "Step 1, Categorize the Objections",
+      "children": [
+        {
+          "text": "From `$ARGUMENTS`, read all the objections. Map each to one of the six categories. If an objection doesn't fit cleanly, put it in the closest category and note it.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-build-the-response-playbook",
+      "title": "Step 2, Build the Response Playbook",
+      "children": [
+        {
+          "text": "For each category that appears, write:\n- The best response approach (acknowledge, reframe, address, ask)\n- 1-2 example responses in natural language\n- What NOT to do (the common mistake)",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Objection Playbook: [Audience / Context]\n\n## Objection Frequency\n| Category             | Count | % of Total |\n|----------------------|-------|------------|\n| Price / Value        | [n]   | [%]        |\n| Timing               | [n]   | [%]        |\n| Credibility / Risk   | [n]   | [%]        |\n| Comparison           | [n]   | [%]        |\n| Blockers             | [n]   | [%]        |\n| Disinterest          | [n]   | [%]        |\n\n## Top Objections and Responses\n\n### [Category Name]\n**They say:** \"[most common version]\"\n**Root fear:** [underlying concern]\n\n**How to respond:**\n1. Acknowledge: \"[example]\"\n2. Reframe: \"[example]\"\n3. Address: \"[example]\"\n4. Ask: \"[example closing question]\"\n\n**Don't:** [common mistake]\n\n---\n\n## Patterns and Insights\n[What the objection mix reveals about your audience or offer]\n\n## Recommended Changes\n[Changes to the offer, messaging, or outreach sequence based on objection patterns]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

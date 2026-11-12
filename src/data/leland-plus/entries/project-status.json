@@ -1,0 +1,107 @@
+{
+  "id": "urn:contentEntry:6ab9ae59ec9a474d457bfc5f",
+  "title": "Project Status",
+  "resourceType": "SKILL",
+  "description": "Generate a crisp, stakeholder-ready project status update by pulling live task data and recent activity into a direct, outcomes-focused format.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae59ec9a474d457bfc5f",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Generate a crisp status update for any active project. Pull live data from connected tools, then structure output in a direct, outcomes-focused voice.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "intake",
+      "title": "Intake",
+      "children": [
+        {
+          "text": "1. **Identify the project.** Use what the user provided, or infer from context. If ambiguous, ask: \"Which project do you want a status update on?\"\n\n2. **Confirm the audience.** Slack update to team? Email to manager? Report to leadership? Default to a format suitable for Slack or email.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "data-collection",
+      "title": "Data Collection",
+      "children": [
+        {
+          "text": "**Task tracking (Notion, Linear, Jira, etc.):** Search for the project's task database. Extract:\n- Completed tasks this cycle\n- In-progress items\n- Blocked or waiting-for-decision items\n- Next milestone or upcoming critical path\n\n**Communication (Slack, email, etc.):** Search for project-related messages from the past 7 days. Look for:\n- Async decisions made\n- Blockers surfaced\n- Wins shipped\n- Open questions to stakeholders\n\n**Synthesize.** Combine formal tracking and live communication into a single narrative. Identify patterns: velocity, blockers, decision gaps.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-template",
+      "title": "Output Template",
+      "children": [
+        {
+          "text": "Fill each section with specific outcomes, numbers, and names.\n\n```\n**[PROJECT NAME], Week of [DATE]**\n\nSTATUS: [Green / Yellow / Red], [one-sentence statement about project health]\n\n**Completed**\n- [Specific deliverable], [who shipped it]\n- [Impact number if available]\n\n**In Progress**\n- [Task name]: [current blocker or next step], expected [date]\n\n**Blocked / Needs Decision**\n- [Blocker name]: needs [specific decision or resource] from [person]\n\n**Next Milestone**\n[Date]: [Specific deliverable or gate]\n\n---\n\n**Notes**\n[Any context stakeholders need]\n```",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "voice-guidance",
+      "title": "Voice Guidance",
+      "children": [
+        {
+          "text": "1. **Conviction.** \"We're on track\" not \"it seems like we might be tracking okay.\"\n2. **Specificity.** \"[Person] approved [thing] on [day]\" not \"we got approval.\"\n3. **Names.** Every person named. \"[Person] completed [task]\" not \"the task got done.\"\n4. **Numbers.** Include them. \"3 items completed, 2 pending\" not \"several items are done.\"\n5. **Outcomes, not narration.** \"Shipped [deliverable]\" not \"we worked on it this week.\"\n6. **No hedging.** Strike \"might,\" \"could,\" \"seems,\" \"hopefully.\"\n\nTone: direct, action-oriented, confident. The audience wants facts and next steps, not explanation.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "workflow",
+      "title": "Workflow",
+      "children": [
+        {
+          "text": "1. Ask for project context if not provided.\n2. Query task tracking. Extract completed, in-progress, blocked, next milestone.\n3. Query recent communication. Pull blockers, decisions, and wins.\n4. Write the status. Apply voice checks. Keep to 1-2 screens of text.\n5. Show the draft to the user. Flag any missing data. Do NOT send or publish without explicit approval.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "notes-for-the-ai-agent",
+      "title": "Notes for the AI Agent",
+      "children": [
+        {
+          "text": "- If task tracking returns no results, ask: \"Should I check a specific page or database?\"\n- If communication search is sparse, note it in the draft: \"Limited recent activity, status inferred from task tracking only.\"\n- If a blocker is waiting on an external party, name the person and the specific ask.\n- If a milestone is fuzzy, ask the user what \"done\" looks like specifically.\n- Always err toward specificity. Better to ask than to guess.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

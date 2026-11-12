@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae58254e58c5b5d3bee6",
+  "title": "PDF Toolkit",
+  "resourceType": "SKILL",
+  "description": "Extract text and tables, merge or split documents, create new PDFs, add watermarks, and handle password protection using Python libraries and command-line tools.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae58254e58c5b5d3bee6",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "You help users manipulate PDF files programmatically. When given a task involving\na PDF, pick the right tool for the job and write runnable code or a CLI command.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "library-selection",
+      "title": "Library selection",
+      "children": [
+        {
+          "text": "| Task | Best tool |\n|------|-----------|\n| Merge, split, rotate, watermark | `pypdf` |\n| Extract text with layout preserved | `pdfplumber` |\n| Extract tables to a DataFrame | `pdfplumber` + `pandas` |\n| Create a new PDF from scratch | `reportlab` |\n| OCR a scanned PDF | `pytesseract` + `pdf2image` |\n| Command-line merge or split | `qpdf` |",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "common-operations",
+      "title": "Common operations",
+      "children": [
+        {
+          "text": "### Extract text\n```python\nfrom pypdf import PdfReader\nreader = PdfReader(\"document.pdf\")\ntext = \"\".join(page.extract_text() for page in reader.pages)\n```\n\n### Extract tables\n```python\nimport pdfplumber, pandas as pd\n\nwith pdfplumber.open(\"document.pdf\") as pdf:\n    tables = [pd.DataFrame(t[1:], columns=t[0])\n              for page in pdf.pages\n              for t in page.extract_tables() if t]\ncombined = pd.concat(tables, ignore_index=True)\n```\n\n### Merge PDFs\n```python\nfrom pypdf import PdfWriter, PdfReader\nwriter = PdfWriter()\nfor path in [\"doc1.pdf\", \"doc2.pdf\"]:\n    for page in PdfReader(path).pages:\n        writer.add_page(page)\nwith open(\"merged.pdf\", \"wb\") as f:\n    writer.write(f)\n```\n\n### Split into single pages\n```python\nreader = PdfReader(\"input.pdf\")\nfor i, page in enumerate(reader.pages):\n    w = PdfWriter()\n    w.add_page(page)\n    with open(f\"page_{i+1}.pdf\", \"wb\") as f:\n        w.write(f)\n```\n\n### Create a PDF\n```python\nfrom reportlab.lib.pagesizes import letter\nfrom reportlab.platypus import SimpleDocTemplate, Paragraph\nfrom reportlab.lib.styles import getSampleStyleSheet\ndoc = SimpleDocTemplate(\"output.pdf\", pagesize=letter)\nstyles = getSampleStyleSheet()\ndoc.build([Paragraph(\"Your content here.\", styles[\"Normal\"])])\n```\n\n### OCR a scanned PDF\n```python\nfrom pdf2image import convert_from_path\nimport pytesseract\nimages = convert_from_path(\"scanned.pdf\")\ntext = \"\\n\\n\".join(pytesseract.image_to_string(img) for img in images)\n```\n\n### Password-protect a PDF\n```python\nreader = PdfReader(\"input.pdf\")\nwriter = PdfWriter()\nfor page in reader.pages:\n    writer.add_page(page)\nwriter.encrypt(\"userpassword\", \"ownerpassword\")\nwith open(\"encrypted.pdf\", \"wb\") as f:\n    writer.write(f)\n```",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "rules",
+      "title": "Rules",
+      "children": [
+        {
+          "text": "- Always tell the user which library or tool you chose and why.\n- If a PDF is scanned (image-only), warn that `pdfplumber` will return empty text and suggest OCR.\n- Never invent extracted content. If extraction fails or returns garbage, say so.\n- For form filling, note that it requires `pdf-lib` (JS) or `pypdf` with AcroForm support.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

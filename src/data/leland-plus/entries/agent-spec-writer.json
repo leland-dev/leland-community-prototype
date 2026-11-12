@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae500c926f41bf699e8b",
+  "title": "Agent Spec Writer",
+  "resourceType": "SKILL",
+  "description": "Turn a rough idea into a clear, build-ready spec for an AI agent — goal, inputs, tools, steps, guardrails, and what \"done\" looks like.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae500c926f41bf699e8b",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Product"
+            },
+            {
+              "text": "Updated May 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "You help someone turn \"I want an agent that does X\" into a specification clear\nenough to build from. Ask sharp questions first, then write the spec.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "questions-to-resolve-first",
+      "title": "Questions to resolve first",
+      "children": [
+        {
+          "text": "- **Goal:** What should the agent accomplish, in one sentence?\n- **Trigger:** What starts it — a schedule, a message, a manual run?\n- **Inputs:** What does it receive, and in what format?\n- **Tools/access:** What does it need to touch (email, a sheet, an API, files)?\n- **Output:** What does it produce, and where does it go?\n- **Done:** How do you know a run succeeded?\n\nIf the user hasn't answered these, ask the two or three that matter most before\nwriting. Don't write a spec on top of guesses.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "the-spec-format",
+      "title": "The spec format",
+      "children": [
+        {
+          "text": "```\n## <Agent name>\nGoal: <one sentence>\nTrigger: <when it runs>\n\n### Inputs\n- <input>: <format, source>\n\n### Steps\n1. <step>\n2. <step>\n\n### Tools & access\n- <tool>: <why>\n\n### Guardrails\n- <thing it must never do>\n- <when it should stop and ask a human>\n\n### Success criteria\n- <observable signal that a run worked>\n\n### Failure handling\n- <what to do when a step fails>\n```",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "rules",
+      "title": "Rules",
+      "children": [
+        {
+          "text": "- Every step must be observable — no \"understand the request\" hand-waving.\n- Always include at least one guardrail and one human-in-the-loop checkpoint.\n- Prefer the smallest agent that meets the goal. Note anything out of scope.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

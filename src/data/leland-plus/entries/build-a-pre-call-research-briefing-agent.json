@@ -1,0 +1,222 @@
+{
+  "id": "urn:contentEntry:6ab9ae3cdbb6bf0b8f44fbae",
+  "title": "Build a pre-call research briefing agent",
+  "resourceType": "TUTORIAL",
+  "description": "A system that checks your calendar before each sales call and hands you a one-page brief on what changed and what to say.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae3cdbb6bf0b8f44fbae",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "api": {
+      "title": "API (Application Programming Interface)",
+      "content": "A way for two programs to talk to each other. When a tool says 'connect via API,' it means software can send requests and get data back automatically — no manual copy-paste needed."
+    },
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "hubspot": {
+      "title": "HubSpot",
+      "content": "A CRM and marketing platform used by sales, marketing, and customer success teams. Common target for AI automations — students connect it to draft outreach, enrich contacts, or sync data with other tools."
+    },
+    "anthropic": {
+      "title": "Anthropic",
+      "content": "The company that created Claude. An AI safety company focused on building reliable, interpretable AI systems."
+    },
+    "read-only": {
+      "title": "Read-only",
+      "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Sales"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Reps walk into calls running on memory, or on whatever they scrolled to find in the ten minutes before. Salesforce's [State of Sales research](https://www.salesforce.com/sales/state-of-sales/sales-statistics/) puts actual selling time at 28 to 30 percent of a rep's week, which is roughly the time a pre-call brief is meant to buy back. This system pulls CRM history, past notes, and public signals (funding, leadership moves, product news) into a one-page [brief](#tooltip-agent) before every external meeting, naming what changed since the last touch and a few real conversation openers.",
+          "type": "prose"
+        },
+        {
+          "text": "[Anthropic](#tooltip-anthropic)'s own [Claude Academy use-case library](https://academy.claude.com/use-cases/account-research-brief) documents this exact pattern, an account brief built from CRM data and recent activity and refreshed on a schedule rather than assembled once per deal. The brief's job is specificity.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a paste-in [prompt](#tooltip-prompt) before a single call, a saved [skill](#tooltip-skill) triggered by your calendar, or a scheduled agent that builds the brief automatically ahead of every external meeting. Every version stays [read-only](#tooltip-read-only) against your CRM.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming which meetings get a brief, where account history lives, and what counts as a useful opener versus a generic one.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that puts together a one-page briefing before every sales call. Ask me questions, one at a time, about which meetings need this, where my CRM and notes live, what public information matters most, how far ahead I want the brief, and what makes a brief useful versus generic. When you have what you need, write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: naming which meetings need a brief up front keeps you from building a system that fires on every calendar event, including internal syncs where it adds nothing."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where account history lives, and whether it exports cleanly.",
+            "How far ahead public information typically exists for your accounts.",
+            "Whether the brief goes to the rep alone or a manager too."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your CRM (Salesforce and [HubSpot](#tooltip-hubspot) publish official connectors and [API](#tooltip-api) docs), your calendar (Google Calendar, Outlook), and enrichment data (Clay, Apollo) for public signals. The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Start building the system your scope document describes, and test it on a real meeting on your calendar. The prompt below is an example. Your scope document will give you a version shaped to your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Produce a one-page brief for my meeting with [account/contact] before [trigger time, e.g. two hours ahead].\n\nContext: [Paste CRM history: past notes, deal stage, last activity date. Note where account history lives, e.g. \"Salesforce plus a shared notes doc.\" List what public information matters most for your business, e.g. funding, leadership moves, product launches.]\n\nRules:\n- Pull only from named sources. No unsourced claims.\n- Every \"what changed since we last spoke\" claim needs a dated source.\n- Flag any CRM history older than [30] days as stale rather than treating it as current.\n- Cap the brief at one page.\n- End with exactly three conversation openers tied to this specific account, not generic ones.",
+          "prompt_note": "How this prompt works: forcing a source and a date on every claim keeps the brief honest about what changed versus old data restated as news."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. One page, three specific openers, every claim sourced, stale history flagged?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what went wrong (a claim has no source, an opener reads generic) and fold the correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Add a \"since we last spoke\" section that only surfaces genuine changes.",
+            "Auto-attach the brief to the calendar invite.",
+            "Cover attendee LinkedIn activity as an additional signal.",
+            "Build a manager's weekly digest across every upcoming meeting."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat turn the scope bar into pass/fail checks and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each brief, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, account, meeting outcome, whether the openers actually got used, and what rule I changed. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and tracking whether an opener got used shows whether the brief is changing how the call goes."
+        },
+        {
+          "text": "**Log** every brief against the rubric. Note the date, which checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the system passes the rubric a few weeks straight, package the prompt and your corrected rules into a reusable AI skill. A check that keeps failing is a skill candidate. [Claude](#tooltip-claude)'s skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. A brief built on stale CRM data reads as current when it isn't, and that's worse than showing up with no brief at all. Keep the staleness flag in every run.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Salesforce, State of Sales statistics](https://www.salesforce.com/sales/state-of-sales/sales-statistics/) — The time-allocation figure.",
+            "[Anthropic, Claude Academy, Account research](https://academy.claude.com/use-cases/account-research-brief) — The CRM-plus-recent-activity brief pattern."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Automate meeting notes into your CRM](/content/item/urn:contentEntry:6ab9ae3c0eb91beef7dce02d) · Sales",
+            "[Build a 1:1 prep assistant](/content/item/urn:contentEntry:6ab9ae46ec5756f65592aa7e) · Leadership",
+            "[Research Brief](/content/item/urn:contentEntry:6ab9ae5a7cac5cd407ea82ef), [Meeting Prep](/content/item/urn:contentEntry:6ab9ae575970ee9cdf0c866b), and [Account Qualification](/content/item/urn:contentEntry:6ab9ae5017e2a223459f3d5c) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

@@ -1,0 +1,118 @@
+{
+  "id": "urn:contentEntry:6ab9ae584ab0c4b844679dcb",
+  "title": "Notion Task Manager",
+  "resourceType": "SKILL",
+  "description": "Parse brain dumps, bullet lists, meeting notes, or voice transcripts into properly structured Notion tasks in one pass.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae584ab0c4b844679dcb",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Take messy input, brain dumps, bullet lists, rambling paragraphs, voice note transcripts, and turn it into properly structured Notion tasks.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "when-to-use-this-skill",
+      "title": "When to Use This Skill",
+      "children": [
+        {
+          "text": "Trigger when the user says \"add to Notion,\" \"create tasks for,\" \"turn this into tasks,\" \"capture this,\" \"log this to Notion,\" \"brain dump,\" or hands over a list of things to do. Also trigger when the user pastes notes from a meeting, a Slack thread, or a voice transcript and there are clear action items buried in them.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-parse-the-input",
+      "title": "Step 1, Parse the Input",
+      "children": [
+        {
+          "text": "Extract discrete tasks from whatever the user provided. For each task, identify:\n- **Title:** the concrete action, not a description or a feeling. What is the actual task?\n- **Project or context:** which project or area? Default to General if unclear.\n- **Owner:** who does this? Default to the user unless someone else is explicitly mentioned.\n- **Priority:** high, medium, or low. Infer from urgency, deadline language, or blocker status.\n- **Deadline:** if inferable from the text, capture it. Otherwise leave blank.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-find-the-right-notion-home",
+      "title": "Step 2, Find the Right Notion Home",
+      "children": [
+        {
+          "text": "Ask one clarifying question at most if the destination page or database is unclear: \"Should these go in your main task list, or is there a specific project database?\"\n\nIf the user does not specify, default to the main task list.\n\nUse `notion-search` to find the primary task database. Look for keywords like \"tasks,\" \"todo,\" \"main,\" or \"inbox.\" Note the database ID once found.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-create-tasks-in-notion",
+      "title": "Step 3, Create Tasks in Notion",
+      "children": [
+        {
+          "text": "Use `notion-create-pages` with the database ID. For each task:\n- Set the title property to the task title\n- Add project, owner, priority, and deadline properties where available\n- Keep content brief. The title carries the task; body content is optional detail.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-4-confirm",
+      "title": "Step 4, Confirm",
+      "children": [
+        {
+          "text": "Show the user what was created in a clean summary table:\n\n| Task | Project | Owner | Priority | Deadline |\n|---|---|---|---|---|\n| [task title] | [project] | [owner] | [priority] | [deadline or blank] |\n\nThen ask: \"All set? Let me know if any of these need adjusting.\"",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "rules",
+      "title": "Rules",
+      "children": [
+        {
+          "text": "**Names matter.** If a task mentions a specific person, they are likely the owner. Capture their name exactly.\n\n**Infer priority ruthlessly.** Blockers, external deadlines, and \"ASAP\" language mean high. Regular work means medium. Nice-to-haves mean low.\n\n**Convert deadline language.** \"Today,\" \"tomorrow,\" \"this week,\" \"next Monday\" should be converted to actual dates. If none is inferable, leave blank.\n\n**One task per item.** Do not nest or combine. Each item in a list is one task.\n\n**Act on context, not medium.** If the input references a message or email, do not create a task to read it. Create a task to act on it: \"Reply to [person] about [topic],\" not \"Read [person]'s message.\"\n\nNever modify existing tasks. Only create new ones.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "tools-used",
+      "title": "Tools Used",
+      "children": [
+        {
+          "text": "- `notion-search`: find the right database\n- `notion-create-pages`: add tasks to that database\n- `notion-fetch` (optional): confirm the data source schema if needed",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

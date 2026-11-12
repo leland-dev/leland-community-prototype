@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae5a7cac5cd407ea82ef",
+  "title": "Research Brief",
+  "resourceType": "SKILL",
+  "description": "Get up to speed on any person, company, tool, or topic in 3 minutes with a tight, scannable brief backed by current sources.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5a7cac5cd407ea82ef",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Research"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Gather current information and synthesize it into a tight, scannable 1-page brief the user can read in 3 minutes.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "instructions",
+      "title": "Instructions",
+      "children": [
+        {
+          "text": "1. **Parse the request.** What is the user researching? (person, company, tool, trend, concept, etc.)\n\n2. **Search for current information.** Use WebSearch with 2-3 targeted queries:\n   - General query about the topic\n   - If a person or company: recent news, funding, announcements\n   - If a tool: pricing, users, key features, recent developments\n   - If a trend: latest coverage, adoption, implications\n\n3. **Fetch key sources.** Use WebFetch on 2-3 of the most relevant results to get deeper context, numbers, dates, and quotes.\n\n4. **Synthesize into a brief.** Write a tight markdown brief (roughly 300-500 words) with these sections:\n   - **What it is** (2-3 sentences max): essentials only\n   - **Why it matters** (1-2 sentences): connection to the user's context or reason this is relevant now\n   - **Key facts and numbers** (3-4 bullets): dates, pricing, users, funding, features, recent moves\n   - **What to watch** (1-2 bullets): open questions, upcoming changes, risks, opportunities\n   - **Sources** (inline citations or list): where the info came from\n\n5. **Confirm before saving.** Show the brief before saving. If the user wants it saved, write it to their notes folder as `[topic]-brief.md`.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "tone-and-style",
+      "title": "Tone and Style",
+      "children": [
+        {
+          "text": "- **Specific.** Names, numbers, dates. Never vague.\n- **Opinionated.** \"This matters because...\" or \"Watch for...\" State relevance directly.\n- **Scannable.** Written for someone skimming before a meeting or decision.\n- **Not comprehensive.** Short and useful beats long and thorough.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```markdown\n# Research Brief: [Topic / Person / Company]\n\n## What It Is\n\n[2-3 sentence essentials. Who founded it? What does it do? When did it launch?]\n\n## Why It Matters\n\n[Connection to the user's current work, context of the ask, or reason this is relevant now.]\n\n## Key Facts\n\n- [Fact with number or date]\n- [Fact with number or date]\n- [Fact with number or date]\n- [Recent development or milestone]\n\n## What to Watch\n\n- [Open question or upcoming change]\n- [Risk, opportunity, or competitive move]\n\n## Sources\n\n- [Source 1](url)\n- [Source 2](url)\n```",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "notes",
+      "title": "Notes",
+      "children": [
+        {
+          "text": "- Always search for current information (within the last 6 months when possible).\n- If the user has a specific meeting or decision context, lean into why that matters for them.\n- If the topic is a tool, prioritize pricing, user count, and recent product changes.\n- If the topic is a person, prioritize recent moves, current role, and notable projects.\n- If the user provides no context, ask one question: \"Is there a specific angle you want me to focus on?\"",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

@@ -1,0 +1,170 @@
+{
+  "id": "urn:contentEntry:6aecf926d2ed8afc502df5b2",
+  "title": "Build a one-page story of your company",
+  "resourceType": "TUTORIAL",
+  "description": "Builds a single shareable web page that says who you serve, the problem you solve, what you sell, and the proof that it works, plus a list of where each quote and number came from.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6aecf926d2ed8afc502df5b2",
+  "viewableFile": "build-a-one-page-story-of-your-company.mp4",
+  "thumbnail": "build-a-company-one-pager.png",
+  "body": {
+  "tooltips": {},
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Marketing"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "children": [
+        {
+          "text": "Ask three people at a company what it does and you tend to get three answers, because the story lives in an About page, a sales deck, and a few case studies that were each written for a different reader. This build pulls them into one page you can open in a browser and share with a partner, a new hire, a prospect, or a journalist. You start with your website address plus a deck or a couple of case studies, and your AI reads them and writes a page covering who you serve, the problem you solve, your products, and the proof, using only the quotes and numbers in your own materials and listing where each one came from. It uses whatever it can reach from the chat, like web search to read your site or file uploads for the deck, and if your tool can show the page as an artifact or canvas, you see it right in the chat.\n\nFirst you'll answer a few questions so it understands your audience and how you talk about the company. Then it builds the page from your answers, and you run it once on your real material and fix whatever looks off. Plan on about 45 minutes the first time.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "setup",
+      "title": "Setup",
+      "children": [
+        {
+          "head": [
+            "You need",
+            "Why",
+            "How to set it up"
+          ],
+          "rows": [
+            [
+              "Your company website address or a saved About page",
+              "The story starts from how you describe yourself publicly",
+              "Have the web address ready, or save the About page as a PDF and attach it."
+            ],
+            [
+              "A sales deck or two or three case studies",
+              "Quotes, numbers, and proof points come from these",
+              "Attach them as PDF, Word, or PowerPoint files, or paste the text into the chat."
+            ],
+            [
+              "A list of the customer quotes you are cleared to use",
+              "The page only uses quotes you have approved",
+              "Ask the case study owner which quotes are approved, and have the list ready. If you have no approvals yet, ask before you start, or expect the page to have no quotes."
+            ]
+          ],
+          "type": "table",
+          "first_column_bold": true
+        },
+        {
+          "text": "**Nice to have:** If you have a contact email or booking link, have it ready and the page will end with it. Without one, the page shows a labeled placeholder you fill in later. If you have a design skill, a design guide, or your brand colors and fonts, call it or attach it at the start, and the page will match your company. Without it, the page gets a clean default look you can restyle later. Turn on web search if you want your AI to read your site directly instead of from pasted text.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build it with this prompt",
+      "children": [
+        {
+          "text": "Paste this into a new chat in your AI tool. It asks about your role and your work first, then builds, then tests what it built with you.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "label": "Prompt",
+          "prompt": "I want to build a one-page story of my company, as a single web page I can open in a browser and share, for my work. First, ask me what my role is and what I work on. Then walk me through it in three stages: Scope, Build, and Evaluate. Use whatever you can reach from this chat, like web search, file uploads, and any connector that fits, and if you can show the page as an artifact or canvas, do that. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. What should the page include and in what order? Offer this as a default I can accept: who we serve, the problem, our products, proof points, and a contact line.\n2. What will I give you: my website address, an About page, a deck, case studies, and where do they live? Have me paste or attach them now, and check whether you can read a website from this chat. If you can't, tell me what to paste instead. Also tell me if I have a design skill, a design guide, or brand colors and fonts you should use, and if I don't, say you'll use a clean default look.\n3. Who is this page for and what should they do after reading it: a prospective customer, a partner, a new hire, or a journalist?\n4. Who sees the page besides me, and how often will I update it? Use my answer when you write the reusable instructions at the end.\n5. What should the page never do or assume? For example, no customer names, quotes, or numbers I haven't approved, and no claims like \"market leader\" without a source.\n6. What would make the page good? Help me turn my answer into three checks I can answer yes or no, and make sure each one can be answered from the text of the page.\nThen write a short spec with my answers and the three checks. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, build the company page.\n- Read my site and documents first and write the story in the words my own materials use.\n- Write who we serve in one or two sentences, then the problem, then each product in a line or two.\n- For proof points, use only quotes and numbers that appear in my case studies or deck, and put the source next to each one. Never round or improve a number.\n- If my materials disagree, like two different customer counts or two product names, show me both and ask which is current.\n- If a quote has no named person or company, or I haven't said it's approved, leave it out and list it as a question for me.\n- If I have no proof points yet, build the page without that section and tell me what to collect.\n- Never invent a customer, a quote, a number, or a link. If the page needs something I haven't given you, put a clearly labeled placeholder on the page and list what I need to supply.\n- Use the materials I gave you in Scope. Before you build, ask me once for anything missing, like a product description, my list of approved quotes, and a contact email or booking link, and wait.\n- If you're unsure about something, ask me instead of guessing.\n- Output: one complete, self-contained HTML file in a single code block, with the styles inside the file, using the design I chose in Scope. If my tool can show it as an artifact or canvas, show it there. Otherwise tell me to save the code as a file ending in .html and open it in my browser. After the code, list every quote and number with where it came from.\n\nStage 3: Evaluate\nGrade the page you just made from my real materials against my three checks. Mark each one yes or no and quote the line that proves it. If any check fails, tell me the one change that would fix the most misses, make it, and show me only the sections that changed, then run the checks again. When all three pass, give me the instructions as one block I can paste into a new chat or a project, so I can rebuild the page whenever our story changes."
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "steps",
+      "title": "Steps",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "title": "Scope",
+              "children": [
+                {
+                  "text": "Your AI starts by asking about your role, then six questions one at a time. The second one is where it checks whether it can read your website directly and you share what it asks for, and the third is where you name one reader and what you want them to do next. Once you've answered, it writes a short spec with three yes/no checks, and you confirm it before it builds anything.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Name one specific reader when it asks who the page is for, such as a prospect who has never heard of you. A single reader decides what goes first.",
+                    "**Tip:** Write one check about proof, such as \"every number and quote traces to a case study.\" A company story with a wrong number is worse than one with none."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "title": "Build",
+              "children": [
+                {
+                  "text": "With the spec confirmed, your AI reads the site, deck, and case studies you gave it before it writes a word. It drafts the story in your own materials' language and builds a page with a source next to every quote and number. You end up with one HTML file you can open in a browser and share (if your tool can't show it, save the code block as company.html and double-click it), plus a list of where each proof point came from.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Give it the case studies with the best numbers, not all of them. Three strong ones make a tighter page than ten.",
+                    "**Tip:** When it asks which of two conflicting facts is current, answer from memory right away. Those conflicts are usually where your old materials have drifted apart."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "title": "Evaluate",
+              "children": [
+                {
+                  "text": "Last, your AI grades the page it just built against your three checks and quotes the line that shows each one passing or failing. It fixes the biggest miss, shows you the changed sections, and checks again.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Ask a colleague who doesn't know the company to read the page and say what you do. Their answer is the real test of your \"a stranger can say what we do\" check.",
+                    "**Tip:** Read the proof section against the original case study once yourself. Checking one number takes a minute and tells you whether to trust the rest."
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a landing page generator](/content/item/urn:contentEntry:6ab9ae4888b15b8d44d92975) · Product",
+            "[Create a brand voice guide from content you've already written](/content/item/urn:contentEntry:6ab9ae3a8bd361a4751ff11f) · Marketing",
+            "[Build a campaign brief generator](/content/item/urn:contentEntry:6ab9ae3a8b11aa5e2169e785) · Marketing",
+            "[Frontend Design](/content/item/urn:contentEntry:6ab9ae532e3c8f48ccd36daf) and [Web Design Guidelines](/content/item/urn:contentEntry:6ab9ae61a504335da054eb3e) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

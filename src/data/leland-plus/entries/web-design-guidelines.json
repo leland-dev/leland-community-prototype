@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae61a504335da054eb3e",
+  "title": "Web Design Guidelines",
+  "resourceType": "SKILL",
+  "description": "Review UI code against the Vercel Web Interface Guidelines, checking accessibility, interaction patterns, and design best practices, then report findings in terse file:line format.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae61a504335da054eb3e",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Design"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Review UI code files for compliance with Web Interface Guidelines. Report findings in terse `file:line` format.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "how-it-works",
+      "title": "How It Works",
+      "children": [
+        {
+          "text": "1. Fetch the latest guidelines from the source URL below\n2. Read the specified files (or ask the user which files to review)\n3. Check all files against every rule in the fetched guidelines\n4. Output findings using the format defined in the guidelines",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "guidelines-source",
+      "title": "Guidelines Source",
+      "children": [
+        {
+          "text": "Fetch fresh guidelines before each review:\n\n```\nhttps://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md\n```\n\nUse WebFetch to retrieve the latest rules. The fetched content contains all rules and the output format instructions.\n\n> Note: This skill fetches instructions from a live external URL at runtime. The upstream file can change without review, and the skill will not work if you are offline. For production use, pin the URL to a specific commit SHA instead of `main` and keep a local snapshot of the guidelines as a fallback.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "usage",
+      "title": "Usage",
+      "children": [
+        {
+          "text": "When a file or pattern is provided:\n1. Fetch guidelines from the source URL\n2. Read the specified files\n3. Apply all rules from the fetched guidelines\n4. Output findings using the format specified in the guidelines\n\nIf no files are specified, ask the user which files or pattern to review.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

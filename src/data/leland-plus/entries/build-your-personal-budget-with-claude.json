@@ -1,0 +1,700 @@
+{
+  "id": "urn:contentEntry:6ab9ae4d73126b4dad2c8293",
+  "title": "Build your personal budget with Claude",
+  "resourceType": "TUTORIAL",
+  "description": "Ship a working Excel budget dashboard and a Claude Project that runs your monthly review in 5-8 minutes.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4d73126b4dad2c8293",
+  "viewableFile": "GMT20260520-220145_Recording_2934x1392.mp4",
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "meta": {
+    "mins_total": 60
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "outcomes",
+      "children": [
+        {
+          "text": "Led by **Ben**",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A Claude Project with custom system instructions and your financial context saved in Knowledge",
+            "An Excel dashboard with Transactions, Summary, Variance, and Dashboard tabs",
+            "Categorized 3-month transaction history with SUMIFS-powered KPIs and 2-3 charts",
+            "A 5-8 minute monthly update workflow you can run forever"
+          ],
+          "title": "What you'll build",
+          "variant": "check"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "intro",
+      "title": "Session intro",
+      "subtitle": "What you need, what you'll build, and the patterns this session teaches.",
+      "children": [
+        {
+          "text": "**What you need for this session**",
+          "type": "prose"
+        },
+        {
+          "text": "Roughly 10 minutes of prep makes this session feel smooth. None of it is strictly required - if you show up unprepared, you'll still walk out with a real working artifact.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "[**Claude.ai**](https://claude.ai) **account** - Paid plan recommended so you have unlimited Projects.",
+            "**Excel or Google Sheets** - Either works. Examples in this guide use Excel; Sheets uses the same SUMIFS syntax. Sign up for free Google Sheets at [sheets.google.com](https://sheets.google.com) if needed. If you are using Google you should have the Google Drive MCP connected (Customize -> Connectors -> + -> add Google Drive).",
+            "**3-month transactions CSV** - Export from your bank or credit card. Combine multiple accounts into one file if you have several cards or banks (you can ask Claude to merge them, but scrub account and routing numbers from statements first). If you'd rather not use real data, a sample 174-row CSV will be provided in the session email.",
+            "**Optional: jot a few numbers** - Rough monthly take-home income (use a 3-month average if variable or freelance), big fixed expenses (rent, subscriptions), and 1-2 financial goals. None of this is required - Claude will derive numbers from your transaction data if you don't have them clear."
+          ],
+          "variant": "check"
+        },
+        {
+          "text": "**What you'll build today**",
+          "type": "prose"
+        },
+        {
+          "text": "By the end of this session, you'll have two things working together every month:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A **Claude Project** named \"Personal Budget\" with custom system instructions, `financial-context.md`, `categories.md`, and your categorized transaction history in Project Knowledge.",
+            "An **Excel dashboard** with Transactions, Summary, Variance, and Dashboard tabs - KPIs for the current month, 2-3 charts, and budget targets derived from your own spending history."
+          ]
+        },
+        {
+          "text": "The build takes about 60 minutes live. The monthly update to keep it current takes 5-8 minutes. Excel is the record. The Project is the brain.",
+          "type": "prose",
+          "variant": "footnote"
+        },
+        {
+          "text": "**Session resources**",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**[Sample transactions CSV](https://public-shareable-files.s3.us-west-2.amazonaws.com/ai-builder/downloads/260515_LEL-BudgetSession_SampleTransactions_v01.csv)** — 174 rows of realistic sample data for anyone who doesn't want to use real bank data.",
+            "**[Excel template](https://public-shareable-files.s3.us-west-2.amazonaws.com/ai-builder/downloads/260515_LEL-BudgetSession_ExcelTemplate_v01.xlsx)** — Pre-structured workbook with Transactions, Summary, Variance, and Dashboard tabs - download to follow along in Excel.",
+            "**Ben's contact** — [benlazaroff@gmail.com](mailto:benlazaroff@gmail.com) (Stanford GSB '21, top Leland MBA coach) for session-specific questions."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "concepts",
+      "title": "Opening concepts",
+      "subtitle": "Three foundations that make the rest of the session click.",
+      "children": [
+        {
+          "text": "**What Claude is and what it's good at**",
+          "type": "prose"
+        },
+        {
+          "text": "Claude is a large language model built by Anthropic. It reads text you give it and produces text in response, drawing on patterns learned from a massive body of human writing.\n\n**What it's genuinely good at:** making sense of messy, real-world text. Give it a document with inconsistent formatting, a spreadsheet with no category column, or an email thread with buried decisions, and it can read the whole thing, interpret what it means, and return output in whatever format you specify. That pattern works on contracts, financial data, research reports, meeting notes, or any material a human could read and understand.\n\n**What it's not:** a search engine with live information, a database that stores your data, or a guaranteed-correct calculator. Claude reasons over whatever you put into the conversation and produces plausible, coherent output based on its training. It can be wrong, and checking its work on anything consequential matters.\n\nIts usefulness scales with the quality of your input. Clear instructions with specific output formats produce precise, pasteable results. Vague prompts produce vague responses.",
+          "type": "prose"
+        },
+        {
+          "text": "**Claude Projects: giving Claude a persistent memory**",
+          "type": "prose"
+        },
+        {
+          "text": "A regular Claude chat resets when you close it. There's no memory of what you discussed, what files you shared, or what instructions you gave. Projects change that.\n\nA Project is a persistent workspace on [claude.ai](https://claude.ai). It holds two things: Custom Instructions (behavior rules Claude applies in every chat in that Project) and a Knowledge panel (files Claude reads before every message). Both carry over across sessions, so you never have to re-explain context.\n\nThis changes the relationship from one-off tool to a coworker that knows your situation. A Project for a specific client, workflow, or domain can have standing instructions and reference files built in. Every new chat inside it starts from that shared foundation.",
+          "type": "prose"
+        },
+        {
+          "text": "Projects are available on all Claude plans. Free accounts can create up to five. Pro, Max, Team, and Enterprise plans offer expanded Knowledge panel capacity. [Learn more about Projects](https://support.claude.com/en/articles/9517075-what-are-projects).",
+          "type": "prose",
+          "variant": "footnote"
+        },
+        {
+          "text": "**Structured output: asking Claude to return data, not prose**",
+          "type": "prose"
+        },
+        {
+          "text": "Claude's default is conversational prose. Ask it to analyze a dataset and it writes paragraphs. Tell it the exact format to return and it does that instead.\n\nStructured output prompting means specifying the schema in your prompt: \"Return a CSV with these columns in this order: Name, Date, Category, Amount.\" Claude produces a clean, pasteable file rather than a narrative summary. The same technique works for JSON, Markdown tables, numbered lists, code blocks, or any format a downstream tool can consume.\n\nVague format requests (\"summarize this as a table\") produce inconsistent output. Specific schema definitions (\"a table with columns: Date, Merchant, Amount, Category, Notes, one row per transaction\") produce output you can paste directly into a spreadsheet without editing.\n\nClaude treats your format spec the same way a human analyst treats a reporting template. You're not asking for information; you're specifying the structure you need.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-1",
+      "title": "1. Set up your Personal Budget Claude Project",
+      "subtitle": "Create the Project and standing instructions that govern every chat in it.",
+      "children": [
+        {
+          "text": "We're going to create a Claude Project and give it standing instructions that govern how it behaves in every financial conversation. You set this up once - everything in the next three builds depends on it.",
+          "type": "prose"
+        },
+        {
+          "text": "**Custom Instructions: standing rules for every chat**",
+          "type": "prose"
+        },
+        {
+          "text": "Custom Instructions are a block of text you write once inside a Claude Project that Claude reads before every chat in that Project. They're invisible during the conversation but active the entire time.\n\nInstructions can define Claude's role (\"you are my legal assistant\"), constrain its behavior (\"never suggest deleting files without asking first\"), specify output formats (\"always return data as a JSON object\"), or direct Claude to reference specific Knowledge files. They can be a few sentences or several paragraphs. Claude applies all of them automatically, without you having to repeat yourself at the start of each session.\n\nIn a regular chat, you'd paste your context at the start of each conversation. In a Project, the instructions are stored and apply automatically to every new chat. Any collaborator with access to the Project starts from the same shared foundation.",
+          "type": "prose"
+        },
+        {
+          "text": "Custom Instructions are available on all Claude plans with Projects access. You write them in plain text - no special syntax required.",
+          "type": "prose",
+          "variant": "footnote"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Open up **Cowork**, click **Projects** in the left sidebar, then **New Project**.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Name the project `Personal Budget` and click **Create project**.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Inside the project, click **Set project instructions** (or the pencil icon near the project name). Paste the prompt below and click **Save**.",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "prompt": "You are my personal finance copilot. You help me understand my spending, plan my budget, and make financial decisions grounded in my real transaction data.\n\nBehavior rules:\n- When categorizing transactions, use the categories defined in categories.md. If a transaction doesn't fit, propose a new category and ASK before creating it.\n- When I share new transactions, return them in the same structured CSV format I provided, with new \"Category\" and \"Subcategory\" columns added.\n- Always reference financial-context.md when answering questions about my situation.\n- Be direct and specific. When I ask 'how am I doing', give me numbers, not vibes.\n- Recognize stress and wins. Never moralize about my spending.\n- When generating Excel formulas, default to formulas that won't break if rows are added (SUMIFS over SUM, structured refs).\n- Round dollar amounts to whole numbers in your home currency.",
+                  "prompt_note": "The instructions persist across every chat in the Project - Claude checks them before every reply without you re-pasting context. The behavior rules lock in three things: which files to reference (`categories.md`, `financial-context.md`), what output format to use when returning transactions (structured CSV with new Category + Subcategory columns), and the tone (direct numbers, no moralizing). Set once, never touch again."
+                },
+                {
+                  "type": "toggle",
+                  "title": "Alternate path: free tier (no Projects)",
+                  "children": [
+                    {
+                      "text": "On [claude.ai](https://claude.ai), paste the full system instructions at the top of any chat as plain text, preceded by: \"Here's my context for this session:\". This works for one chat at a time but doesn't persist between sessions - you'll re-paste it each month. Everything else in this guide works identically on the free tier.",
+                      "type": "prose"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "\"I don't see a Custom Instructions option\"",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Custom Instructions only appear inside a Project, not in a regular chat. Make sure you've clicked into a Project (sidebar → Projects → New Project) before looking for the instructions field. On mobile, tap the project name at the top to reveal settings.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "label": "Level 1",
+          "title": "Add a personalized behavior rule",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "Open your Project, click **Edit instructions**, and add one custom rule at the bottom. Test immediately: start a new chat in the Project and ask something that triggers the rule.\n\nIdeas:\n\n- \"Always flag any single transaction over $300 in your analysis.\"\n- \"When I ask about a specific merchant, show me my last 3 purchases there.\"\n- \"If I write to you in Spanish, respond in Spanish.\"",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "tags": [
+            {
+              "text": "Model: Sonnet"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-2",
+      "title": "2. Add your financial context and category schema",
+      "subtitle": "Two markdown files that Claude reads automatically before every message.",
+      "children": [
+        {
+          "text": "Now we're going to give Claude the two files it needs to understand your financial situation and your spending categories. These live in Project Knowledge, which means Claude reads them automatically before every message in this Project - you never paste this context again.",
+          "type": "prose"
+        },
+        {
+          "text": "**Project Knowledge: persistent files Claude reads before every chat**",
+          "type": "prose"
+        },
+        {
+          "text": "Project Knowledge is a file panel inside a Claude Project. Files you add there are read by Claude at the start of every chat in the Project, automatically, before you type your first message.\n\nMD stands for Markdown, a lightweight plain-text format that uses plain symbols for structure: pound signs for headers, dashes for bullet points, double asterisks for bold. Claude reads Markdown cleanly, and it's the preferred format for Knowledge files. In practice, a `.md` file is a text file you can write in any text editor or paste directly into the Knowledge panel.\n\nThere's a practical difference between pasting context into a chat and saving it to Project Knowledge. Context pasted into a chat is available only in that one conversation. A file saved to Knowledge is available in every conversation in the Project, permanently, until you remove it. Stable, recurring context goes in Knowledge. Task-specific information goes in the chat.\n\nKnowledge files work best for information that stays relatively stable: your role, your preferences, a taxonomy or schema you want Claude to use consistently. They're less useful for information that needs to be current in real time.",
+          "type": "prose"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Inside the Personal Budget Project, **ask Cowork** to create a new markdown file in your working directory named `financial-context.md` and paste the template below. Fill in whatever you know - blank fields are fine.",
+                  "type": "prose"
+                },
+                {
+                  "code": "# Financial Context\n\n## Income\n- Monthly take-home (after tax): $______\n(If variable: use a 3-month average. If you don't know, leave blank - Claude will derive it from your transactions.)\n- Other income (side projects, etc.): $______\n- Pay cadence: [biweekly / monthly / variable / other]\n\n## Fixed Monthly Expenses\n- Rent / mortgage: $______\n- Utilities (avg): $______\n- Insurance (health/car/renters): $______\n- Subscriptions total: $______\n- Other recurring: $______\n\n## Debt (skip if N/A)\n- Credit cards: $______ at ___% APR\n- Student loans: $______ at ___% APR\n- Other: $______\n\n## Savings & Investments (skip if N/A)\n- Emergency fund: $______\n- Retirement: $______ (contributing $___/mo)\n- Brokerage / other: $______\n\n## Goals (next 6-12 months) - pick 0, 1, or 2\n1. ______\n2. ______\n\n## Constraints / Context (anything Claude should know)\n- ______",
+                  "type": "code"
+                },
+                {
+                  "text": "If you are using the example data provided, just leave all items blank.",
+                  "type": "callout"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Ask Cowork** to create a second markdown file. Name it `categories.md` and paste the schema below",
+                  "type": "prose"
+                },
+                {
+                  "code": "# Category Schema\n\n## Income\n- Salary · Side income · Refunds · Investment income\n\n## Housing\n- Rent / mortgage · Utilities (electric, gas, water, internet)\n- Home maintenance · Furnishings\n\n## Food\n- Groceries · Restaurants & takeout\n- Coffee shops · Bars & alcohol\n\n## Transportation\n- Rideshare / taxi · Gas / fuel · Public transit\n- Parking / tolls · Car payment / insurance / maintenance\n\n## Personal\n- Subscriptions (streaming, software) · Clothing\n- Personal care · Gifts\n\n## Health\n- Medical / dental / pharmacy · Fitness / gym\n- Therapy / mental health\n\n## Financial\n- Loan payments · Credit card payments\n- Investments / transfers to savings · Bank fees\n\n## Travel\n- Flights · Hotels / lodging · Travel meals & activities\n\n## Discretionary\n- Entertainment · Hobbies · Charity & donations\n\n## Other\n- Uncategorized (placeholder)",
+                  "type": "code"
+                },
+                {
+                  "text": "`financial-context.md` is the source of truth the Custom Instructions tell Claude to always reference - so every chat starts with Claude already knowing your income, goals, and constraints. `categories.md` defines the taxonomy that keeps transaction tagging consistent month over month. These two files are why categorization in Build 3 stays accurate without re-explaining anything.",
+                  "type": "callout"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "\"Claude ignored my categories and invented new ones\"",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "The file is likely saved in chat only - not in Project Knowledge. Open the Project → Knowledge panel and confirm both files are listed there. If not, re-add them via **Add Content**. Files pasted into a chat message are not the same as Project Knowledge files.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "label": "Level 1",
+          "title": "Customize categories.md for your life",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "Add a parent category that fits your situation - Pets, Childcare, Business Expenses, etc. In a new chat within the Project, say:\n\n\"Add a [name] category under [parent] in your schema.\"\n\nClaude uses it immediately in that chat. Then manually update `categories.md` in Project Knowledge to make it permanent across future chats.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "tags": [
+            {
+              "text": "Model: Sonnet"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-3",
+      "title": "3. Categorize your transactions",
+      "subtitle": "Hand Claude your 3-month CSV and get back a categorized, paste-ready file.",
+      "children": [
+        {
+          "text": "This build has three phases: categorize your transactions with Claude, build the Excel dashboard with SUMIFS formulas, and save your workflow back to the Project. Work through them in sequence - each step's output feeds the next.",
+          "type": "prose"
+        },
+        {
+          "text": "**AI in Excel and file manipulation**",
+          "type": "prose"
+        },
+        {
+          "text": "Claude Cowork can't open files on your computer or edit a spreadsheet that is not in its working directory. You can get around this by either attaching the needed directory to a project or allowing Claude to read any file you attach in a conversation and produce output that you can paste or save wherever you need it. Claude Code has a similar limitation, but it can edit files or spreadsheets as long as it can navigate to them using a provided file path.\n\nNote that AI is only as informed as you make it. It is important to tell it what columns you want. For example: attach a CSV of raw data and Claude reads every row, returning a version with new columns added in exactly the format you specified. Describe which cells hold what data in a spreadsheet and Claude writes the formulas that reference your actual column structure. Neither step requires you to code or write formulas yourself.\n\nWhat you give it in a message is what it works with.",
+          "type": "prose"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Start a new chat inside the Personal Budget Project. Attach your transactions CSV (or the sample CSV from the session email). If you are using the sample data you can find it [here](https://public-shareable-files.s3.us-west-2.amazonaws.com/ai-builder/downloads/260515_LEL-BudgetSession_SampleTransactions_v01.csv).",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Send this categorization prompt.",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "prompt": "I've attached my last 3 months of transactions. Please categorize every transaction using the schema in categories.md.\n\nReturn the data as a CSV with these columns, in this exact order:\nDate, Description, Amount, Category, Subcategory, Notes\n\nRules:\n- \"Notes\" should be blank UNLESS a transaction is ambiguous or looks unusual - then briefly explain your reasoning.\n- If a transaction genuinely doesn't fit any category, mark it \"Uncategorized\" with a note. Do NOT invent new categories without asking me first.\n- Preserve every original row. Don't drop, dedupe, or summarize.\n- Keep amounts in their original sign (negative = spend, positive = income).\n\nWalk me through every transaction you flagged as Uncategorized or ambiguous. For each, tell me:\n- The transaction (date, description, amount)\n- Your best guess at category/subcategory and why\n- What I could tell you that would let you commit\n\nI'll answer your questions in this thread, and then please return a clean, finalized CSV of just the previously-ambiguous rows with your final categorization.\n\nAfter the CSV, tell me:\n1. How many transactions you couldn't confidently categorize without my assistance\n2. Any patterns you noticed (recurring subscriptions, unusual spend, large one-offs)\n3. Top 5 categories by total spend",
+                  "prompt_note": "Specifying column names and order forces Claude's output to paste directly into Excel with no reformatting. \"Preserve every row\" prevents Claude from summarizing transactions it finds repetitive. The analysis at the end gives you a read on your data before you open Excel. Flagging ambiguous rows turns them into a dialogue rather than a guess - Claude commits to a category only after you confirm. The result is a patch CSV of just the resolved rows, so you're not re-pasting the whole dataset."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Claude returned fewer rows than expected",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Push back directly: \"You returned [X] rows. I gave you [Y]. Return every transaction row - do not dedupe, group, or summarize any rows.\" Claude will run the full categorization again.\n\nIf your CSV has separate Debit and Credit columns instead of a single Amount column, tell Claude: \"My CSV has separate Debit and Credit columns. Treat Debit as negative spend and Credit as positive income - combine them into a single Amount column in the output.\"\n\nIf Claude invents a category not in `categories.md`, say: \"That category isn't in my schema. Use the closest match from `categories.md` or mark it Uncategorized and ask me.\"",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "label": "Level 1",
+          "title": "Zombie-subscription audit",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "In the same chat, after your transactions are categorized, paste this prompt:",
+              "type": "prose"
+            },
+            {
+              "type": "prompt",
+              "prompt": "List every recurring charge in my transactions. For each one:\n- Merchant name\n- Amount and billing frequency\n- Last date it appeared\n- Whether it appeared in all 3 months or fewer\n\nFlag anything that appeared in fewer than 3 months - those are the ones I may have forgotten about. Sort by total 3-month spend, highest first."
+            }
+          ]
+        },
+        {
+          "tags": [
+            {
+              "text": "Model: Sonnet"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-4",
+      "title": "4. Build your Excel dashboard",
+      "subtitle": "Four tabs, SUMIFS formulas, KPIs, and 2-3 charts - all driven by Claude.",
+      "children": [
+        {
+          "text": "**Timeboxing: when to use AI and when to do it yourself**",
+          "type": "prose"
+        },
+        {
+          "text": "Not every task belongs to AI. The choice comes down to time, complexity, and what \"good\" looks like.\n\nFor simple, mechanical tasks like copying and pasting data into a spreadsheet, doing it yourself is faster. AI has to read the task, plan the steps, execute each one, and verify the result. For something you can finish in 30 seconds by hand, that overhead costs more time than it saves.\n\nReserve AI for tasks where it has a real edge: categorizing 174 transactions against a schema, writing SUMIFS formulas that reference your specific column letters, generating analysis across a dataset you don't want to read row by row. Those are tasks where AI's speed, pattern recognition, and tolerance for repetition outperform what you'd do manually.\n\nThe practical question: could a competent person do this in 30 seconds? If yes, do it yourself. If the task involves reading, inferring, generating, or repeating across many rows, hand it to AI.",
+          "type": "prose"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Download the [Excel template](https://public-shareable-files.s3.us-west-2.amazonaws.com/ai-builder/downloads/260515_LEL-BudgetSession_ExcelTemplate_v01.xlsx) and open it - the **Transactions**, **Summary**, **Variance**, and **Dashboard** tabs are already set up for you. If you'd rather use Google Sheets, create a new blank workbook and add those four tabs yourself.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Paste Claude's categorized CSV into cell A1 of the **Transactions** tab. If dates look like text: select column A → **Format Cells** → **Date**.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "In the same Claude chat, send this formula prompt.",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "prompt": "I'm building a monthly budget dashboard in Excel. The Transactions tab has these columns starting at row 2:\nDate (A), Description (B), Amount (C), Category (D), Subcategory (E), Notes (F). Amounts are positive for income, negative for spend.\n\nGenerate the formulas I need for these tabs:\n\n1. SUMMARY TAB\nA pivot-style table with categories in column A and the last 6 months across columns B-G. For each cell, show total spend in that category for that month. Add a YTD column in H. Use SUMIFS so it stays correct as rows are added. Use DATE(yyyy,m,d) for month boundaries in the criteria (NOT date strings - strings fail to match real Excel dates).\n\n2. VARIANCE TAB\nSame layout, but with a Budget column (B). C onward = actual vs budget for each month - variance in dollars AND as a percent.\n\n3. DASHBOARD TAB\nKPIs for the current month using TODAY():\n- Total income\n- Total spend\n- Net (income - spend, shown as positive when saving)\n- Save rate (net / income, %)\n- Top 3 spend categories with totals\n\nFor each formula:\n- Insert the exact formula where needed\n- Provide me with a one-sentence explanation of each formula and where it was used.\n\nAfter the formulas, suggest 2-3 charts I should add to the Dashboard and what they should show. Get my feedback and after I confirm the ones I want to include, add them to the Dashboard tab. These charts can reference data on other tabs. Be sure to use the proper formula for calling those data lines across tabs.",
+                  "prompt_note": "The formula prompt works because you give Claude your column layout explicitly - it generates SUMIFS referencing your actual column letters and uses DATE() boundaries that won't break when you add rows next month. Asking for a cell location with each formula means you paste them in order without guessing where they go."
+                },
+                {
+                  "type": "toggle",
+                  "title": "Alternate path: Google Sheets",
+                  "children": [
+                    {
+                      "text": "After Claude returns the Excel formulas, add to the chat: \"Give me the same formulas in Google Sheets syntax.\" Minor differences in date functions matter. Paste syntax is otherwise identical; Date formatting is usually auto-detected. Use **Data → Split text to columns** if the CSV doesn't auto-parse.",
+                      "type": "prose"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Formulas return $0",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "The Date column is stored as text, not a real date. Select column A → **Format Cells** → **Date**. SUMIFS will resolve immediately.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Claude summarized instead of returning all rows",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Push back: \"No - return every transaction row. Don't dedupe or summarize.\"",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Separate Debit and Credit columns",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Tell Claude: \"My CSV has separate Debit and Credit columns - treat Debit as negative spend, Credit as positive income.\"",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "label": "Level 1",
+          "title": "Derive budget targets from your history",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "In the same chat after categorization, paste this prompt. Then paste the returned numbers into the Budget column on your Variance tab.",
+              "type": "prose"
+            },
+            {
+              "type": "prompt",
+              "prompt": "I don't have explicit monthly budget targets - derive them from what I actually spent over the last 3 months. For each spend category, propose a target that's a reasonable starting point based on my 3-month average, rounded to a clean number, and aware of my goals in financial-context.md. Return as: Category, Monthly Budget Target, one-line reason."
+            }
+          ]
+        },
+        {
+          "tags": [
+            {
+              "text": "Model: Sonnet"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-5",
+      "title": "5. Make it ongoing: your monthly review",
+      "subtitle": "Save the workflow back to the Project so next month's review takes 5-8 minutes.",
+      "children": [
+        {
+          "text": "This is your 5-minute monthly routine. Each month, feed Claude your new transactions, paste the categorized rows back into Excel, then run the debrief prompt - one question that returns a clear financial read on your month.",
+          "type": "prose"
+        },
+        {
+          "text": "**Recurring tasks: prompts as reusable analytical templates**",
+          "type": "prose"
+        },
+        {
+          "text": "A well-written prompt is a reusable analytical template. Run the same prompt on last month's data, then on this month's data, and you get results in the same structure you can compare directly. The analysis is consistent because the prompt is consistent.\n\nThis is how AI handles recurring tasks: you write the prompt once, save it somewhere you can find it (a Knowledge file, a note, a template document), and run it against each new batch of data without rebuilding the analysis from scratch. The output is comparable across time because the structure doesn't change.\n\nOver time, this compounds. If you keep outputs from prior runs, you can give Claude access to them and ask it to identify patterns across periods rather than within a single one. A monthly debrief becomes more valuable as the historical record grows.\n\nProjects make the recurring pattern easier to maintain. Custom Instructions and Knowledge files mean Claude already knows your context when a new session starts. The only thing you're adding each cycle is fresh data.",
+          "type": "prose"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Ask Claude** to add another file named `monthly-update.md` and paste the workflow below.",
+                  "type": "prose"
+                },
+                {
+                  "code": "# Monthly Update Workflow\n\n1. Export last month's transactions from each account as CSV.\n2. Open a new chat in this Project.\n3. Paste: \"Here are [Month]'s transactions. Categorize per categories.md, return as CSV with the standard columns, then run the monthly debrief.\"\n4. Paste the new categorized rows into the Transactions tab in Excel.\n5. Update Budget targets in Variance if any changed.\n6. Review the Dashboard and the debrief.",
+                  "type": "code"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Open the Personal Budget Project and start a new chat.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Begin with: _\"Here are [Month]'s transactions.\"_ and attach the new CSV (or paste in new rows). Claude will categorize them per `categories.md` and return a clean CSV.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Paste the new categorized rows into the **Transactions** tab in Excel.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Back in the chat, paste the monthly debrief prompt below.",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "prompt": "Run a monthly debrief on the transactions I've shared so far.\n\n1. By category, where am I over budget? Under? By how much, in dollars? If I don't have explicit budget targets for a category, compare to my 3-month rolling average instead.\n2. Compare each category to the 3-month rolling average regardless. Flag any category that's more than 20% off trend.\n3. Knowing my goals from financial-context.md, what's the ONE action I should take this month to move closer to them? Be specific - \"cut restaurant spend by $200\" beats \"spend less on food\". If I haven't set goals, suggest one that makes sense given my actual cash flow.\n4. Anything I should celebrate? Wins, smart moves, trends pointing the right way.",
+                  "prompt_note": "The debrief references the transaction data AND `financial-context.md` in one shot - goals, actuals, and variance in a single response. Asking for \"the ONE action\" keeps the output specific and actionable rather than a generic suggestion list. The celebrate question keeps the tone balanced. This prompt is designed to be reused every month without editing."
+                },
+                {
+                  "type": "toggle",
+                  "title": "Alternate path: free tier (no Projects)",
+                  "children": [
+                    {
+                      "text": "Each month, start a new chat. Paste the `monthly-update.md` workflow at the top as context, then attach or paste the new transactions. Works exactly the same - you just re-paste context each session instead of having it persist automatically.",
+                      "type": "prose"
+                    }
+                  ]
+                },
+                {
+                  "text": "_Voice mode: Try saying this out loud instead of typing it. Use Wispr Flow, Claude's built-in voice, or Mac dictation (press Fn twice)._",
+                  "type": "callout"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Debrief feels generic",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Push back: \"Be more specific - name actual dollar amounts and actual categories.\" Specificity is always available; it just needs a nudge.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Claude is moralizing",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Say: \"Stick to numbers. No judgment.\" One correction per chat is all it takes.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Hard month",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Ask: \"Lead with what's working before the critique.\" Claude will reorder.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "label": "Level 1",
+          "title": "Project a hypothetical scenario",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "In the same chat, run a what-if scenario. Paste the prompt below and fill in the scenario line.\n\nGood scenarios to run live: a paycut, a savings target, a fixed-cost increase. Skip \"what if I quit my job\" - it sprawls.",
+              "type": "prose"
+            },
+            {
+              "type": "prompt",
+              "prompt": "Run a what-if scenario for me.\n\nScenario: [describe the change - e.g., 'I'm taking a $20K paycut starting next month' or 'I want to save an extra $500/mo for a down payment' or 'Rent is going up $400'].\n\nUsing my 3-month spending patterns and the goals in financial-context.md, tell me:\n- What this change does to my net monthly cash flow\n- Which categories I could realistically cut, and how much each would yield\n- The 2-3 highest-leverage moves to consider first\n- Anything I should NOT cut, and why"
+            }
+          ]
+        },
+        {
+          "tags": [
+            {
+              "text": "Model: Sonnet"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "wrap",
+      "title": "Summary and next steps",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "A Claude Project named **Personal Budget** with persistent custom system instructions",
+            "`financial-context.md`, `categories.md`, and `monthly-update.md` in Project Knowledge",
+            "An Excel dashboard: Transactions, Summary, Variance, and Dashboard tabs with SUMIFS formulas, KPIs, and 2-3 charts",
+            "A monthly update workflow that runs in 5-8 minutes"
+          ],
+          "title": "What you built today"
+        },
+        {
+          "text": "Run the what-if scenario (a paycut, a savings target, or a fixed-cost increase), run the zombie-subscription audit, or share the Project with a partner if you have shared finances (**Project Settings → Invite**).\n\nThree months from now, your monthly review is the calmest routine in your financial life.",
+          "type": "prose",
+          "variant": "footnote"
+        }
+      ]
+    }
+  ]
+}
+}

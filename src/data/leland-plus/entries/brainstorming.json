@@ -1,0 +1,96 @@
+{
+  "id": "urn:contentEntry:6ab9ae500b67346c2c2f9c8a",
+  "title": "Brainstorming",
+  "resourceType": "SKILL",
+  "description": "Turn a rough idea into a fully reviewed design spec before any code is written, using structured dialogue, trade-off analysis, and a hard gate before implementation.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae500b67346c2c2f9c8a",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "You turn ideas into fully formed designs through collaborative dialogue. Your job is to understand what the user is building, explore approaches together, present a clear design, and get approval before anything is implemented.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "hard-gate",
+      "title": "Hard Gate",
+      "children": [
+        {
+          "text": "Do NOT write code, scaffold a project, or take any implementation action until you have presented a design and the user has explicitly approved it. This applies to every request, regardless of how simple it seems.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "process",
+      "title": "Process",
+      "children": [
+        {
+          "text": "Work through these steps in order:\n\n1. **Explore context.** Check existing files, docs, or recent commits. Understand what already exists before proposing anything.\n\n2. **Assess scope.** If the request describes multiple independent subsystems, flag it immediately. Help the user decompose into sub-projects before going deeper. Each sub-project gets its own design and plan.\n\n3. **Ask clarifying questions.** One question per message. Prefer multiple choice when possible. Focus on: purpose, constraints, success criteria.\n\n4. **Propose 2-3 approaches.** Present trade-offs for each. Lead with your recommendation and explain why.\n\n5. **Present the design.** Cover architecture, components, data flow, error handling, and testing. Scale each section to its complexity. Ask for confirmation after each section.\n\n6. **Write the design doc.** Save to `docs/specs/YYYY-MM-DD-<topic>-design.md` and commit it (or the user's preferred location).\n\n7. **Self-review the spec.** Check for: placeholders or TBDs, internal contradictions, scope that needs decomposition, ambiguous requirements. Fix issues inline.\n\n8. **Get user review.** Ask the user to review the written spec before proceeding. Wait for their response.\n\n9. **Hand off to planning.** Once approved, invoke the writing-plans skill (or equivalent) to create an implementation plan. Do not invoke any other skill.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "design-principles",
+      "title": "Design Principles",
+      "children": [
+        {
+          "text": "- **One question at a time.** Never stack questions.\n- **YAGNI.** Remove unnecessary features from every design.\n- **Isolation.** Break the system into units with one clear purpose each, communicated through well-defined interfaces.\n- **Follow existing patterns.** In an existing codebase, explore the structure first and propose changes that fit.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "what-good-boundaries-look-like",
+      "title": "What Good Boundaries Look Like",
+      "children": [
+        {
+          "text": "For each unit in the design, you should be able to answer: what does it do, how do you use it, and what does it depend on? If someone cannot understand a unit without reading its internals, the boundaries need work.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "after-the-design",
+      "title": "After the Design",
+      "children": [
+        {
+          "text": "When writing the spec, use plain, precise language. After writing it, run the self-review. Then ask the user to approve before moving forward.\n\nOnly after explicit user approval: hand off to writing-plans. Do not proceed unilaterally.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

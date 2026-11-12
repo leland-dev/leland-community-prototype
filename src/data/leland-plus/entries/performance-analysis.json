@@ -1,0 +1,96 @@
+{
+  "id": "urn:contentEntry:6ab9ae588f4cd522c944f170",
+  "title": "Performance Analysis",
+  "resourceType": "SKILL",
+  "description": "Diagnose campaign or outreach performance through a six-layer metrics stack to find exactly where a sequence is breaking down",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae588f4cd522c944f170",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Data"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Diagnose where a campaign is breaking down using a 6-layer metrics stack. Work top-down. Find where numbers drop off sharply. That's the problem layer.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "the-six-layers",
+      "title": "The Six Layers",
+      "children": [
+        {
+          "text": "### Layer 1, Deliverability\nAre messages reaching inboxes?\n- Bounce rate (target: below 2%)\n- Spam complaints (target: below 0.1%)\n- Send volume vs. delivered\n\n### Layer 2, Open Rate\nAre people opening?\n- Benchmark: 30-50% for warm audiences, 15-25% for cold\n- If low: subject line or sender reputation issue\n\n### Layer 3, Click / Engagement Rate\nAre people engaging with the content?\n- If opens are fine but clicks are low: body copy or CTA issue\n\n### Layer 4, Reply Rate\nAre people responding?\n- Benchmark: 2-5% cold, 10-20% warm\n- If opens are high but replies are low: the offer or ask isn't compelling\n\n### Layer 5, Conversion Rate\nOf people who reply, how many move forward?\n- If replies are happening but not converting: qualification or objection issue\n\n### Layer 6, Revenue Attribution\nWhat's the revenue per contact in the sequence?\n- Final measure of whether the whole system is working",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-gather-the-data",
+      "title": "Step 1, Gather the Data",
+      "children": [
+        {
+          "text": "Ask the user to provide whatever metrics they have for the campaign. Fill in as many layers as possible.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-find-the-leak",
+      "title": "Step 2, Find the Leak",
+      "children": [
+        {
+          "text": "Identify the layer where performance drops most significantly. That's where to focus.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-diagnose-and-recommend",
+      "title": "Step 3, Diagnose and Recommend",
+      "children": [
+        {
+          "text": "For the problem layer, identify 2-3 likely root causes and specific tests to run.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Performance Analysis: [Campaign Name]\nAnalyzed: [date]\n\n## Funnel\n| Layer | Metric | Benchmark | Actual | Status |\n|-------|--------|-----------|--------|--------|\n| Deliverability | Bounce rate | <2% | [%] | OK/Warn |\n| Open rate | | 30-50% | [%] | OK/Warn |\n| Click rate | | varies | [%] | OK/Warn |\n| Reply rate | | 2-20% | [%] | OK/Warn |\n| Conversion | | varies | [%] | OK/Warn |\n\n## Where It's Breaking\n[Layer name + what the data shows]\n\n## Root Causes (most likely)\n1. [cause]\n2. [cause]\n\n## Tests to Run\n1. [specific test with hypothesis]\n2. [specific test]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

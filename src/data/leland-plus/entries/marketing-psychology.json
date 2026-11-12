@@ -1,0 +1,118 @@
+{
+  "id": "urn:contentEntry:6ab9ae56c6466536c2e817eb",
+  "title": "Marketing Psychology",
+  "resourceType": "SKILL",
+  "description": "Apply psychological principles and behavioral science to marketing decisions, copy, pricing, and design to improve conversions and understand why people buy.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae56c6466536c2e817eb",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Research"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "You are an expert in applying psychological principles and mental models to marketing. Help users understand why people buy, how to influence behavior ethically, and how to make better marketing decisions.\n\nWhen helping users: identify which models apply to their situation, explain the psychology behind the model, provide specific marketing applications, and suggest how to implement ethically.\n\nIf a `product-marketing-context.md` file exists in the project directory, read it first and tailor recommendations to that specific product and audience.\n\n---",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "foundational-thinking-models",
+      "title": "Foundational Thinking Models",
+      "children": [
+        {
+          "text": "### First Principles\nBreak problems to basic truths and build from there. Use the 5 Whys to find root causes.\n**Marketing application:** Don't assume you need content marketing because competitors do. Ask why, what problem it solves, whether there's a better solution.\n\n### Jobs to Be Done\nPeople don't buy products. They \"hire\" them to get a job done.\n**Marketing application:** A drill buyer doesn't want a drill, they want a hole. Frame around the job accomplished, not the specifications.\n\n### Inversion\nAsk \"What would guarantee failure?\" then avoid those things.\n**Marketing application:** List everything that would make your campaign fail (confusing messaging, wrong audience, slow page), then prevent each.\n\n### Pareto Principle (80/20)\n80% of results come from 20% of efforts.\n**Marketing application:** Find the 20% of channels, customers, or content driving 80% of results. Cut the rest.\n\n### Theory of Constraints\nEvery system has one bottleneck. Fix that before optimizing elsewhere.\n**Marketing application:** If your funnel converts well but traffic is low, more conversion optimization won't help. Fix traffic first.\n\n### Second-Order Thinking\nConsider the effects of the effects.\n**Marketing application:** A flash sale boosts revenue (first order) but may train customers to wait for discounts (second order).\n\n---",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "understanding-buyers-and-human-psychology",
+      "title": "Understanding Buyers and Human Psychology",
+      "children": [
+        {
+          "text": "### Mere Exposure Effect\nPeople prefer things they've seen before. Familiarity breeds liking.\n**Marketing application:** Consistent brand presence builds preference over time. Repetition across channels creates comfort and trust.\n\n### Confirmation Bias\nPeople seek information confirming existing beliefs.\n**Marketing application:** Understand what your audience already believes and align messaging accordingly. Fighting beliefs head-on rarely works.\n\n### Mimetic Desire\nPeople want things because others want them. Desire is socially contagious.\n**Marketing application:** Show that desirable people want your product. Waitlists, exclusivity, and social proof trigger mimetic desire.\n\n### Endowment Effect\nPeople value things more once they own them.\n**Marketing application:** Free trials and freemium models let customers \"own\" the product, making them reluctant to give it up.\n\n### Hyperbolic Discounting / Present Bias\nPeople strongly prefer immediate rewards over future ones.\n**Marketing application:** Emphasize immediate benefits (\"Start saving time today\") over future ones (\"You'll see ROI in 6 months\").\n\n### Status-Quo Bias\nPeople prefer the current state of affairs. Change feels risky.\n**Marketing application:** Reduce friction to switch. Make the transition feel safe and easy.\n\n### Paradox of Choice\nToo many options overwhelm and paralyze.\n**Marketing application:** Limit options. Three pricing tiers beat seven. Recommend a single \"best for most\" option.\n\n### Peak-End Rule\nPeople judge experiences by the peak and the end, not the average.\n**Marketing application:** Design memorable peaks and strong endings (thank you pages, follow-up emails).\n\n### Zeigarnik Effect\nUnfinished tasks occupy the mind more than completed ones.\n**Marketing application:** \"You're 80% done\" creates pull to finish. Abandoned carts and progress indicators leverage this.\n\n---",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "influencing-behavior-and-persuasion",
+      "title": "Influencing Behavior and Persuasion",
+      "children": [
+        {
+          "text": "### Reciprocity\nPeople feel obligated to return favors.\n**Marketing application:** Free content, free tools, and generous free tiers create reciprocal obligation. Give value before asking.\n\n### Commitment and Consistency\nOnce people commit, they want to stay consistent with that commitment.\n**Marketing application:** Get small commitments first (email signup, free trial). People who've taken one step are more likely to take the next.\n\n### Authority Bias\nPeople defer to experts and authority figures.\n**Marketing application:** Feature expert endorsements, certifications, \"featured in\" logos, and thought leadership content.\n\n### Scarcity / Urgency\nLimited availability increases perceived value.\n**Marketing application:** Limited-time offers and exclusive access create urgency. Only use when genuine.\n\n### Loss Aversion / Prospect Theory\nLosses feel roughly twice as painful as equivalent gains feel good.\n**Marketing application:** Frame in terms of what they'll lose by not acting. \"Don't miss out\" often outperforms \"You could gain.\"\n\n### Anchoring Effect\nThe first number seen heavily influences subsequent judgments.\n**Marketing application:** Show the higher price first (original price, competitor price, enterprise tier) to anchor expectations.\n\n### Decoy Effect\nAdding a third, inferior option makes one of the original two look better.\n**Marketing application:** A \"decoy\" pricing tier that's clearly worse value makes your preferred tier look like the obvious choice.\n\n### Framing Effect\nHow something is presented changes how it's perceived.\n**Marketing application:** \"90% success rate\" vs. \"10% failure rate\" are identical but feel different. Frame positively.\n\n---",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "pricing-psychology",
+      "title": "Pricing Psychology",
+      "children": [
+        {
+          "text": "### Charm Pricing / Left-Digit Effect\nPrices ending in 9 seem significantly lower. $99 feels much cheaper than $100.\n**Marketing application:** Use .99 endings for value-focused products. The left digit dominates perception.\n\n### Rounded-Price Effect\nRound numbers feel premium. $100 signals quality; $99 signals value.\n**Marketing application:** Use round prices for premium products, charm prices for value products.\n\n### Rule of 100\nUnder $100: percentage discounts seem larger (\"20% off\"). Over $100: absolute discounts seem larger (\"$50 off\").\n\n### Good-Better-Best\nPeople judge prices relative to options presented. The middle tier seems reasonable between cheap and expensive.\n**Marketing application:** Three tiers where the middle is your target. The expensive tier makes it look reasonable; the cheap tier provides an anchor.\n\n---",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "design-and-delivery-models",
+      "title": "Design and Delivery Models",
+      "children": [
+        {
+          "text": "### Hick's Law\nDecision time increases with number and complexity of choices.\n**Marketing application:** One clear CTA beats three. Fewer form fields beat more.\n\n### BJ Fogg Behavior Model\nBehavior = Motivation x Ability x Prompt. All three must be present for action.\n**Marketing application:** High motivation but hard to do = won't happen. Easy but no prompt = won't happen. Design for all three.\n\n### Activation Energy\nHigh starting friction prevents action even if the overall task is easy.\n**Marketing application:** Pre-fill forms, offer templates, show quick wins. Make the first step trivially easy.\n\n---",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "quick-reference",
+      "title": "Quick Reference",
+      "children": [
+        {
+          "text": "| Challenge | Relevant Models |\n|-----------|-----------------|\n| Low conversions | Hick's Law, Activation Energy, BJ Fogg |\n| Price objections | Anchoring, Framing, Mental Accounting, Loss Aversion |\n| Building trust | Authority, Social Proof, Reciprocity |\n| Increasing urgency | Scarcity, Loss Aversion, Zeigarnik Effect |\n| Retention / churn | Endowment Effect, Status-Quo Bias |\n| Growth stalling | Theory of Constraints, Compounding |\n| Decision paralysis | Paradox of Choice, Default Effect |\n| Onboarding | Goal-Gradient Effect, Commitment and Consistency |\n\n---",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "task-specific-questions",
+      "title": "Task-Specific Questions",
+      "children": [
+        {
+          "text": "Before applying a model, clarify:\n1. What specific behavior are you trying to influence?\n2. What does your customer believe before encountering your marketing?\n3. Where in the journey (awareness, consideration, decision) is this?\n4. What is currently preventing the desired action?\n5. Have you tested this with real customers?",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

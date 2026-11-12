@@ -1,0 +1,96 @@
+{
+  "id": "urn:contentEntry:6ab9ae56c5c5183105a66fea",
+  "title": "Learn",
+  "resourceType": "SKILL",
+  "description": "Audit a completed session to extract what went wrong, what worked, and propose documentation updates so future sessions start better.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae56c5c5183105a66fea",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Audit this session. Extract what went well, what went wrong, and propose documentation updates so future sessions are more efficient. Also give direct feedback on how the user can work with AI more effectively.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-session-audit",
+      "title": "Step 1: Session Audit",
+      "children": [
+        {
+          "text": "Review the current conversation and identify:\n\n**What went wrong:**\n- Errors, dead ends, retries, or wasted steps\n- Misunderstandings (unclear prompts, wrong assumptions)\n- Tools that failed or returned unexpected results\n- Approaches abandoned partway through\n\n**What went well:**\n- Efficient patterns (clear prompts, good sequencing, smart parallelization)\n- Decisions that saved time or reduced back-and-forth\n- Workflows worth repeating\n\n**What was learned:**\n- New facts about systems, data, processes, or tools\n- Corrections to previous assumptions\n- Patterns worth codifying\n\nSummarize this concisely before proceeding.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-propose-documentation-updates",
+      "title": "Step 2: Propose Documentation Updates",
+      "children": [
+        {
+          "text": "Based on the audit, identify which files should be updated. Check each category:\n\n**Memory files:** New memories to save. Existing memories that are now outdated or wrong.\n\n**Skill files:** Skills that were used and need refinement. Missing instructions that caused errors. New edge cases to handle.\n\n**Agent config file (CLAUDE.md, AGENTS.md, or equivalent):** New conventions discovered. Corrections to existing instructions.\n\nFor each proposed change, display it clearly:\n\n```\n### [file path]\nAction: [Create / Update / Delete]\nWhat changes: [description]\nWhy: [what happened in this session that motivates this]\n\n> [Specific content to add, change, or remove]\n```\n\nDo NOT write any changes until the user approves. Ask: \"Want me to apply all of these, some of them, or none?\"",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-direct-feedback-for-the-user",
+      "title": "Step 3: Direct Feedback for the User",
+      "children": [
+        {
+          "text": "Give specific, honest feedback on how the user can work with AI more efficiently. This is a coaching moment, not a compliment session.\n\nStructure:\n\n**Token Efficiency.** Were prompts unnecessarily long? Could context have been set once instead of repeated? Were there back-and-forth cycles a clearer initial prompt would have avoided?\n\n**Prompt Patterns.** What worked (with a specific example). What to try differently next time (with a specific suggestion).\n\n**Workflow Suggestions.** Could more work have been parallelized? Were there manual steps that could be automated? Did the user do something the AI should have done, or vice versa?\n\n**One Thing to Try Next Time.** The single highest-leverage change for the next session.\n\nBe specific to this session. Reference actual moments. Do not give generic productivity advice.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-4-apply-approved-changes",
+      "title": "Step 4: Apply Approved Changes",
+      "children": [
+        {
+          "text": "After the user approves (all, some, or none):\n- Write approved memory files\n- Edit approved skill files\n- Update the agent config if approved\n- Confirm what was updated",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "notes",
+      "title": "Notes",
+      "children": [
+        {
+          "text": "- Most valuable after long or complex sessions where things did not go smoothly\n- The documentation updates are the durable output. They compound across future sessions.\n- If the session went perfectly and there is nothing to learn, say so. Do not manufacture feedback.\n- Never update documentation without showing the user first and getting approval.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

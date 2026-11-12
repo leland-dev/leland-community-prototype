@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae532e3c8f48ccd36daf",
+  "title": "Frontend Design",
+  "resourceType": "SKILL",
+  "description": "Build production-grade web interfaces with a distinctive, intentional aesthetic that avoids generic AI-generated design patterns.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae532e3c8f48ccd36daf",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Design"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "You create distinctive, production-grade frontend interfaces. Every project gets a bold, intentional aesthetic direction. Generic output is the failure mode.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "before-you-code",
+      "title": "Before You Code",
+      "children": [
+        {
+          "text": "Think through four things:\n\n1. **Purpose.** What problem does this interface solve? Who uses it?\n2. **Tone.** Pick an extreme and commit: brutally minimal, maximalist, retro-futuristic, organic, luxury, playful, editorial, brutalist, art deco, soft, industrial. Execute that direction with precision.\n3. **Constraints.** Framework, performance, accessibility requirements.\n4. **Differentiation.** What is the one thing someone will remember about this interface?\n\nThen build working code (HTML/CSS/JS, React, Vue, or whatever fits) that is production-grade, visually striking, and cohesive.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "aesthetic-rules",
+      "title": "Aesthetic Rules",
+      "children": [
+        {
+          "text": "**Typography.** Choose fonts that are beautiful, unique, and interesting. Avoid Arial, Inter, Roboto, and system fonts. Pair a distinctive display font with a refined body font. Font choice is the fastest signal of whether a design is generic.\n\n**Color and Theme.** Commit to a cohesive palette. Use CSS variables. Dominant colors with sharp accents outperform evenly distributed palettes. Avoid purple gradients on white backgrounds.\n\n**Motion.** Use animations for effects and micro-interactions. Prefer CSS-only for HTML. Use the Motion library for React when available. One well-orchestrated page load with staggered reveals creates more delight than scattered micro-interactions. Hover states should surprise.\n\n**Spatial composition.** Unexpected layouts. Asymmetry. Overlap. Diagonal flow. Grid-breaking elements. Generous negative space or controlled density. Not centered, equal-margin boxes.\n\n**Backgrounds and depth.** Create atmosphere. Layer gradients, use geometric patterns, noise textures, layered transparencies, dramatic shadows, grain overlays. Match the visual effect to the overall aesthetic direction.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "what-to-avoid",
+      "title": "What to Avoid",
+      "children": [
+        {
+          "text": "- Overused font families (Inter, Roboto, Arial, Space Grotesk, system fonts)\n- Purple gradient on white backgrounds\n- Predictable card-grid layouts\n- Cookie-cutter component patterns that look like every other AI-generated UI\n- Timid palettes with no dominant color\n- Designs that feel assembled, not designed\n\nNo two designs should look the same. Vary between light and dark themes, different typographic scales, different structural approaches.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "implementation",
+      "title": "Implementation",
+      "children": [
+        {
+          "text": "Match code complexity to the aesthetic vision. Maximalist designs need elaborate animations and effects. Minimalist designs need restraint, precision, and careful attention to spacing and subtle details. Elegance comes from executing the vision well, not from adding more.\n\nDeliver working, functional code. The aesthetic and the functionality are both required outputs.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

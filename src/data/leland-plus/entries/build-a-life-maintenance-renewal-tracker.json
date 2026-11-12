@@ -1,0 +1,220 @@
+{
+  "id": "urn:contentEntry:6ab9ae4a35c1e8d4795d7c63",
+  "title": "Build a life maintenance renewal tracker",
+  "resourceType": "TUTORIAL",
+  "description": "A system that checks your renewal list on a schedule and names what needs action before it lapses.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4a35c1e8d4795d7c63",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "action": {
+      "title": "Action",
+      "content": "A step an automation performs after the trigger fires — like 'send a Slack message' or 'create a Notion page.' One workflow can chain a dozen actions off a single trigger."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "database": {
+      "title": "Database",
+      "content": "An organized place to store and retrieve data — like a spreadsheet on steroids. When Claude builds an app that remembers users or saves entries, it's reading from and writing to a database (often Supabase or Postgres)."
+    },
+    "main-branch": {
+      "title": "Main Branch",
+      "content": "The default, live branch of your repo — the version of your project that's considered done and working. Other branches eventually merge into main once the work is approved. (Older repos sometimes call it 'master' instead.)"
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Life & Personal"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Renewals lapse when the lead time runs out before anyone acts on them. The average adult spends [8 hours 48 minutes a week on hated admin](https://www.brightpearl.com/press-and-media/press-releases/news-average-adult-spends-five-years-and-five-months-of-their-lives-doing-hated-admin), per Brightpearl's personal-admin survey, more than 8 years of waking life across a lifetime. Renewals sit right inside that pile until they've already lapsed.",
+          "type": "prose"
+        },
+        {
+          "text": "This system checks your renewal list against today's date and flags anything inside its lead-time window, naming the real next [action](#tooltip-action) for each item. A passport and a car registration don't carry the same warning window.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a monthly paste-in [prompt](#tooltip-prompt), a saved skill, or a scheduled [agent](#tooltip-agent) that posts to your calendar or inbox.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming what you're tracking, the lead time each type needs, and where reminders should land.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that tracks every renewal I'm responsible for. Ask me questions, one at a time, about what needs tracking, how much lead time each type needs, where reminders should show up, and the real next action for each type. When you have what you need, write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview surfaces decisions you didn't know you needed to make, and the scope document becomes the brief for every check after it."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where the [master](#tooltip-main-branch) list lives and how a new item gets added.",
+            "How lead time varies by item type.",
+            "Whether reminders land in a calendar, a digest, or both."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are a calendar for nudges (Google Calendar), a spreadsheet or [database](#tooltip-database) for the master list (Google Sheets, [Notion](#tooltip-notion)), and email or a reminders app for the actual action. The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Start building the system your scope document describes, and test it on your real renewal list. The prompt below is an example of the core task. Your scope document will give you a version shaped to your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Check my renewal list against today's date and produce this month's action items.\n\nContext: [Paste your list: item, expiration date, lead time needed for each.] Today's date: [date].\n\nRules:\n- Flag anything inside its lead-time window, not only what expires this month.\n- State the real next action per item, not \"renew this.\"\n- Never guess a date I haven't given you.\n- Output as a table: Item | Expires | Lead Time | Status | Next Action.",
+          "prompt_note": "How this prompt works: checking the lead-time window instead of the raw expiration date is what catches a renewal while there's still room to act."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Everything inside its window flagged, a real next action stated, no guessed dates?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what was wrong (a lead time too short, a next action too vague) and fold the correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Split household renewals from personal ones.",
+            "Keep a \"just renewed\" log as a paper trail.",
+            "Build a once-a-year deep audit for anything billed annually."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft rubric and run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each monthly check, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, items flagged, items renewed on time, items nearly missed, and what rule I changed. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make a shrinking lead time visible months before it lapses."
+        },
+        {
+          "text": "**Log** every run against the rubric. Note the date, which checks passed or failed, and what changed. Even a quiet month with nothing due is useful signal that your lead times are working. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the rubric passes a few months straight, package the prompt and your corrected rules into a reusable AI skill, so every run starts from your defaults. A repeated failure earns its own skill. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. A tracker only survives if adding an item is nearly frictionless, and a single generic lead time won't hold since a passport and a car registration need very different windows.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Brightpearl, Personal-Admin Survey](https://www.brightpearl.com/press-and-media/press-releases/news-average-adult-spends-five-years-and-five-months-of-their-lives-doing-hated-admin) — The weekly hated-admin time stat."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a subscription and bill watchdog](/content/item/urn:contentEntry:6ab9ae4ac38b20d89a85ee61) · Life & Personal",
+            "[Build a contract renewal tracker](/content/item/urn:contentEntry:6ab9ae4547908e200ddceb98) · Legal & Compliance",
+            "[SOP Creator](/content/item/urn:contentEntry:6ab9ae5e6dea06cc86f4baa1), [Notion Task Manager](/content/item/urn:contentEntry:6ab9ae584ab0c4b844679dcb), and [PDF Toolkit](/content/item/urn:contentEntry:6ab9ae58254e58c5b5d3bee6) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

@@ -1,0 +1,228 @@
+{
+  "id": "urn:contentEntry:6ab9ae479b58a5b0600ca5c9",
+  "title": "Build a churn-risk watcher",
+  "resourceType": "TUTORIAL",
+  "description": "A system that watches your usage and support data on a schedule and flags accounts drifting toward churn.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae479b58a5b0600ca5c9",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "slack": {
+        "title": "Slack",
+        "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+      },
+      "action": {
+        "title": "Action",
+        "content": "A step an automation performs after the trigger fires — like 'send a Slack message' or 'create a Notion page.' One workflow can chain a dozen actions off a single trigger."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "hubspot": {
+        "title": "HubSpot",
+        "content": "A CRM and marketing platform used by sales, marketing, and customer success teams. Common target for AI automations — students connect it to draft outreach, enrich contacts, or sync data with other tools."
+      },
+      "posthog": {
+        "title": "PostHog",
+        "content": "An open-source product analytics platform that tracks user behavior, runs feature flags, and records session replays. Useful once a student's app has real users and they want to see what's actually being used."
+      },
+      "trigger": {
+        "title": "Trigger",
+        "content": "The event that kicks off an automation, like 'new email received' or 'row added to a sheet.' Every Zapier or n8n workflow starts with a trigger and then runs the actions that follow."
+      },
+      "grounding": {
+        "title": "Grounding",
+        "content": "Feeding an AI real, current source material before it answers, so the response is based on facts instead of just training data. Copilot grounds in your organization's files; Gemini grounds in Google Search results. The main defense against hallucination."
+      },
+      "read-only": {
+        "title": "Read-only",
+        "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Entrepreneurship"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "Customers rarely leave without warning. [Bain & Company's retention research](https://www.bain.com/insights/retaining-customers-is-the-real-challenge/) puts a number on why catching that drift matters: a 5-percentage-point improvement in customer retention has been shown to increase profits by 25% to 95%, depending on the business, since retained customers cost less to serve and buy more over time. This system runs on a schedule against your usage and support data, flags accounts drifting toward churn, and drafts a personalized check-in for each one. Acting on it is still your call.",
+            "type": "prose"
+          },
+          {
+            "text": "Catching a drifting account while it's still reachable produces a different outcome than reaching out after they've already decided to leave. Watching usage and support signals together catches risk that either one alone would miss.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a weekly paste-in [prompt](#tooltip-prompt), a saved [skill](#tooltip-skill), or a scheduled [agent](#tooltip-agent) that posts flagged accounts to [Slack](#tooltip-slack). Every version stays [read-only](#tooltip-read-only), and outreach waits for a human before it sends.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your usage and support data sources, what \"healthy\" looks like for your product, your review cadence, and who approves outreach before it goes out.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that watches my customer usage and support data on a regular schedule and flags accounts that look like they're at risk of churning, then drafts a personalized outreach for each one. Ask me questions, one at a time, about what usage or support data I actually have access to, what \"healthy\" usage looks like for my product, how often I want this to run, and who reviews the drafted outreach before it goes out. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview surfaces what data you can get to and what counts as healthy for your product, and the scope document becomes the brief for every run after it."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Which usage and support data exists and is exportable, since not every product has clean usage telemetry from day one.",
+              "The review cadence, weekly or daily, matched to how fast your typical customer relationship moves.",
+              "Who owns sending the drafted outreach, since a churn-risk flag isn't a fully automatic [action](#tooltip-action)."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather the access it calls for: your product analytics tool (Amplitude, Mixpanel, [PostHog](#tooltip-posthog)), your support or helpdesk tool (Zendesk, Intercom, Help Scout), and your CRM to log outreach ([HubSpot](#tooltip-hubspot), Salesforce, or a spreadsheet). The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Build your system and test it on a real week of data. The prompt below is an example. Your scope document gives a version for your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Review this week's account usage and support ticket data, flag accounts showing early churn-risk signals, and draft a personalized check-in for each one.\n\nContext: Usage data comes from [product analytics tool]. Support history comes from [helpdesk tool]. A \"healthy\" account for my product looks like [describe, e.g. \"logs in at least twice a week and has used feature X in the last 30 days\"].\n\nRules:\n- Never flag an account on a single data point; require at least two independent signals (a usage drop plus a support complaint, for example) before flagging as at-risk.\n- State the specific signal behind each flag in plain language, not a risk score with no explanation.\n- Draft outreach that references the account's actual usage history, not a generic \"checking in\" message.\n- Never send anything automatically; every draft waits for human review.",
+            "prompt_note": "How this prompt works: requiring two independent signals before a flag keeps a single noisy metric from turning into a false alarm, and the human-review rule keeps a person between draft and send."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. Two signals behind every flag, reasons in plain language, outreach [grounded](#tooltip-grounding) in real usage history?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what went wrong (\"that account wasn't at risk, it's just a slow-growth account\") and fold each correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Track whether flagged accounts that got outreach recovered, to tune the signal logic over time.",
+              "Segment the flag logic by customer size or plan tier.",
+              "Build a lightweight win-back offer template tied to the specific reason an account was flagged."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft the rubric and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each week's flagged account list, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, accounts flagged, flags that turned out to be real, false positives, and what rule I changed. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make recurring false positives visible after a few weeks of entries."
+          },
+          {
+            "text": "**Log** every run against the rubric. Note the date, which rubric checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from the log. Once the rubric passes a few weeks straight, package the prompt and rules into a skill. [Claude](#tooltip-claude)'s skill-creator skill writes it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. A model that only reads usage data misses the customer who's using the product fine but furious about a support experience. Feed it both signal types every run.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Bain & Company, Retaining Customers Is the Real Challenge](https://www.bain.com/insights/retaining-customers-is-the-real-challenge/) — The retention-to-profit figure."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Create a system that optimizes ad spend](/content/item/urn:contentEntry:6ab9ae39d840e3f8fcd83c6d) · Marketing",
+              "[Build a subscription and bill watchdog](/content/item/urn:contentEntry:6ab9ae4ac38b20d89a85ee61) · Life & Personal",
+              "[Trigger Mapping](/content/item/urn:contentEntry:6ab9ae601126143ee94c9b86), [Personalization Engine](/content/item/urn:contentEntry:6ab9ae58b1ba1dbc62fb5def), and [Revenue Monitor](/content/item/urn:contentEntry:6ab9ae5c212a6fc781df1125) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

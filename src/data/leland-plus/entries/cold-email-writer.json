@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae5186bbb91b4bcd5c5e",
+  "title": "Cold Email Writer",
+  "resourceType": "SKILL",
+  "description": "Draft outbound email that reads like a real person with a specific ask, not a templated sequence. Built around one clear reason for reaching out.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5186bbb91b4bcd5c5e",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Writing"
+            },
+            {
+              "text": "Updated May 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "You write short cold emails that get replies. Every email is built around one\nspecific, true reason this person should care right now.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "before-you-write",
+      "title": "Before you write",
+      "children": [
+        {
+          "text": "Ask for, or infer from context:\n\n- Who the recipient is and what they do.\n- The one thing you want (a call, a reply, an intro).\n- The specific trigger — something real about them or their company that makes\n  this relevant today.\n\nIf you don't have a real trigger, say so. Do not invent flattery.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "the-structure",
+      "title": "The structure",
+      "children": [
+        {
+          "text": "1. **Subject:** 3–5 words, lowercase, no clickbait. Name the topic.\n2. **First line:** the trigger. Prove you did five minutes of homework.\n3. **Second line:** the value or reason, in one sentence.\n4. **The ask:** one low-friction question. \"Worth a quick call next week?\"\n5. **Sign-off:** your name. No signature wall.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "rules",
+      "title": "Rules",
+      "children": [
+        {
+          "text": "- Under 90 words. If it scrolls, it's too long.\n- No \"I hope this email finds you well.\" No \"I wanted to reach out.\"\n- One link maximum, and only if it earns its place.\n- Write at a ninth-grade reading level.\n- Never fabricate a mutual connection or a fake compliment.\n\nEnd by offering one alternate subject line and one shorter version.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

@@ -1,0 +1,223 @@
+{
+  "id": "urn:contentEntry:6ab9ae4525fb79a9419eb330",
+  "title": "Build an NDA triage system",
+  "resourceType": "TUTORIAL",
+  "description": "A system that sorts incoming NDAs into auto-approve, minor edits, or attorney review before anyone reads the whole document.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4525fb79a9419eb330",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "triage": {
+      "title": "Triage",
+      "content": "Sorting items by urgency or importance to decide what gets attention first. Your email-manager skill triages your inbox — it separates messages that need a real reply from noise you can ignore."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "workflow": {
+      "title": "Workflow",
+      "content": "A multi-step process Claude runs to accomplish a goal — for example: read emails → filter by topic → summarize → post to Slack. Workflows can be run manually or on a schedule."
+    },
+    "anthropic": {
+      "title": "Anthropic",
+      "content": "The company that created Claude. An AI safety company focused on building reliable, interpretable AI systems."
+    },
+    "routing-pattern": {
+      "title": "Routing (Orchestration Pattern)",
+      "content": "An orchestration pattern where a classifier looks at the input and sends it down a specialized path — support tickets to the refund flow, bug reports to the triage flow. Each path stays simple because it only handles its own kind of input."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Legal & Compliance"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Most incoming NDAs are boilerplate, but each one still lands on a lawyer's desk for a full read. [Anthropic](#tooltip-anthropic)'s own [Claude Legal plugin](https://claude.com/plugins/legal) ships a dedicated NDA-[triage](#tooltip-triage) command, described as rapid NDA pre-screening that sorts incoming NDAs into standard approval, counsel review, or full review, confirming this three-tier pattern is a supported [workflow](#tooltip-workflow).",
+          "type": "prose"
+        },
+        {
+          "text": "Even mature legal AI deployments still route a meaningful share of repetitive compliance and contract work to a human, a fair baseline for how much NDA volume this system can realistically absorb. This system classifies each incoming NDA as standard, minor edits needed, or attorney review required, with a stated reason for the call, so counsel spends time on the ones that need it.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a paste-in [prompt](#tooltip-prompt) each time an NDA lands, a saved [skill](#tooltip-skill), or a scheduled [agent](#tooltip-agent) tied to your intake portal or e-signature tool. Every version needs a written standard to compare against before it can classify anything.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your standard NDA template, your tier rules, your intake source, and your notification path.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that triages incoming NDAs into standard, needs-minor-edits, or needs-attorney-review, with a reason for each call. Ask me questions, one at a time, about what counts as a standard NDA for us, what edits are minor enough to auto-flag versus what needs a lawyer, how NDAs arrive today, and who gets notified for each tier. When you have what you need, write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview forces you to define \"standard\" in writing before the system has to guess, and the scope document becomes the brief for every build session after it."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where NDAs enter your workflow today, since the intake point decides how this plugs in.",
+            "What counts as a minor edit in your organization, since that line is where most of the time savings live.",
+            "Who gets notified for each tier and how fast, since a standard NDA sitting unsigned defeats the point."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common connectors are your inbox or intake portal (Gmail, Typeform) where NDAs arrive, e-signature tools (DocuSign, HelloSign) for standard approvals, and your document management system for logging every triage decision. The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Build and test the system on a real NDA. The prompt below is one example; your scope document has the full version.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Classify the attached NDA as standard, minor edits needed, or attorney review required, with a specific reason for the classification.\n\nContext: Our standard NDA template and acceptable variations are documented in [location]. NDAs typically arrive from [source, e.g. an inbox, a portal, a Slack channel]. Past triage decisions are logged in [location] for consistency reference.\n\nRules:\n- Compare against our own standard template and named acceptable variations, not a generic idea of what an NDA should say.\n- Classify as \"standard\" only if every clause matches an approved position exactly.\n- Classify as \"minor edits\" only for deviations on a named list of low-risk clauses (e.g. notice period, governing law within an approved set).\n- Anything outside those two categories is \"attorney review,\" with the specific clause and reason stated.\n- Never auto-approve based on the counterparty's reputation or deal size; classify the document on its terms alone.\nOutput format: classification, reason, and the specific clause(s) driving the call.",
+          "prompt_note": "How this prompt works: naming the exact clauses that separate the tiers makes \"standard\" auditable."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Right tier, specific clause cited, no shortcut on reputation or deal size?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what went wrong and fold the correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Keep a running log of triage decisions so patterns in counterparty pushback become visible.",
+            "Extend the pattern to other high-volume, low-variance documents like order forms or standard MSAs.",
+            "Run a quarterly review of \"minor edit\" calls to confirm the category boundary still holds.",
+            "Add an auto-send step for standard NDAs by connecting your e-signature tool through a [tool connector](#tooltip-tool-connectors) once trust in the classification is established."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft rubric and run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each NDA classification, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, NDA classified, tier assigned, whether the tier held up on review, and what rule I changed. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make a drifting tier boundary visible after a few weeks of entries."
+        },
+        {
+          "text": "**Log** every run. Note the date, which rubric checks passed or failed, and what changed. A single miss is noise, and a repeated miss is an unwritten instruction.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the rubric passes weeks straight, package the prompt and corrected rules into a skill, so every run starts from your defaults. A repeated failure earns its own skill. [Claude](#tooltip-claude)'s skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. Silent scope creep in what counts as standard, where an edge case gets auto-approved because it resembled one on the surface. Review a sample of auto-approved documents on a schedule.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Anthropic, Claude Legal plugin](https://claude.com/plugins/legal) — The NDA-triage three-tier classification pattern.",
+            "Industry reporting on agentic AI in legal — The human-[routing](#tooltip-routing-pattern) baseline for mature legal AI deployments."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Automate contract reviews](/content/item/urn:contentEntry:6ab9ae45dc700f422210c621) · Legal & Compliance",
+            "[Automate support ticket triage](/content/item/urn:contentEntry:6ab9ae49a7b97d0e8799f7c5) · Entrepreneurship",
+            "[Build a bot to answer common HR questions](/content/item/urn:contentEntry:6ab9ae4336554a317a0287a6) · HR & Recruiting",
+            "[PDF Toolkit](/content/item/urn:contentEntry:6ab9ae58254e58c5b5d3bee6) and [SOP Creator](/content/item/urn:contentEntry:6ab9ae5e6dea06cc86f4baa1) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

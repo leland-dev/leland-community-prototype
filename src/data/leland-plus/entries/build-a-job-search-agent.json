@@ -1,0 +1,217 @@
+{
+  "id": "urn:contentEntry:6ab9ae4a5e36bda156cf6a1b",
+  "title": "Build a job search agent",
+  "resourceType": "TUTORIAL",
+  "description": "A system that turns a job posting into a tailored application packet, a tracker entry, and an honest list of gaps.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4a5e36bda156cf6a1b",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "airtable": {
+      "title": "Airtable",
+      "content": "A spreadsheet-database hybrid for tracking structured data — projects, content calendars, CRMs, inventories. Often used as the storage layer behind AI workflows because it has a clean API and connects to every major automation tool."
+    },
+    "database": {
+      "title": "Database",
+      "content": "An organized place to store and retrieve data — like a spreadsheet on steroids. When Claude builds an app that remembers users or saves entries, it's reading from and writing to a database (often Supabase or Postgres)."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Life & Personal"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "The average job opening now draws around 242 applications, per [The Interview Guys' State of Job Search research](https://blog.theinterviewguys.com/the-average-job-opening-now-gets-242-applications/), which makes mass-applying with one resume a volume game no one wins by hand. This system turns a posting into a tailored application packet and a logged pipeline entry with a follow-up date, in one pass per posting.",
+          "type": "prose"
+        },
+        {
+          "text": "Tailoring materials to the actual posting is what moves reply rates. It pulls the requirements a posting emphasizes and maps each to real experience you already have, so nothing gets invented and no near-miss requirement gets quietly skipped.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a paste-in [prompt](#tooltip-prompt) per posting, a saved [skill](#tooltip-skill) triggered from your job board tabs, or a scheduled [agent](#tooltip-agent) that checks feeds and queues matches for your review. Every version stops short of pressing submit.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming the roles and locations you're targeting, where it watches for postings, what your resume needs to emphasize per role type, and how applications get tracked.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that runs my job search for me. Ask me questions, one at a time, about the roles and locations I'm targeting, where it should watch for postings, what my resume needs to emphasize per role type, and how I want applications tracked. When you have what you need, write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview forces you to state your targeting criteria before any posting gets judged against them, so matches stay consistent instead of a gut call per posting."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where postings come from, since not every job board is scrapeable.",
+            "Where the tracker lives and whether it checks for duplicates before logging a new entry.",
+            "How much tailoring runs automatically versus waiting on your review."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common connectors are a spreadsheet or [database](#tooltip-database) for the tracker (Google Sheets, [Notion](#tooltip-notion), [Airtable](#tooltip-airtable)), the job boards you're watching (LinkedIn, Indeed, company sites), and email for drafts and digests (Gmail, Outlook). The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Build and test the system on a real posting. The prompt below is one example; your scope document has the full version.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Turn a job posting into a tailored application packet and a tracker entry.\n\nContext: [Paste the posting. Paste or reference a file with your experience. Note the role type and level you're targeting.]\n\nRules:\n- Pull the 3 to 5 requirements the posting emphasizes and map each to a real line from my experience. Never invent experience.\n- Draft a cover letter under 250 words addressing those requirements.\n- Flag any requirement I clearly don't meet.\n- Log the company, role, date applied, and a follow-up date 7 days out.\n- Output as a Requirement Match table, a Cover Letter Draft, and a Tracker Row.",
+          "prompt_note": "How this prompt works: mapping each requirement to a real line from your own experience keeps the cover letter honest instead of confident-sounding fiction."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Every requirement mapped to real experience, letter under the word limit, gaps flagged instead of glossed over?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what's off (\"too generic on requirement 2, tie it to the actual metric\") and fold each correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Connect job boards through a [tool connector](#tooltip-tool-connectors) and schedule a weekly digest of new matches.",
+            "Have it build an interview-prep brief from the tracker once a company responds.",
+            "Track reply rate by resume version.",
+            "Add a duplicate check against postings already logged."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric) your AI chat drafts, so quality isn't just a gut call. Have it draft a run log in the same pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each application packet, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, company, requirements matched, requirements flagged as gaps, and reply received. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the guesswork on whether a cover letter addressed the posting, and the log makes reply rate visible across resume versions after a few weeks of entries."
+        },
+        {
+          "text": "**Log** every run against the rubric. Note the date, which checks passed or failed, and what changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the rubric passes a few weeks straight, package the prompt and your corrected rules into a reusable AI skill, so every run starts from your defaults. A repeated failure earns its own skill. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. It never submits anything for you, and it won't quietly cover for a requirement you don't meet. A wrong fact in a cover letter costs the role, so treat every flagged gap as real before you apply.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[The Interview Guys, State of Job Search 2025](https://blog.theinterviewguys.com/the-average-job-opening-now-gets-242-applications/) — The 242-applications-per-opening figure."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a job description generator](/content/item/urn:contentEntry:6ab9ae44b898aa5eccb908c7) · HR & Recruiting",
+            "[Create an agent that helps you think through decisions](/content/item/urn:contentEntry:6ab9ae4a225e5315e4c0c3c6) · Life & Personal",
+            "[Job Finder](/content/item/urn:contentEntry:6ab9ae560ef0d286e7c54c5b), [Opportunity Tracker](/content/item/urn:contentEntry:6ab9ae58eed4be81c3fc7192), and [Research Brief](/content/item/urn:contentEntry:6ab9ae5a7cac5cd407ea82ef) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

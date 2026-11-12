@@ -1,0 +1,96 @@
+{
+  "id": "urn:contentEntry:6ab9ae58b1ba1dbc62fb5def",
+  "title": "Personalization Engine",
+  "resourceType": "SKILL",
+  "description": "Turn a generic email template into personalized variants by mapping recipient signals to message variables, with example fills for 2-3 recipient profiles",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae58b1ba1dbc62fb5def",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Writing"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Turn a generic email template into personalized messages by mapping what you know about recipients to targeted message variables.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "signal-categories",
+      "title": "Signal Categories",
+      "children": [
+        {
+          "text": "### Demographic Signals\n- Job title, seniority, function\n- Company size, industry, location\n\n### Behavioral Signals\n- Prior interaction with your product or content (visited a page, opened a prior email)\n- Existing customer or past participant\n- Applied or inquired about something specific\n\n### Situational Signals\n- Career or business stage\n- Timeline urgency (deadline approaching)\n- Prior interaction state (never replied, said \"later\", active thread)\n\n### Intent Signals\n- Specific interest expressed\n- Price sensitivity signals\n- Questions asked previously",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-identify-available-signals",
+      "title": "Step 1: Identify Available Signals",
+      "children": [
+        {
+          "text": "From the user's input, list what is known about the recipient or recipient segment. Map each piece of information to a signal category above.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-build-variable-templates",
+      "title": "Step 2: Build Variable Templates",
+      "children": [
+        {
+          "text": "For each signal, define a personalization variable. Example structure:\n\n```\n{{hook}} =\n  - If [condition A]: \"[value A]\"\n  - If [condition B]: \"[value B]\"\n  - Default: \"[fallback value]\"\n\n{{urgency_line}} =\n  - If deadline < 2 weeks: \"This closes on [date].\"\n  - If deadline > 2 weeks: \"The next round kicks off in [month].\"\n  - If no deadline: \"[offer description] runs on a rolling basis.\"\n```\n\nDefine as many variables as the template has natural personalization points.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-apply-to-template",
+      "title": "Step 3: Apply to Template",
+      "children": [
+        {
+          "text": "Take the base email and insert variables at natural points. Show the filled-in version for 2-3 distinct recipient profiles so the user can see range.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output",
+      "title": "Output",
+      "children": [
+        {
+          "text": "```\n## Variable Map\n| Variable | Condition | Value |\n|----------|-----------|-------|\n| {{hook}} | [condition] | \"[value]\" |\n| ... | | |\n\n## Example: Recipient Profile A, [describe]\n[full personalized email]\n\n## Example: Recipient Profile B, [describe]\n[full personalized email]\n\n## Example: Recipient Profile C, [describe, if useful]\n[full personalized email]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

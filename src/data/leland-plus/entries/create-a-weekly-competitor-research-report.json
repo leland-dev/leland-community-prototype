@@ -1,0 +1,231 @@
+{
+  "id": "urn:contentEntry:6ab9ae4225cab744782f9dbf",
+  "title": "Create a weekly competitor research report",
+  "resourceType": "TUTORIAL",
+  "description": "A system that checks your competitors' public pages every week and sends you a cited digest of what changed.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4225cab744782f9dbf",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "n8n": {
+      "title": "n8n",
+      "content": "A workflow automation tool (pronounced \"n-eight-n\") that chains apps together on a trigger — like Zapier or Make. Used in Level 2 to run multi-step automations across Gmail, Slack, Notion, and other apps without writing code."
+    },
+    "pull": {
+      "title": "Pull",
+      "content": "Downloading the latest changes from GitHub to your computer so your local copy is up to date. Claude pulls before starting work to make sure it's building on the newest version, not an old one."
+    },
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "slack": {
+      "title": "Slack",
+      "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "zapier": {
+      "title": "Zapier",
+      "content": "A no-code automation tool that connects apps with simple triggers and actions. The most popular workflow builder for non-technical users. Similar to Make and n8n, with the largest app library and the friendliest interface."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "trigger": {
+      "title": "Trigger",
+      "content": "The event that kicks off an automation, like 'new email received' or 'row added to a sheet.' Every Zapier or n8n workflow starts with a trigger and then runs the actions that follow."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Product & R&D"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Competitive analysis that once took a PM's week can now run in minutes once an [agent](#tooltip-agent) handles the synthesis, according to [Reforge's research on AI's impact on product management](https://www.reforge.com/blog/ai-impact-product-management). [Anthropic's own product management plugin](https://claude.com/plugins/product-management) treats this as standard work, shipping a built-in command that produces a competitive brief on demand.",
+          "type": "prose"
+        },
+        {
+          "text": "This system reads your competitors' blogs, changelogs, and pricing pages, filters for what changed since the last run, and sends you a digest with a source link on every item. You still decide what a move means.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a weekly paste-in [prompt](#tooltip-prompt), a saved [skill](#tooltip-skill), or a scheduled agent that posts to [Slack](#tooltip-slack). Every version only reads public pages.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your competitors, the sources to check for each, what counts as a meaningful change, and where the digest lands.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that watches my competitors and sends me a weekly digest of what changed. Ask me questions, one at a time, about which competitors matter most, which sources to check for each, how far back to look, what counts as a meaningful change versus noise, and where the digest should land. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: naming the noise threshold up front stops the first digest from arriving full of cosmetic edits nobody asked for."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Which competitors and sources earn a weekly check.",
+            "Whether pricing pages need a scraper or a direct fetch works.",
+            "What counts as a meaningful change versus noise, per competitor."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are a scheduler ([n8n](#tooltip-n8n), [Zapier](#tooltip-zapier)), team chat (Slack, email) to deliver the digest, and a docs tool ([Notion](#tooltip-notion)) to hold the running history. The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Build the system your scope document describes, and test it on your competitor list and their URLs. The prompt below is an example. Your scope document gives you a version for your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Produce a weekly cited digest of meaningful competitor changes.\n\nContext: [3-5 competitors with blog/changelog/pricing URLs], [your core value props to compare against]\n\nRules:\n- Only include changes from the last 7 days.\n- Cite the source URL for every item.\n- Group findings by competitor.\n- Skip cosmetic edits (typo fixes, rewording, date stamps).\n- Flag any pricing or packaging change as high priority.\nOutput as a short weekly digest: competitor name, what changed, why it matters, and the source link.",
+          "prompt_note": "How this prompt works: a required source link on every line keeps a vague blog post from turning into a confident claim about a shipped feature."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Grouped by competitor, every item linked, pricing changes flagged, cosmetic edits gone?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Fix the rules, since hand-editing this week's output won't carry into the next run.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Connect a scheduler so the digest arrives every week without a [trigger](#tooltip-trigger).",
+            "Track competitor messaging tone over time.",
+            "Auto-flag mentions of a keyword tied to your own roadmap.",
+            "[Pull](#tooltip-pull) App Store review deltas alongside blog changes."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft the rubric and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each weekly competitor digest, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, competitors checked, changes flagged, changes confirmed meaningful, and false positives. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the guesswork, and the log surfaces which competitors move versus which just post noise."
+        },
+        {
+          "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. After a few weeks it shows which competitors are worth the weekly check and which rarely change. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the system passes the rubric a few weeks straight, package the prompt and your corrected rules into a reusable AI skill. A check that fails again and again is a candidate for a skill of its own. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write the skill for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. An agent with open web access will confidently describe a \"new feature\" from an ambiguous post, so every claim needs a clickable source behind it. This stays a monitoring tool, and the call on what to do about a competitor's move stays yours.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Anthropic, Product Management Plugin](https://claude.com/plugins/product-management) — The competitive-brief command this build mirrors.",
+            "[Reforge, Moving to Higher Ground: Product Management in the Age of AI](https://www.reforge.com/blog/ai-impact-product-management) — The time-savings claim on competitive analysis."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a competitor ad teardown system](/content/item/urn:contentEntry:6ab9ae3b723c26e6c88c39e5) · Marketing",
+            "[Create competitor comparison sheets for your sales team](/content/item/urn:contentEntry:6ab9ae3c7739139b9eeef6cb) · Sales",
+            "[Build a regulatory change monitor](/content/item/urn:contentEntry:6ab9ae4631f07f264a42e01b) · Legal & Compliance",
+            "[Research Brief](/content/item/urn:contentEntry:6ab9ae5a7cac5cd407ea82ef), [Revenue Monitor](/content/item/urn:contentEntry:6ab9ae5c212a6fc781df1125), and [Slack Digest](/content/item/urn:contentEntry:6ab9ae5ecf30b8c16a8a74b2) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

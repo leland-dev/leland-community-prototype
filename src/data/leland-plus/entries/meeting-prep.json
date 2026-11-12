@@ -1,0 +1,107 @@
+{
+  "id": "urn:contentEntry:6ab9ae575970ee9cdf0c866b",
+  "title": "Meeting Prep",
+  "resourceType": "SKILL",
+  "description": "Pull together everything you need to know before a meeting in under 5 minutes, including context, open questions, and what to accomplish.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae575970ee9cdf0c866b",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Pull together everything the user needs to know before a meeting in under 5 minutes.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-get-the-meeting-details",
+      "title": "Step 1: Get the Meeting Details",
+      "children": [
+        {
+          "text": "Find the meeting the user specified, or the next upcoming meeting. Extract:\n- Meeting title and description\n- Time and duration\n- Attendees (names and roles)\n- Any agenda or notes attached to the event\n\nIf the user named a person or topic (\"my call with [name]\", \"the project sync\"), match it to the nearest upcoming event.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-search-for-project-context",
+      "title": "Step 2: Search for Project Context",
+      "children": [
+        {
+          "text": "Search any connected project management tools (Notion, Linear, Jira, etc.) using the meeting title, attendee names, and topic keywords. Look for:\n- Active tasks or projects related to this meeting\n- Previous meeting notes or agendas\n- Outstanding action items related to the attendees\n- Open decisions that might come up\n\nPull the most relevant 2-3 items and extract key context: status, blockers, open questions.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-search-for-recent-communication-context",
+      "title": "Step 3: Search for Recent Communication Context",
+      "children": [
+        {
+          "text": "Search any connected communication tools (Slack, email, etc.) for recent conversations about the meeting topic or attendees. Focus on the last 3-7 days. Look for:\n- Decisions already made that will affect the discussion\n- Blockers or tensions surfaced recently\n- Requests or questions from the people in the meeting\n- Tone or context that matters for how the meeting will go",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-4-synthesize-the-brief",
+      "title": "Step 4: Synthesize the Brief",
+      "children": [
+        {
+          "text": "Compile everything into this template:\n\n```\n# Meeting Brief: [Meeting Title]\n\n**When:** [Date, time, duration]\n**With:** [Attendee names and roles]\n**Purpose:** [What this meeting is actually for, be specific]\n\n---\n\n## Background\n\n[2-3 sentences of relevant context. What is the current state of the project or relationship? What has been happening recently?]\n\n## What to Accomplish\n\n- [Specific outcome 1, a decision, approval, or alignment]\n- [Specific outcome 2]\n- [Specific outcome 3 if applicable]\n\n## Open Questions\n\n- [Question the user should raise or be ready to answer]\n- [Question]\n\n## Relevant Context\n\n**From project tools:**\n[Key task or project status, blockers, or decisions relevant to this meeting]\n\n**From recent communication:**\n[Recent conversation highlights, decisions, tensions, or context that matters]\n\n## Prep Notes\n\n[Anything worth knowing walking in: tone to expect, likely pushback, or a decision that is about to come up]\n```",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-5-deliver",
+      "title": "Step 5: Deliver",
+      "children": [
+        {
+          "text": "Present the brief inline in chat. If the user wants a saved copy, write it to their notes folder with a filename like `[date]-[meeting-name]-brief.md`.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "rules",
+      "title": "Rules",
+      "children": [
+        {
+          "text": "- **Specificity is credibility.** Name every person, project, and outcome exactly. Never \"the team,\" always the actual name.\n- **One page max.** If there is more context than fits, prioritize: What to Accomplish, then Open Questions, then Relevant Context.\n- **Surface conflicts.** If any source reveals a blocker, tension, or unresolved issue, call it out in Prep Notes.\n- **Never fabricate.** If connected tools return nothing useful, say so in the brief. Do not fill it with generic content.\n- **Never send the brief anywhere.** It is for the user's eyes only. Show it in chat.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

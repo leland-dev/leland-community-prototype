@@ -1,0 +1,221 @@
+{
+  "id": "urn:contentEntry:6ab9ae42e4af7bd005835afc",
+  "title": "Build a backlog prioritizer",
+  "resourceType": "TUTORIAL",
+  "description": "A system that scores your backlog on impact, effort, confidence, and strategic alignment, and returns a ranked list with the reasoning attached.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae42e4af7bd005835afc",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "pull": {
+        "title": "Pull",
+        "content": "Downloading the latest changes from GitHub to your computer so your local copy is up to date. Claude pulls before starting work to make sure it's building on the newest version, not an old one."
+      },
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "notion": {
+        "title": "Notion",
+        "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "trigger": {
+        "title": "Trigger",
+        "content": "The event that kicks off an automation, like 'new email received' or 'row added to a sheet.' Every Zapier or n8n workflow starts with a trigger and then runs the actions that follow."
+      },
+      "read-only": {
+        "title": "Read-only",
+        "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Product & R&D"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "Most backlogs get ranked by gut feel and whoever argued loudest in the meeting. Only 13.5% of product teams consistently use a formal scoring framework, and just 4.1% use any AI-assisted scoring at all, per [Product-Led Alliance's State of Product Management Report 2026](https://productledalliance.com/product-management-statistics). This system scores your backlog on impact, effort, confidence, and strategic alignment, and returns a ranked list with the reasoning behind each score visible.",
+            "type": "prose"
+          },
+          {
+            "text": "The same report finds 49.2% of teams cite resource and capacity constraints, and 47.5% cite shifting short-term priorities, as their top causes of roadmap misalignment. A visible, evidence-backed score is easier to defend when priorities get challenged mid-cycle.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it before each planning cycle as a paste-in [prompt](#tooltip-prompt), a saved skill, or a scheduled [agent](#tooltip-agent) that pulls straight from your backlog tool. Every version stays [read-only](#tooltip-read-only) against your ticketing system.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your scoring factors, tie-break rules, backlog location, and [trigger](#tooltip-trigger).",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that scores and ranks my backlog. Ask me questions, one at a time, about which factors matter most (impact, effort, confidence, strategic alignment, customer evidence), how ties get broken, where my backlog lives, and whether scoring runs automatically or only when I trigger it. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview forces you to define scoring factors and tie-breaks before a single ticket gets ranked, and the scope document becomes the brief for every run after it."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Which factors matter most, and how each one is weighted.",
+              "Where the backlog lives, and whether effort estimates already exist or need [pulling](#tooltip-pull) from engineering.",
+              "How ties get broken, and whether scoring runs automatically or only when you trigger it."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your ticketing system (Linear, Jira, Asana) and a sheet (Google Sheets, [Notion](#tooltip-notion)) for the rubric. The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Build your system and test it on a real backlog export, every open item included. The prompt below is an example. Your scope document gives a version for your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Score and rank a backlog so the team can defend what's next.\n\nContext: [Paste your backlog export, one row per item. Include this quarter's strategic priorities, and any effort estimates already on file.]\n\nRules:\n- Score each item 1-5 on impact, effort, confidence, and strategic alignment.\n- Show the reasoning behind each score.\n- Flag high-impact items with no supporting evidence as needing validation.\n- Never drop an item. If it scores low, rank it low and say why.",
+            "prompt_note": "How this prompt works: scoring every item on the same four factors keeps the ranking consistent from cycle to cycle, and visible reasoning gives you something to defend in the planning meeting."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. Every item scored on all four factors, reasoning visible, nothing dropped?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what went wrong (\"effort estimates are off for this team, recalibrate\") and fold each correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Pull recurring feedback themes into the impact score instead of scoring blind.",
+              "Re-run the ranking as new tickets come in.",
+              "Build a Now-Next-Later view instead of a flat list."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat turn the scope bar into pass/fail checks and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each ranked backlog output, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, items scored, items flagged for missing evidence, scores overridden after review, and what rule changed. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns show which scores you keep overriding, which is where your weights need sharpening."
+          },
+          {
+            "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. After a few cycles it shows which scores you keep overriding by hand and where the weights are off. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the system passes the rubric a few cycles straight, package the prompt, factor weights, and tie-break rules into a reusable AI skill. A check that fails again and again is a candidate for a skill of its own. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write the skill for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. A scoring system produces a confident-looking number even when the inputs are guesses, so every score needs its reasoning attached, and the final call on what ships stays a human decision.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Product-Led Alliance, State of Product Management Report 2026](https://productledalliance.com/product-management-statistics) — The scoring-adoption and roadmap-misalignment stats."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Build an idea-to-PRD generator](/content/item/urn:contentEntry:6ab9ae43fd30fff006b1a5c7) · Product & R&D",
+              "[Build a feedback theme tracker](/content/item/urn:contentEntry:6ab9ae42324ca1079e90c3a6) · Product & R&D",
+              "[Automate your A/B test readouts](/content/item/urn:contentEntry:6ab9ae414c606334ed556eef) · Product & R&D",
+              "[Lead Prioritization](/content/item/urn:contentEntry:6ab9ae563f2aab31bfe40f42) and [Project Status](/content/item/urn:contentEntry:6ab9ae59ec9a474d457bfc5f) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae553149d018b07cf693",
+  "title": "Investor Revenue Report",
+  "resourceType": "SKILL",
+  "description": "Turn pipeline and revenue data into a board-ready report covering ARR trends, pipeline coverage, and key metrics benchmarked against targets",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae553149d018b07cf693",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Data"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Reframe pipeline and revenue data for executive and leadership audiences. The report leads with the headline number and works down, with no operational detail.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-gather-the-data",
+      "title": "Step 1, Gather the Data",
+      "children": [
+        {
+          "text": "Ask the user to provide, for the period being reported:\n- Total revenue closed\n- Revenue vs. target\n- Open pipeline value\n- New deals created\n- Deals closed-won and closed-lost\n- Pipeline coverage ratio (open pipeline / period target)",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-frame-for-leadership",
+      "title": "Step 2, Frame for Leadership",
+      "children": [
+        {
+          "text": "Executive audiences care about four questions:\n1. Are we on track to hit the number?\n2. What's driving the gap, positive or negative?\n3. Is the pipeline healthy enough to cover next period?\n4. What's the risk?\n\nLead with the headline. Avoid operational minutiae.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Revenue Report, [Period]\nPrepared: [date]\n\n## Headline\n[One sentence: on track / behind / ahead, and by how much]\n\n## Revenue\n| Metric | Target | Actual | % of Target |\n|--------|--------|--------|-------------|\n| Revenue | $[target] | $[actual] | [%] |\n| Deals Closed |, | [n] |, |\n| Avg Deal Size |, | $[amount] |, |\n\n## Pipeline Health\n- Open pipeline: $[value] across [n] deals\n- Coverage ratio: [X]x (pipeline / period target)\n- Pipeline created this period: $[value]\n\n## Key Drivers\n[2-3 bullets on what drove results: product mix, conversion rate, market conditions, etc.]\n\n## Risk\n[What could prevent hitting next period's target]\n\n## Outlook\n[One paragraph on next period confidence and assumptions]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

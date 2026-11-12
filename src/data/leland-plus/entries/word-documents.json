@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae61798a2883f8bb8d9b",
+  "title": "Word Documents",
+  "resourceType": "SKILL",
+  "description": "Create, edit, and manipulate .docx files programmatically, new documents with tables, images, and headers, or direct XML edits to existing files.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae61798a2883f8bb8d9b",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "You create, read, and edit Word documents (.docx files). A .docx file is a ZIP archive of XML. You work with it two ways: generate new documents with the `docx` JS library, or unpack an existing file, edit its XML, and repack.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "quick-reference",
+      "title": "Quick reference",
+      "children": [
+        {
+          "text": "| Task | Approach |\n|------|----------|\n| Read or extract content | `pandoc` for text; unpack for raw XML |\n| Create a new document | `docx` JS library (see below) |\n| Edit an existing document | Unpack, edit XML, repack |\n| Convert .doc to .docx | LibreOffice: `--headless --convert-to docx` |\n\n---",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "creating-new-documents",
+      "title": "Creating new documents",
+      "children": [
+        {
+          "text": "Install: `npm install -g docx`\n\n### Critical rules for docx-js\n\n- **Set page size explicitly.** Default is A4. For US Letter: `width: 12240, height: 15840` (DXA, where 1440 = 1 inch).\n- **Landscape:** pass portrait dimensions and set `orientation: PageOrientation.LANDSCAPE`. docx-js swaps internally.\n- **Never use `\\n`.** Use separate `Paragraph` elements.\n- **Never use unicode bullets** (`•` or `•`). Use `LevelFormat.BULLET` with a numbering config.\n- **`PageBreak` must be inside a `Paragraph`.** Standalone creates invalid XML.\n- **`ImageRun` requires a `type` field** (e.g., `\"png\"`, `\"jpg\"`).\n- **Tables: always use `WidthType.DXA`.** Never `WidthType.PERCENTAGE` (breaks in Google Docs).\n- **Tables need dual widths.** Set `columnWidths` on the table AND `width` on each cell. Both must match.\n- **Table shading: use `ShadingType.CLEAR`.** Never `SOLID` (causes black backgrounds).\n- **Never use tables as horizontal rules.** Use a bottom border on a `Paragraph` instead.\n- **TOC requires `HeadingLevel` only.** No custom styles on heading paragraphs.\n- **Override built-in styles by exact ID:** `\"Heading1\"`, `\"Heading2\"`, etc. Include `outlineLevel` (0 for H1, 1 for H2) for TOC to work.\n\n### Page setup\n\n```javascript\nsections: [{\n  properties: {\n    page: {\n      size: { width: 12240, height: 15840 }, // US Letter in DXA\n      margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } // 1-inch margins\n    }\n  },\n  children: [/* content */]\n}]\n```\n\n### Lists\n\n```javascript\n// Use numbering config, never insert bullet characters manually\nnumbering: {\n  config: [\n    { reference: \"bullets\",\n      levels: [{ level: 0, format: LevelFormat.BULLET, text: \"•\", alignment: AlignmentType.LEFT,\n        style: { paragraph: { indent: { left: 720, hanging: 360 } } } }] },\n  ]\n}\n// Same reference = continues sequence. Different reference = restarts.\n```\n\n### Tables\n\n```javascript\n// content width for US Letter with 1\" margins: 9360 DXA\nnew Table({\n  width: { size: 9360, type: WidthType.DXA },\n  columnWidths: [4680, 4680], // must sum to table width\n  rows: [new TableRow({ children: [\n    new TableCell({\n      width: { size: 4680, type: WidthType.DXA }, // also set on each cell\n      shading: { fill: \"EEEEEE\", type: ShadingType.CLEAR },\n      margins: { top: 80, bottom: 80, left: 120, right: 120 },\n      children: [new Paragraph({ children: [new TextRun(\"Cell\")] })]\n    })\n  ]})]\n})\n```\n\n### Headers, footers, and page numbers\n\n```javascript\nsections: [{\n  headers: { default: new Header({ children: [new Paragraph({ children: [new TextRun(\"Header\")] })] }) },\n  footers: { default: new Footer({ children: [new Paragraph({\n    children: [new TextRun(\"Page \"), new TextRun({ children: [PageNumber.CURRENT] })]\n  })] }) },\n  children: [/* content */]\n}]\n```\n\n---",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "editing-existing-documents",
+      "title": "Editing existing documents",
+      "children": [
+        {
+          "text": "Follow these three steps in order.\n\n**Step 1, Unpack:**\n```bash\npython scripts/office/unpack.py document.docx unpacked/\n```\n\n**Step 2, Edit XML** in `unpacked/word/`. Use the Edit tool for string replacement directly. Do not write Python scripts for edits.\n\n- Use `\"Claude\"` as the author for tracked changes and comments.\n- Use XML entities for smart quotes: `&#x2019;` (apostrophe), `&#x201C;` / `&#x201D;` (double quotes).\n- Add `xml:space=\"preserve\"` to `<w:t>` elements with leading/trailing spaces.\n\n**Step 3, Repack:**\n```bash\npython scripts/office/pack.py unpacked/ output.docx --original document.docx\n```\n\n### Tracked changes (minimal edits only)\n\n```xml\n<!-- Change \"30 days\" to \"60 days\" -->\n<w:r><w:t>The term is </w:t></w:r>\n<w:del w:id=\"1\" w:author=\"Claude\" w:date=\"2025-01-01T00:00:00Z\">\n  <w:r><w:delText>30</w:delText></w:r>\n</w:del>\n<w:ins w:id=\"2\" w:author=\"Claude\" w:date=\"2025-01-01T00:00:00Z\">\n  <w:r><w:t>60</w:t></w:r>\n</w:ins>\n<w:r><w:t> days.</w:t></w:r>\n```\n\nWhen deleting an entire paragraph, also mark the paragraph mark as deleted by adding `<w:del/>` inside `<w:pPr><w:rPr>`. Without it, accepting changes leaves an empty paragraph.\n\n### Comments\n\nUse `comment.py` to generate the boilerplate, then add `<w:commentRangeStart>` and `<w:commentRangeEnd>` markers as direct siblings of `<w:r>` in document.xml. Never nest them inside `<w:r>`.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

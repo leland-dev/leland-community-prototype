@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae522638a4b47c5afeb2",
+  "title": "Excel Spreadsheets",
+  "resourceType": "SKILL",
+  "description": "Create, edit, and analyze Excel files with correct formulas, proper formatting, and zero errors, using Python (pandas and openpyxl) to do the work.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae522638a4b47c5afeb2",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Data"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "You create, edit, and analyze Excel files using Python. Always use formulas\ninside the spreadsheet rather than computing values in Python and hardcoding\nthe results. The file should recalculate when source data changes.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "tools",
+      "title": "Tools",
+      "children": [
+        {
+          "text": "- **pandas**: data analysis, bulk read/write, simple export.\n- **openpyxl**: formulas, formatting, multi-sheet work, Excel-specific features.\n\nUse pandas when you need to analyze or transform data. Use openpyxl when you\nneed formulas, color, fonts, or precise cell control.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "core-rules",
+      "title": "Core rules",
+      "children": [
+        {
+          "text": "- Every file must have zero formula errors (#REF!, #DIV/0!, #VALUE!, #N/A, #NAME?).\n- Write formulas as strings in openpyxl (`sheet['B10'] = '=SUM(B2:B9)'`), never\n  computed Python values.\n- After writing any formula, run `recalc.py` to force LibreOffice to evaluate\n  and verify: `python recalc.py output.xlsx`. Check the returned JSON for errors.\n- When editing an existing file, load with `load_workbook()` (not `data_only=True`)\n  to preserve formulas. Opening `data_only=True` then saving permanently\n  destroys all formulas.\n- Cell indices in openpyxl are 1-based. DataFrame row 5 = Excel row 6.\n- Keep Python code minimal. No unnecessary print statements or verbose variable names.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "financial-model-standards",
+      "title": "Financial model standards",
+      "children": [
+        {
+          "text": "When the file is a financial model, apply these conventions unless the existing\ntemplate says otherwise:\n\n**Color coding (text color):**\n- Blue (0,0,255): hardcoded inputs the user will change.\n- Black (0,0,0): all formulas and calculated cells.\n- Green (0,128,0): links to other sheets in the same workbook.\n- Red (255,0,0): links to external files.\n- Yellow background (255,255,0): key assumptions or cells needing review.\n\n**Number formatting:**\n- Currency: `$#,##0`; always include units in headers (e.g., \"Revenue ($mm)\").\n- Zeros display as `-` (use `$#,##0;($#,##0);-`).\n- Percentages: one decimal (`0.0%`). Multiples: one decimal with \"x\" (`0.0x`).\n- Negative numbers: parentheses `(123)`, not minus sign.\n- Years: formatted as text strings, not numbers.\n\n**Assumptions:**\n- Put all assumptions (growth rates, margins, multiples) in dedicated cells.\n- Always reference those cells in formulas; never hardcode rates mid-formula.\n- Document the source for any hardcoded value in a comment or adjacent cell:\n  \"Source: [Document], [Date], [Reference].\"",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "formula-verification-checklist",
+      "title": "Formula verification checklist",
+      "children": [
+        {
+          "text": "Before delivering any file:\n- [ ] Test 2-3 sample references to confirm they pull the right cells.\n- [ ] Check row/column offsets (1-indexed; DataFrame row N = Excel row N+1).\n- [ ] Guard against division by zero in ratio formulas.\n- [ ] Use correct cross-sheet syntax: `Sheet1!A1`.\n- [ ] Run `recalc.py` and confirm `\"status\": \"success\"` with `\"total_errors\": 0`.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

@@ -1,0 +1,233 @@
+{
+  "id": "urn:contentEntry:6ab9ae43fc5f0dd7ad56634f",
+  "title": "Automate the user interview process",
+  "resourceType": "TUTORIAL",
+  "description": "A system that reads a batch of interview transcripts and returns recurring pains and contradictions, each tied to a quote.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae43fc5f0dd7ad56634f",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "stack": {
+        "title": "Stack",
+        "content": "The set of tools something is built with or that you work with. An app's stack is its languages and services, from database to frontend (the Leland Courses stack is Astro, Tailwind, Cloudflare, and Supabase). Your AI stack is the toolkit you've assembled for your own work — chat tools, agents, automations, and the connectors that tie them together."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "notion": {
+        "title": "Notion",
+        "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "granola": {
+        "title": "Granola",
+        "content": "An AI meeting notes app that listens to your calls and produces structured summaries, action items, and transcripts. Works in the background during Zoom, Google Meet, and in-person meetings. Useful as a source of raw material for AI workflows — feed transcripts into Claude for follow-ups or CRM updates."
+      },
+      "workflow": {
+        "title": "Workflow",
+        "content": "A multi-step process Claude runs to accomplish a goal — for example: read emails → filter by topic → summarize → post to Slack. Workflows can be run manually or on a schedule."
+      },
+      "batch-api": {
+        "title": "Batch API",
+        "content": "A way to send a big pile of requests to Claude at once and get the results back later (usually within 24 hours) at a discount. Good for one-time bulk jobs like classifying 10,000 customer support tickets."
+      },
+      "read-only": {
+        "title": "Read-only",
+        "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+      },
+      "repository": {
+        "title": "Repository (Repo)",
+        "content": "A project folder tracked by Git. Your GitHub repo is where Claude stores your code and files. When Claude 'pushes to GitHub,' it's sending changes from your computer to the online repo."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Product & R&D"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "Interview synthesis eats hours it doesn't need to. [Perspective AI's research](https://getperspective.ai/blog/ai-user-research-tools-the-2026-buyer-s-map-by-research-stage) finds synthesizing one hour of interview used to take 3 to 5 hours; AI synthesis has cut that to under 30 minutes. [Anthropic's product plugin](https://claude.com/plugins/product-management) gives this its own dedicated [workflow](#tooltip-workflow), turning interview notes into structured findings a researcher can act on.",
+            "type": "prose"
+          },
+          {
+            "text": "This system reads a [batch](#tooltip-batch-api) of transcripts from one round and returns the behaviors, pains, and contradictions that show up across the set, each tied to a quote and a participant, instead of one person rereading every call.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a paste-in [prompt](#tooltip-prompt) after each round, a saved skill, or a scheduled [agent](#tooltip-agent) that pulls fresh transcripts from your meeting notes tool. Every version stays [read-only](#tooltip-read-only) against your transcripts and your research [repository](#tooltip-repository).",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your transcript format, your round cadence, your finding rules, and what happens to the output afterward.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that synthesizes my user interviews into recurring behaviors, pains, and contradictions I can act on. Ask me questions, one at a time, about how I want this system to work. Cover how many interviews I run per round, what format my transcripts come in, what I want to see at the end, and how much it should flag versus decide on its own. When you have what you need, write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview surfaces the judgment calls a synthesis system has to make before you're staring at a [stack](#tooltip-stack) of transcripts, and the scope document becomes the brief for every round after."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Whether transcripts arrive from a notetaker or need manual upload each round.",
+              "Whether output updates a living persona doc or stays a one-off summary.",
+              "How many participants need to raise a pain before it counts as a finding."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first in a fresh session or a different [model](#tooltip-model), asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are a meeting notes tool for the transcripts ([Granola](#tooltip-granola)), a research repository for the running history (Dovetail, [Notion](#tooltip-notion)), and a living persona doc if the scope calls for one. The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Start building the system your scope document describes, and test it on a real batch of transcripts. The prompt below is an example of the core task. Your scope document will give you a version shaped to your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Synthesize a batch of interview transcripts into a structured findings summary.\n\nContext: [Paste transcripts or notes for this round], [the research question this round is meant to answer], [target customer segment]\n\nRules:\n- Report a pain only when at least 2 participants raise it, unless a single report is safety- or churn-relevant.\n- Attach a quote and participant ID to every claim.\n- Call out contradictions between participants rather than smoothing them over.\n- End with 3 open questions the round left unanswered.",
+            "prompt_note": "How this prompt works: the two-participant threshold keeps one offhand comment from reading as a trend, and the quote-plus-ID rule keeps every finding traceable back to who said it."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. Quotes and IDs attached, contradictions kept in, threshold respected?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what's off (\"that's not a contradiction, that's two segments\") and fold the correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Build a searchable repository across every past round.",
+              "Have it auto-generate follow-up questions from gaps the round left open.",
+              "Score confidence by how many participants echoed each finding."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric) instead of a feel check. Have your AI chat draft rubric and run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each interview synthesis, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for round date, interviews included, findings flagged, findings confirmed by a later round, and contradictions surfaced. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns surface a pattern of overstated or missed findings after a few rounds."
+          },
+          {
+            "text": "**Log** every round against the rubric. Note the date, which checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the system passes the rubric a few rounds straight, package the prompt and your corrected rules into a reusable AI skill. A check that keeps failing is a skill candidate. [Claude](#tooltip-claude)'s skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. Synthesis can flatten real disagreement into a false consensus, so contradictions have to survive in the output. Simulated users can pressure-test wording, but never stand in for what real users said.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Perspective AI, AI User Research Tools: The 2026 Buyer's Map](https://getperspective.ai/blog/ai-user-research-tools-the-2026-buyer-s-map-by-research-stage) — The synthesis-time stat.",
+              "[Anthropic, Product Management Plugin](https://claude.com/plugins/product-management) — The synthesize-research pattern."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Build a customer interview analyzer](/content/item/urn:contentEntry:6ab9ae47c28a183e845f72d5) · Entrepreneurship",
+              "[Build a feedback theme tracker](/content/item/urn:contentEntry:6ab9ae42324ca1079e90c3a6) · Product & R&D",
+              "[Meeting Analyzer](/content/item/urn:contentEntry:6ab9ae572155c4d377d9627e), [Transcript Analysis](/content/item/urn:contentEntry:6ab9ae607788e3091188ded0), and [Persona Development](/content/item/urn:contentEntry:6ab9ae58aca57d1134405bf1) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

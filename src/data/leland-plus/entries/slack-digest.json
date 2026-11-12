@@ -1,0 +1,118 @@
+{
+  "id": "urn:contentEntry:6ab9ae5ecf30b8c16a8a74b2",
+  "title": "Slack Digest",
+  "resourceType": "SKILL",
+  "description": "Summarize recent Slack activity into the 3-5 things that actually need attention, organized by action items, key decisions, and FYI updates",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5ecf30b8c16a8a74b2",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Surface signal, not noise. Search the last 24 hours of Slack activity (or whatever time period the user specifies) across channels relevant to their work, then synthesize it into the things they actually need to know.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-clarify-time-period",
+      "title": "Step 1: Clarify Time Period",
+      "children": [
+        {
+          "text": "If the user did not specify a timeframe, assume the last 24 hours. Adjust if they say \"this week\" or \"since Monday.\"",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-search-slack-for-recent-activity",
+      "title": "Step 2: Search Slack for Recent Activity",
+      "children": [
+        {
+          "text": "Use `slack_search_public_and_private` with separate calls for:\n- Keywords related to the user's active projects\n- Messages from their key collaborators\n- Direct mentions of the user (`@username`)\n- Action-item language: \"action item OR assignment OR can you OR need from you\"\n\nSort by most recent first.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-read-relevant-channels",
+      "title": "Step 3: Read Relevant Channels",
+      "children": [
+        {
+          "text": "For channels surfaced in search results, use `slack_read_channel` to get the last 50 messages and catch full thread context, including replies and decisions that search may have missed.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-4-synthesize-into-three-categories",
+      "title": "Step 4: Synthesize into Three Categories",
+      "children": [
+        {
+          "text": "**NEED YOUR ATTENTION**\nAction items assigned to the user, questions waiting on their answer, decisions they need to weigh in on, anything blocking someone else. List each with: who said it, what they need, and by when (if specified).\n\n**KEY DECISIONS AND UPDATES**\nDecisions that affect the user's work, new direction from their manager or team, project milestones or pivots, anything that changes how they should approach their work.\n\n**FYI** (low priority, useful)\nAnnouncements, wins, new hires. Good-to-know context that does not require action.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\nSLACK DIGEST, Last 24 Hours\n\nNEED YOUR ATTENTION\n-------------------------------------------\n[Item 1]\nFrom: [Name] in #[channel]\nWhat: [What they need from the user]\nBy when: [Deadline, if any]\n\n[Item 2]\n...\n\nKEY DECISIONS AND UPDATES\n-------------------------------------------\n[Update 1]\n[Update 2]\n\nFYI\n-------------------------------------------\n[Brief line]\n[Brief line]\n\nNOTHING URGENT\n[If no action items or key updates, state this explicitly]\n```",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "rules",
+      "title": "Rules",
+      "children": [
+        {
+          "text": "**Signal over noise:**\n- Skip casual banter, memes, and off-topic chats\n- Skip resolved discussions the user was not involved in\n- Skip long threads unless they contain a decision or action for the user\n- If a thread is 10+ messages, read it and summarize the key point. Do not dump the whole thing.\n\n**Specificity:**\n- Always name the person who said it\n- Always name the channel\n- Always state exactly what they need. Not vague.\n- Quote directly if it is a direct ask or decision\n\n**Recency:**\n- Messages from the last 2-4 hours take priority for \"need your attention\"\n- Messages older than 24 hours should rarely appear unless they are ongoing decisions\n\n**When in doubt:** include it. Better to surface something the user skips than hide something important. But bias toward action items and decisions over announcements.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "signals-worth-watching",
+      "title": "Signals Worth Watching",
+      "children": [
+        {
+          "text": "- Manager and team lead posts are high-signal. Read those threads.\n- \"Can you...\" addressed to the user is an action item even in a side thread.\n- Decisions usually come with language like \"we're going to\", \"we've decided\", \"starting Monday\", \"new process is.\"\n- Questions waiting on the user show up as replies to their past messages or direct @mentions.\n\n**Tool dependencies:** `slack_search_public_and_private`, `slack_read_channel`",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

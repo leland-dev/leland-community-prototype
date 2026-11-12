@@ -1,0 +1,170 @@
+{
+  "id": "urn:contentEntry:6aecf8ddd41d2460d0fd75b8",
+  "title": "Build a personal welcome page for each new hire",
+  "resourceType": "TUTORIAL",
+  "description": "Builds one shareable web page for a new hire with their day-by-day first week, the people to meet and why, the links they need, and a short FAQ, plus a list of anything you still need to fill in.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6aecf8ddd41d2460d0fd75b8",
+  "viewableFile": "build-a-personal-welcome-page-for-each-new-hire.mp4",
+  "thumbnail": "build-a-new-hire-welcome-page.png",
+  "body": {
+  "tooltips": {},
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "People"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "children": [
+        {
+          "text": "A new hire's first week often arrives as a PDF checklist, a few calendar invites, and a list of links spread across several emails, so day one starts with hunting for things. This build puts everything for one person on a single web page they can open in a browser. You start with your onboarding checklist, the hire's name, role, and start date, and a list of the people on their team. Your AI turns them into one HTML file with a day-by-day first week, the people to meet and why, the links they need, and a short FAQ. Anything it can't confirm from what you gave it goes on a separate list for you instead of onto the page, and once the build works you reuse it for each new hire.\n\nFirst you'll answer a few questions so it understands how onboarding works at your company and who sees the page. Then it builds the welcome page from your answers, and you run it once on a real upcoming hire and fix whatever looks off. Plan on about 45 minutes the first time.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "setup",
+      "title": "Setup",
+      "children": [
+        {
+          "head": [
+            "You need",
+            "Why",
+            "How to set it up"
+          ],
+          "rows": [
+            [
+              "Your onboarding checklist or onboarding doc",
+              "The first-week schedule and the FAQ come from it",
+              "Attach it to the chat as a PDF or Word file, or paste the text."
+            ],
+            [
+              "Details for one real or recent new hire",
+              "The page is personal, so it needs a name, role, manager, the first day they actually work, and the days you want on the page",
+              "Use the next person starting, or someone who joined in the last few months."
+            ],
+            [
+              "The team list for that hire",
+              "The page tells them who to meet and why",
+              "Paste each person's name, title, and a line on what they help with."
+            ]
+          ],
+          "type": "table",
+          "first_column_bold": true
+        },
+        {
+          "text": "**Nice to have:** If you have a design skill, a design guide, or your company's brand colors and fonts, attach it or paste it into the chat so the page matches the rest of your onboarding material. Without it, your AI uses a clean default look. If your tools live in a shared doc, paste the list of links so the page can point to the real ones. Without it, the page leaves those links out and your AI lists each missing one for you to fill in before you send the page. If your AI tool can show a page as an artifact or canvas, you can preview it right in the chat. Without that, you save the code as a file ending in .html and open it in your browser.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build it with this prompt",
+      "children": [
+        {
+          "text": "Paste this into a new chat in your AI tool. It asks about your role and your work first, then builds, then tests what it built with you.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "label": "Prompt",
+          "prompt": "I want to build a personal welcome page for each new hire, as one web page I can open in a browser and share, for my work. First, ask me what my role is and what I work on. Then walk me through it in three stages: Scope, Build, and Evaluate. Use whatever you can reach from this chat, like web search, files I upload, and any connector that fits, and if you can show the page as an artifact or canvas, do that. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. What should the welcome page include, and in what order? For example a greeting, a day-by-day first week, people to meet, links, and an FAQ.\n2. What will I give you for each hire, and where does it live today? For example an onboarding checklist, their name, role, and start date, and a team list. Tell me whether you can reach any of it from here or I'll upload or paste it.\n3. Which parts of the first week are the same for every hire, and which change with the role? For example equipment, accounts, and the company intro. If I'm not sure, ask me what an engineer's first week looks like next to a salesperson's.\n4. How often will I build one, and who sees the page besides the new hire?\n5. What should the page never do or assume? For example, should it ever show a meeting, a time, or a person I haven't confirmed, or any pay, benefits, or policy details I didn't paste word for word?\n6. What would make the page good? Help me turn my answer into three checks I can answer yes or no. For example: every day names a place and a person, and no time, name, or link appears that I didn't give you.\nThen write a short spec with my answers and the three checks. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, build one welcome page from a real hire with me.\n- Tell me exactly what to upload, connect, or paste, one thing at a time, and wait for it. Likely sources: the onboarding checklist as a PDF or Word file, the hire's details, and the team list.\n- Write the page to the new hire by first name, in a warm and plain tone.\n- Ask me for the first-day arrival time and place before you write the page. If I don't have them, add them to the \"Still to fill in\" list.\n- Build the first week day by day from my checklist. If an item has no day, keep it off the page and put it on the \"Still to fill in\" list. If it has a day but no time, room, owner, or link, keep it on the page marked \"to be confirmed\" and add it to the list.\n- If the start date falls on a weekend or a holiday, ask me for the first day they actually work. After I confirm it, restate which date each day lands on before you build. If my checklist covers more than five days, ask which days go in the first week and put the later days under a \"Coming up\" heading.\n- List the people to meet with their title and one line on why, using only names from my team list. If someone on my checklist isn't on the team list, add them to the list of gaps instead of the page.\n- Use only the links I gave you. If I gave you no links, leave out the links section. Otherwise show the links I gave and list each missing one on the \"Still to fill in\" list. Show me that list in the chat after the code.\n- Keep anything private out of the page: no pay, no performance notes, and nothing personal beyond name, role, and start date.\n- Write the FAQ from facts my onboarding doc states, like dress, parking, and tools. If a fact isn't written down, add it to the \"Still to fill in\" list instead of answering it. Never invent a policy, a date, or a name.\n- Make the page readable on a phone and when printed, with the styles inside the file.\n- If I gave you a design skill, a design guide, or brand colors and fonts, use them. If not, use a clean default look.\n- If you're unsure about something, ask me instead of guessing.\n- Output: one complete, self-contained HTML file in a single code block, with the styles inside the file. In order: a greeting with the hire's name, role, start date, and manager, then the first week day by day, then any \"Coming up\" days, then people to meet, then links, then the FAQ. If my tool can show it as an artifact or canvas, show it there. Otherwise give me three save steps: paste the code into a text editor, save it as welcome.html, and double-click the file. After the code, show the \"Still to fill in\" list.\n\nStage 3: Evaluate\nGrade the welcome page you just built from our real hire details against my three checks. Mark each one yes or no and quote the line that proves it. For a check about something that must not appear, quote the line that comes closest to breaking it. If any check fails, tell me the one change that would fix the most misses, make it, and run it again on the same details. Change the page, not the checks. When all three pass, give me the instructions as one block I can paste into a new chat or a project, so I can build a page for every new hire."
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "steps",
+      "title": "Steps",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "title": "Scope",
+              "children": [
+                {
+                  "text": "Your AI starts by asking about your role, then six questions one at a time. The third is the one that shapes the page: you say what changes with the hire's role and what stays the same for everyone, so your AI knows which parts to rebuild each time and which to reuse. Once you've answered, it writes a short spec with three checks, and you confirm it before it reads your checklist.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** When it asks what differs by role, name the one or two things that always change, like the tools an engineer needs compared with a salesperson. Everything else becomes a fixed part you reuse for every hire.",
+                    "**Tip:** Write one check about what you haven't confirmed, such as \"no meeting appears without a time or the words time to be confirmed.\" New hires act on what the page says, so a guessed time sends them to the wrong place."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "title": "Build",
+              "children": [
+                {
+                  "text": "With the spec confirmed, your AI asks for your checklist, the hire's details, and the team list, one at a time. It reads the checklist, writes the page to the hire by name, and builds the week day by day. When it finishes you have the HTML file and the Still to fill in list.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Use a hire from a few months ago for the first run. You'll know right away whether the week and the people it lists match what actually happened.",
+                    "**Tip:** Read the \"Still to fill in\" list before you send anything. An empty slot is much easier to fix than a wrong one."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "title": "Evaluate",
+              "children": [
+                {
+                  "text": "Last, your AI grades the page it just built against your three checks and quotes the line that shows each one passing or failing. It fixes the biggest miss and rebuilds the page from the same details, then hands you the instructions as one block.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Read the first-week schedule as if you were the new hire on Monday morning. If anything leaves you wondering where to be, tell your AI which line to fix.",
+                    "**Tip:** Keep the instructions block it gives you. When the next hire is confirmed, paste it into a new chat with their details and get their page back."
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a new hire onboarding assistant](/content/item/urn:contentEntry:6ab9ae44453159773c5ae7dd) · People",
+            "[Build a bot to answer common HR questions](/content/item/urn:contentEntry:6ab9ae4336554a317a0287a6) · People",
+            "[Build a job description generator](/content/item/urn:contentEntry:6ab9ae44b898aa5eccb908c7) · People",
+            "[Web Design Guidelines](/content/item/urn:contentEntry:6ab9ae61a504335da054eb3e) and [Word Documents](/content/item/urn:contentEntry:6ab9ae61798a2883f8bb8d9b) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

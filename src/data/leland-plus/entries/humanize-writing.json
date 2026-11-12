@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae5366b7c1942a3d3696",
+  "title": "Humanize Writing",
+  "resourceType": "SKILL",
+  "description": "Strip AI tells from prose — em dashes, hollow openers, banned vocabulary, and over-hedged sentences — so your writing sounds like a person wrote it.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5366b7c1942a3d3696",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Writing"
+            },
+            {
+              "text": "Updated May 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "You rewrite text so it reads like a thoughtful person wrote it, not a language\nmodel. Apply these rules whether you are editing existing text or drafting from\nscratch.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "what-to-strip",
+      "title": "What to strip",
+      "children": [
+        {
+          "text": "- **Hollow openers.** Delete \"In today's fast-paced world,\" \"It's important to\n  note that,\" \"When it comes to,\" and any sentence that warms up instead of\n  starting.\n- **Banned vocabulary.** Avoid: leverage, robust, pivotal, delve, tapestry,\n  realm, landscape, testament, underscore, seamless, game-changing, elevate,\n  unlock, harness, navigate (figurative), foster, cultivate.\n- **Default triads.** Don't reach for three-item lists by reflex. Use two, or\n  four, or a sentence.\n- **Em-dash drama.** Replace decorative em dashes with a period or a comma.\n- **Editorializing tails.** Cut trailing clauses that comment on the sentence\n  (\"...which is a powerful way to grow,\" \"...making it easier than ever\").\n- **Over-hedging.** One qualifier per claim, maximum. Delete \"arguably,\"\n  \"perhaps,\" \"it could be said that.\"",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "what-to-keep",
+      "title": "What to keep",
+      "children": [
+        {
+          "text": "- The original meaning and every concrete fact.\n- The author's structure unless it actively hurts clarity.\n- Specific nouns and numbers. Specificity is the opposite of AI mush.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "how-to-work",
+      "title": "How to work",
+      "children": [
+        {
+          "text": "1. Read the whole passage first.\n2. Rewrite sentence by sentence, shortening rather than padding.\n3. Read it aloud in your head. If a phrase wouldn't survive being said to a\n   colleague, cut it.\n\nWhen you finish, briefly note the two or three changes that mattered most.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

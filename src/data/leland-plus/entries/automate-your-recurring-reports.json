@@ -1,0 +1,227 @@
+{
+  "id": "urn:contentEntry:6ab9ae4079403e9797fd44fa",
+  "title": "Automate your recurring reports",
+  "resourceType": "TUTORIAL",
+  "description": "A system that pulls your recurring report's numbers, compares them to last period, and drafts the write-up for you to review and send.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4079403e9797fd44fa",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "n8n": {
+        "title": "n8n",
+        "content": "A workflow automation tool (pronounced \"n-eight-n\") that chains apps together on a trigger — like Zapier or Make. Used in Level 2 to run multi-step automations across Gmail, Slack, Notion, and other apps without writing code."
+      },
+      "pull": {
+        "title": "Pull",
+        "content": "Downloading the latest changes from GitHub to your computer so your local copy is up to date. Claude pulls before starting work to make sure it's building on the newest version, not an old one."
+      },
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "slack": {
+        "title": "Slack",
+        "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "notion": {
+        "title": "Notion",
+        "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "zapier": {
+        "title": "Zapier",
+        "content": "A no-code automation tool that connects apps with simple triggers and actions. The most popular workflow builder for non-technical users. Similar to Make and n8n, with the largest app library and the friendliest interface."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "database": {
+        "title": "Database",
+        "content": "An organized place to store and retrieve data — like a spreadsheet on steroids. When Claude builds an app that remembers users or saves entries, it's reading from and writing to a database (often Supabase or Postgres)."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Operations"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "The typical FP&A team loses at least two hours a week per staffer to manual reporting, and staff spend more than 75% of their time gathering and managing data rather than analyzing it, per a University of Baltimore/DataRails study of over 1,000 teams reported by [CFO Dive](https://www.cfodive.com/news/bad-use-of-fpa-costs-us-companies-78b-a-year/617159/). This system points an [agent](#tooltip-agent) at the same sources you'd check by hand, pulls the current numbers, and drafts the written summary in the format your report has always used.",
+            "type": "prose"
+          },
+          {
+            "text": "That same research notes the data-gathering share of the job \"has been more or less the same for the last 10 years.\" The pattern predates AI tools and won't fix itself without automating the [pull](#tooltip-pull)-and-draft step.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a paste-in [prompt](#tooltip-prompt) the day before the report is due, a saved skill, or a scheduled agent dropping a draft into your reporting home. A person reviews and sends it.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your data sources, your report's format, what counts as a meaningful change, and who reviews before it goes out.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that pulls together my recurring report the same way I do it by hand, and drafts the written summary, not just the raw numbers. Ask me questions, one at a time, about where the data comes from, what the report has always looked like, what counts as a meaningful change versus noise, and who reviews it before it goes out. When you have what you need, write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview forces you to name the format and threshold decisions you've been making by feel, giving the build something concrete to match."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Whether your data sources are cleanly exportable or need a manual pull first.",
+              "The significance threshold for what's worth flagging as a change.",
+              "Who reviews the draft, and how much time they need before it's due."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document, then gather what it calls for. Common [connectors](#tooltip-tool-connectors) are your data source (a dashboard, a spreadsheet, a [database](#tooltip-database), an ERP export), your reporting home (Google Docs, [Notion](#tooltip-notion), a [Slack](#tooltip-slack) channel, an email list), and a scheduling layer if this runs on a timer ([n8n](#tooltip-n8n), [Zapier](#tooltip-zapier)). The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Start building the system your scope document describes, and test it on a real pull of current data. The prompt below is an example. Your scope document will give you a version shaped to your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Draft [report name], a [frequency] report covering [what it covers], in the same format it's always used.\n\nContext: Data sources are [list actual sources]. Past reports for reference at [location]. Audience is [who reads it] and cares most about [what matters to them].\n\nRules:\n- Compare every number to the prior period and call out the direction and size of the change.\n- Only flag a change as significant if it crosses [a defined threshold, e.g. 10%].\n- Never state a number not traceable to a listed source.\n- Match the tone and structure of the last three reports.\n- Output: exact section order of the template, plus a one-line \"what changed\" summary at the top.",
+            "prompt_note": "How this prompt works: naming a numeric threshold up front keeps the draft from flagging every small wiggle as news, and matching prior reports keeps the format steady."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. Every number traced to a source, threshold applied consistently, format matching the last three reports?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Fix the misfiring rule, then fold the correction into the prompt. A threshold too loose just needs the right number written in.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Keep a running log of what changed report over report so trends stay visible.",
+              "Draft it a day early so there's real review time before it's due.",
+              "Add an exception path so a failed or obviously wrong data pull gets flagged instead of reported.",
+              "Extend the pattern to a second recurring report once the first is trusted."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** against a [rubric](#tooltip-rubric), skipping the feel check. Have your AI chat draft the rubric and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each report draft, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, changes flagged, changes that held up on review, threshold adjustments made, and review turnaround time. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns surface a drifting threshold or slipping review window within a few cycles."
+          },
+          {
+            "text": "**Log** every run against the rubric. Note the date, what passed or failed, and what changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from the log. Once the rubric passes a few cycles straight, package the prompt and corrected rules into a reusable AI skill. A check that keeps failing is your next candidate. [Claude](#tooltip-claude)'s skill-creator skill interviews you and writes it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. A dashboard pull error looks exactly like a real number until someone checks it, so build a sanity check into the pull itself, before the draft ever gets reviewed.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[CFO Dive, Bad Use of FP&A Costs U.S. Companies $7.8B a Year](https://www.cfodive.com/news/bad-use-of-fpa-costs-us-companies-78b-a-year/617159/) — The manual-reporting time and data-gathering share stats, from University of Baltimore/DataRails research."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Automate project status updates](/content/item/urn:contentEntry:6ab9ae403408c56238d5888f) · Operations",
+              "[Create board updates from your operating data](/content/item/urn:contentEntry:6ab9ae464312b8f229471292) · Leadership",
+              "[Automate your budget vs. actuals reporting](/content/item/urn:contentEntry:6ab9ae40e7196c57e98f073a) · Finance",
+              "[Find where work gets stuck](/content/item/urn:contentEntry:6ab9ae40662f2c57cbffcf43) · Operations",
+              "[Weekly Recap](/content/item/urn:contentEntry:6ab9ae61f68999a1ef52821b) and [Revenue Monitor](/content/item/urn:contentEntry:6ab9ae5c212a6fc781df1125) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

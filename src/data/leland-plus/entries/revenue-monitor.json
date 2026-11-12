@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae5c212a6fc781df1125",
+  "title": "Revenue Monitor",
+  "resourceType": "SKILL",
+  "description": "Take a weekly snapshot of the sales pipeline, detect meaningful changes from the prior week, and generate a digest of what moved and why it matters",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5c212a6fc781df1125",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Data"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Weekly pipeline surveillance. Detect what changed and surface what needs action.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-gather-current-pipeline",
+      "title": "Step 1, Gather Current Pipeline",
+      "children": [
+        {
+          "text": "Ask the user to provide all open deals. For each, capture:\n- Deal name, stage, amount, ask price, floor price (if tracked)\n- Days in current stage\n- Last contact date\n- Current status",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-identify-changes",
+      "title": "Step 2, Identify Changes",
+      "children": [
+        {
+          "text": "Look for:\n- Deals that moved stages (forward or backward)\n- Deals where price changed\n- Deals newly created this week\n- Deals that went cold (no contact in 7 or more days)\n- Deals recently closed, won or lost",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-score-the-week",
+      "title": "Step 3, Score the Week",
+      "children": [
+        {
+          "text": "### Positive Signals\nDeals advancing, new pipeline created, closings.\n\n### Warning Signals\nDeals stalling, going cold, or showing signs of churn.\n\n### Net Pipeline Movement\nIs the pipeline growing, shrinking, or flat vs. the revenue target?",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Pipeline Monitor, Week of [date]\n\n## Net Summary\n[1-2 sentences: is the pipeline healthy, improving, or at risk?]\n\n## Moved Forward\n- [Deal], [old stage] to [new stage]\n\n## Moved Backward / Stalled\n- [Deal], [issue]\n\n## New This Week\n- [Deal], [$amount], [category or source]\n\n## Went Cold (7+ days no contact)\n- [Deal], last contact [date]\n\n## Closed This Week\n- Won: [deals + revenue]\n- Lost: [deals + reason]\n\n## Action Items\n- [ ] [specific thing to act on]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

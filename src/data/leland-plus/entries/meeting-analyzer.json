@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae572155c4d377d9627e",
+  "title": "Meeting Analyzer",
+  "resourceType": "SKILL",
+  "description": "Extract action items, decisions, open questions, and missed opportunities from any meeting transcript or notes, in a scannable format.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae572155c4d377d9627e",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Analyze a meeting and produce a structured breakdown that is actually useful. Not just a summary, but a clear record of what happened, what needs to happen next, and what almost got missed.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-get-the-transcript",
+      "title": "Step 1: Get the Transcript",
+      "children": [
+        {
+          "text": "If the user provided a meeting name, date, or keywords, use that to identify the meeting.\n\nIf no argument is given, ask the user to paste the transcript or notes, or to identify which meeting to analyze.\n\nOnce identified, work from the full transcript or notes.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-analyze",
+      "title": "Step 2: Analyze",
+      "children": [
+        {
+          "text": "Read the full transcript carefully. Extract:\n\n**Action Items.** For each action item found:\n- Who owns it (name or role)\n- What exactly they need to do\n- By when, if a deadline was mentioned\n\nIf ownership is ambiguous, flag it.\n\n**Decisions Made.** Things that were agreed on, confirmed, or resolved. Be specific: \"we decided X\" not \"there was discussion about X.\"\n\n**Open Questions.** Things that came up but were not resolved. Questions that need answers before work can move forward.\n\n**Missed Opportunities.** This is the most valuable section. Look for:\n- Moments where the user could have pushed harder but did not\n- Topics that were dropped or glossed over\n- Commitments that were vague and should have been pinned down\n- Questions that were not asked but should have been\n- Anything that will likely come back as a problem later\n\n**Key Context.** 1-2 sentences on what this meeting was about and what the high-level outcome was.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-output-format",
+      "title": "Step 3: Output Format",
+      "children": [
+        {
+          "text": "```\n## [Meeting Name], [Date]\n\n**In one line:** [what this meeting was and what was resolved]\n\n---\n\n### Action Items\n- [ ] [Person], [what to do], [by when if known]\n\n### Decisions Made\n- [Decision 1]\n- [Decision 2]\n\n### Open Questions\n- [Question that still needs an answer]\n\n### Missed Opportunities\n- [Specific moment and what could have been said or done differently]\n\n---\n```\n\nKeep it scannable. No fluff. If a section has nothing in it (for example, no missed opportunities), skip that section rather than writing \"none found.\"",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

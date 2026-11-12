@@ -1,0 +1,932 @@
+{
+  "id": "urn:contentEntry:6ab9ae4b465e396e657f56f9",
+  "title": "Build a Personal AI That Schedules Your Life",
+  "resourceType": "TUTORIAL",
+  "description": "A hands-on workshop. Build a Telegram bot that reads, creates, updates, and deletes your Google Calendar events — all from a simple chat.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4b465e396e657f56f9",
+  "viewableFile": "GMT20260507-150255_Recording_1920x1020.mp4",
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "meta": {
+      "mins_total": 60
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "outcomes",
+        "children": [
+          {
+            "text": "Led by **Luca T.**",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Build a Telegram bot that reads, creates, updates, and deletes your Google Calendar events from chat",
+              "Wire an AI Agent with a structured system prompt, dynamic date injection, and per-chat memory",
+              "Connect five scoped calendar tools using parameter descriptions as prompt engineering",
+              "Implement a security gate that stops unauthorized users at the canvas level — not in the LLM",
+              "Apply the four production-ready patterns that show up in every serious AI agent build"
+            ],
+            "title": "What you'll build",
+            "variant": "check"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "intro",
+        "title": "Session intro",
+        "children": [
+          {
+            "text": "**What to have ready before we start**",
+            "type": "prose"
+          },
+          {
+            "text": "Get these four things ready before the build. None take more than a few minutes — but you need them all before you can test anything.",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "An n8n account (cloud or self-hosted) — the workflow uses the AI Agent node and Data Tables",
+              "A Telegram account — to create your bot and chat with it",
+              "An OpenAI, Anthropic, or other LLM API key — powers the agent's reasoning",
+              "A Google account — the calendar you want the bot to manage"
+            ],
+            "variant": "check"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-1",
+        "title": "1. Prepare Your Credentials",
+        "subtitle": "Create your Telegram bot, get an LLM API key, and configure Google Calendar access",
+        "children": [
+          {
+            "text": "**What you're building — and how it fits together**",
+            "type": "prose"
+          },
+          {
+            "text": "A Telegram bot wired to Google Calendar through an AI Agent in n8n. The agent reads your messages, decides which calendar tool to call, and sends back a formatted reply.\n\nThe full flow: Telegram → security gate → AI Agent (with calendar tools, memory, and contacts) → Telegram reply. Two parallel branches give you instant feedback while the agent thinks.",
+            "type": "prose"
+          },
+          {
+            "code": "      Telegram message\n             |\n             v\n      Telegram Trigger\n             |\n             v\n   +------------------+\n   | IF: chatID match |   <- security gate\n   +------------------+\n             | true\n      +------+-------+\n      v              v\nSend chat action   AI Agent ---- Memory (per chat.id)\n      |            |   |\n      v            |   +-- OpenAI / Anthropic model\n\"Working on it!\"   |   +-- Get events\n                   |   +-- Create event\n                   |   +-- Update event\n                   |   +-- Delete event\n                   |   +-- Get Contacts (data table)\n                   v\n            Send text message\n            (MarkdownV2 escaped)\n                   |\n                   v\n               Telegram",
+            "type": "code"
+          },
+          {
+            "text": "**Why n8n — and not the Claude app or Hermes?**",
+            "type": "prose"
+          },
+          {
+            "text": "The Claude app can read your calendar, but you have to open it and ask. This bot lives in Telegram and responds the moment you text it — any time of day, without you touching a computer. That requires a deployment target, not an interactive session.\n\nHermes can build a similar bot faster, but it abstracts the pieces. This build wires everything by hand so you understand the architecture, not just the output.\n\nThe pattern is also model-agnostic. Swap OpenAI for Anthropic, Gemini, or a local Ollama model and the workflow doesn't change. Want Slack or WhatsApp instead of Telegram? Only the trigger and output nodes change — the agent core stays identical.\n\nIf you just want personal calendar management, the Claude app might already be enough. We're building this the long way because the architecture — trigger, security gate, agent, tools, output layer — transfers to every agent you build after this one.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Install Telegram and create a bot",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "**Install Telegram** if you don't have it: [App Store (iPhone)](https://apps.apple.com/app/telegram-messenger/id686449807), [Google Play (Android)](https://play.google.com/store/apps/details?id=org.telegram.messenger), [Mac App Store](https://apps.apple.com/app/telegram/id747648890), [Windows](https://desktop.telegram.org/), or [web.telegram.org](https://web.telegram.org) (no install).",
+                      "**Find BotFather.** Open Telegram, search for `@BotFather` and confirm it has a blue checkmark. Tap **Start**. BotFather is the official Telegram account that creates bots.",
+                      "**Create your bot.** Type `/newbot` and send it. BotFather will ask for a display name (anything), then a username that must end in `bot` — e.g. `my_scheduler_bot`.",
+                      "**Save your bot token.** Once accepted, BotFather sends a token like `1234567890:ABCdefGHIjklMNOpqrs...`. Copy it somewhere safe — treat it as a password. Anyone with this token can control your bot.",
+                      "**Start a chat with your bot.** Search for your bot's username in Telegram, open the chat, tap **Start**, then send any message (e.g. `hello`). The bot won't reply — that's expected. You're creating a chat record.",
+                      "**Find your chat ID.** In a browser, open `https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates` — replace `<YOUR_TOKEN>` with your token. You'll see JSON — find `\"from\": { \"id\": 987654321 }`. That number is your chat ID. Save it next to your token. _Troubleshooting: if you see an empty result array, send your bot another message and refresh._"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Get an LLM API key",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "For n8n Cloud trials, OpenAI works out of the box with free credits. Any provider with an n8n Chat Model node works: Anthropic, Gemini, Groq, Mistral, or a local Ollama model."
+                    ]
+                  },
+                  {
+                    "type": "toggle",
+                    "title": "OpenAI",
+                    "children": [
+                      {
+                        "text": "1. Go to platform.openai.com\n2. Create an API key under **API keys**\n3. If you burn through the trial credits, set up billing",
+                        "type": "prose"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "toggle",
+                    "title": "Anthropic",
+                    "children": [
+                      {
+                        "text": "1. Go to [console.anthropic.com](https://console.anthropic.com)\n2. Click **API Keys** in the left sidebar\n3. Click **Create Key**",
+                        "type": "prose"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "toggle",
+                    "title": "Gemini — recommended if you have org restrictions on API keys",
+                    "children": [
+                      {
+                        "text": "1. Go to [aistudio.google.com](https://aistudio.google.com)\n2. Click **Get API key** in the left sidebar\n3. Click **Create API key** in the upper right",
+                        "type": "prose"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Set up Google Calendar OAuth (self-hosted n8n only — cloud users skip this)",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "In n8n, go to **Credentials** in the left sidebar → **New** → search \"Google Calendar OAuth2 API\". Copy the **Redirect URL** n8n shows you.",
+                      "In [Google Cloud Console](https://console.cloud.google.com/projectcreate), create a project, enable the Google Calendar API, create OAuth 2.0 credentials (select **Web application**). Paste the n8n Redirect URL into the **Authorized redirect URIs** field.",
+                      "Copy the **Client ID** and **Client Secret** back into n8n → click **Sign in with Google** → grant access.",
+                      "Save the credential as `Google Calendar account`."
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Before anything else, you need an n8n instance to build in. The fastest path for a workshop is the cloud trial.\n\n1. Go to [n8n.io](https://n8n.io)\n2. Click **Get started** (or Try for free)\n3. Pick a workspace name and a region\n4. You're in. The trial gives you 14 days of full access to n8n Cloud — no credit card required.\n\nThe trial includes everything in this workshop: the AI Agent node, Data Tables, all integration nodes, executions, and credentials.\n\n_After the trial, n8n Cloud has paid plans, or you can self-host n8n with Docker on your own server. The workflow JSON you build today imports cleanly into either, so the choice is reversible._",
+            "type": "callout",
+            "title": "New to n8n? Set up your environment here"
+          },
+          {
+            "text": "The security gate later in the workflow compares against it. Without this number, anyone who finds your bot can use your calendar.",
+            "type": "callout",
+            "title": "Why do we get the chat ID?"
+          },
+          {
+            "type": "toggle",
+            "title": "getUpdates returns an empty result array",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "You need to send your bot at least one message before updates appear. Send `hello` to your bot in Telegram, then refresh the URL.",
+                "type": "prose"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-2",
+        "title": "2. Create the Contacts Data Table",
+        "subtitle": "Build a controlled list of people the agent is allowed to invite — so it never invents an email address",
+        "children": [
+          {
+            "text": "**Why a data table and not Google Contacts?**",
+            "type": "prose"
+          },
+          {
+            "text": "It gives you total control. The agent can only invite people you've added on purpose — no surprises, trivial to reset between runs.\n\nIn production you'd swap this for a CRM (HubSpot, Salesforce), a project tool (Linear, Asana), or Notion. The agent loop never changes. Only the tool you wire up changes.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "In your n8n project, go to the **Overview** tab in the left sidebar, then click **Data Tables**",
+                    "type": "prose"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Click **Create Data Table**, name it `contacts`",
+                    "type": "prose"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Add two columns: `name` (string) and `email` (string)",
+                    "type": "prose"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Add 3–5 rows with real people you actually want to invite from chat",
+                    "type": "prose"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Keep the data table open — you'll need its ID when wiring up the tool in Step 6",
+                    "type": "prose"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Anything that already has the people in it:\n\n- **CRM (HubSpot, Pipedrive, Salesforce):** invite clients you already track\n- **Project tools (ClickUp, Asana, Linear, Jira):** invite task assignees automatically\n- **Notion or Airtable database:** if your team's address book lives there\n- **Google Contacts:** if you want the full personal address book and accept the risk\n\nThe agent loop never changes. Only the tool you wire up changes.",
+            "type": "callout",
+            "title": "What you'd use in real production"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-3",
+        "title": "3. Build the Entry Layer",
+        "subtitle": "Set up the Telegram trigger and the security gate that stops unauthorized users cold",
+        "children": [
+          {
+            "text": "**Security at the canvas level — why it matters**",
+            "type": "prose"
+          },
+          {
+            "text": "Prompts can be jailbroken with creative phrasing. A node-level filter cannot. Security belongs in the canvas, not in the LLM.\n\nIf the IF node returns false, the workflow stops cold — no tools run, no tokens are spent, no calendar is touched.\n\nProduction upgrade: for multi-user deployments, replace the hardcoded chat ID with a lookup against a Postgres table or a data table of authorized users.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Create the Telegram Trigger",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Create a new workflow (click **+** → **Workflow**)",
+                      "On the canvas, click **Add first step** → search **Telegram Trigger** → select triggers \"on message\"",
+                      "Credentials: click **Set up credential** → **Access Token** → paste your bot token from Setup",
+                      "Trigger On: select `message`"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Add the security gate (IF node)",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Click **+** after the trigger → search **IF**",
+                      "Left value / Value 1: `{{ $json.message.from.id }}`",
+                      "Operator: **Number** → **Is Equal to**",
+                      "Right value / Value 2: your chat ID from Setup",
+                      "Turn **Convert types where required** on",
+                      "Connect the trigger's output to this IF node"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "title": "The workflow fires but nothing happens",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "Check the IF node — the `from.id` comparison fails silently if your chat ID is off by one digit. Copy-paste the ID instead of typing it.",
+                "type": "prose"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-4",
+        "title": "4. Build the Instant Feedback Layer",
+        "subtitle": "A typing indicator and confirmation message — on a parallel branch so they add zero latency to the agent's answer",
+        "children": [
+          {
+            "text": "**Why parallel and not in front of the agent?**",
+            "type": "prose"
+          },
+          {
+            "text": "AI agents take 3–15 seconds to reply. In a chat UI, that silence reads as 'is this thing broken?'.\n\nThese two nodes run on a separate branch out of the IF node. They fire at the same moment the agent starts — not before it. Zero added latency to the answer.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Add the typing indicator",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Add a **Telegram** node → **Action in an app** → search **Telegram**",
+                      "Configure the node with:",
+                      "- **Credential:** Telegram account (from Setup)",
+                      "- **Resource:** Message",
+                      "- **Operation:** Send Chat Action",
+                      "- **Chat ID:** `{{ $json.message.chat.id }}`",
+                      "- **Action:** Typing",
+                      "Connect from the **true** output of the IF node"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Add the confirmation message",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Add another **Telegram** node after the typing indicator",
+                      "Action: **Send a Text Message**",
+                      "Chat ID: `={{ $('Telegram Trigger').item.json.message.chat.id }}`",
+                      "Text: `Working on it!`",
+                      "Additional Fields → Append n8n Attribution: **off** | Parse Mode: **HTML**"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "The typing indicator is the native Telegram UX cue, but it's subtle. The 'Working on it!' line confirms in plain text that the bot received the request and is thinking.",
+            "type": "callout",
+            "title": "Why two signals?"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-5",
+        "title": "5. Build the AI Agent",
+        "subtitle": "One node — but the configuration matters more than any other step in this workflow",
+        "children": [
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Add the AI Agent node",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Click **+** in the upper right → add the **AI Agent** node",
+                      "Connect the **true** output of the IF node to it",
+                      "Source for Prompt (User Message): **Define Below**",
+                      "Prompt (User Message): `{{ $json.message.text }}`"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Write the system message",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Inside the AI Agent node, click **Add Option** → **System Message**",
+                      "Structure it in clear sections: Role + Context block, then a section for each tool",
+                      "For each tool: cover when to call it (with example phrases), when NOT to call it, and how to call it (parameter format and edge cases)",
+                      "End with an Output format block and a Constraints block (never invent meetings, never invent emails, never delete without confirmation)"
+                    ]
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "System message: Role + Context block",
+                    "prompt": "Role\nYou are a personal calendar assistant that helps the user check\nand reason about their schedule via Telegram. You have access\nto their Google Calendar through tools.\n\nCurrent context\nToday is: {{ $now.setZone('Europe/Rome').format('cccc, yyyy-MM-dd HH:mm') }} (Europe/Rome).\nAlways interpret relative dates (\"today\", \"tomorrow\", \"monday\",\n\"this week\") relative to today.",
+                    "prompt_note": "Replace the timezone string with your own (e.g. 'America/New_York'). The $now expression resolves at runtime on every single message — the LLM has no real concept of today without it."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Connect the language model",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Under AI Agent → Chat Model → add **OpenAI Chat Model** (or your provider)",
+                      "Credentials: your API key from Setup",
+                      "Model: start cheap — `gpt-4.1-mini`, `gpt-4o-mini`, or equivalent"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Connect memory",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Under AI Agent → Memory → **Simple Memory**",
+                      "Session ID: **Define below**",
+                      "Key: `={{ $('Telegram Trigger').item.json.message.chat.id }}`",
+                      "Context window: leave at default (5)"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "The LLM has no real concept of 'today'. Without `{{ $now }}` in the context, 'tomorrow' becomes a hallucination roulette. The expression resolves at runtime, every single message.",
+            "type": "callout",
+            "title": "Why inject the date dynamically?"
+          },
+          {
+            "text": "The work this agent does is parsing dates, picking the right tool, and writing two-line replies. Start cheap, measure quality on real conversations, upgrade only if you see real failures. A bigger model rarely fixes a vague prompt. A tighter prompt almost always fixes a small model.",
+            "type": "callout",
+            "title": "Why a small model?"
+          },
+          {
+            "text": "Each chat keeps its own isolated context. No cross-contamination between users, no leaked schedules.",
+            "type": "callout",
+            "title": "Why key memory to chat.id?"
+          },
+          {
+            "text": "Simple Memory lives in n8n's process and vanishes on restart. For production, swap it for a Postgres-backed memory store.",
+            "type": "callout",
+            "title": "Simple Memory doesn't survive restarts"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-6",
+        "title": "6. Connect the Calendar Tools",
+        "subtitle": "Wire four Google Calendar nodes as tools — the agent decides when and how to call each one based on the parameter descriptions you write",
+        "children": [
+          {
+            "text": "**Parameter descriptions are prompt engineering**",
+            "type": "prose"
+          },
+          {
+            "text": "The agent reads the `$fromAI` description to decide how to fill each field. Vague descriptions equal malformed dates and surprise behavior. Treat these strings like part of your system prompt — they are.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Get Many Events",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Under AI Agent → add a **Google Calendar Tool** node",
+                      "Resource: **Event** | Operation: **Get Many**",
+                      "Calendar: pick your calendar from the list",
+                      "Turn on **Return All** → click the sparkle button to let AI determine"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Create Event",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Add another **Google Calendar Tool** | Operation: **Create**",
+                      "Calendar: select your preferred calendar",
+                      "Start: enable AI definition (sparkle button), then paste the Start description below",
+                      "End: same — sparkle button, then paste the End description below",
+                      "Additional Fields: enable `summary`, `description`, `attendees` — sparkle button for each. Examples: Summary: `Event Title` | Description: `Optional event description or notes`",
+                      "Also add **Conference Data** → select your video provider for auto-Meet links"
+                    ]
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Start parameter description",
+                    "prompt": "Event start datetime in ISO8601 format, {INSERT YOUR} timezone. The current year is 2026."
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "End parameter description",
+                    "prompt": "Event end datetime in ISO8601 format, {INSERT YOUR} timezone. The current year is 2026."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Update Event",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Add a 3rd **Google Calendar Tool** | Operation: **Update**",
+                      "Event ID: AI-defined. Description: `The ID of the event to update. Retrieve it first with the Get tool if not already known.`",
+                      "For each field (start, end, summary, description): sparkle button + description"
+                    ]
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Start / End parameter description for Update",
+                    "prompt": "New start datetime. Only set if the user asked to change the time.",
+                    "prompt_note": "Without the 'only set if asked' wording, the agent will sometimes pass every field on every update, silently overwriting things the user didn't ask to change."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Delete Event",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Add a 4th **Google Calendar Tool** | Operation: **Delete**",
+                      "Event ID: AI-defined. Description:"
+                    ]
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Delete Event ID description",
+                    "prompt": "The ID of the event to delete. Only call this tool after the user\nhas explicitly confirmed the deletion.",
+                    "prompt_note": "This single sentence is what makes the bot ask 'are you sure?' before deleting. Without it, a casual 'remove my Monday meeting' would delete immediately."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "While configuring the AI Agent, n8n's built-in chat interface lets you test your system message and model behavior in real time before you wire up the calendar tools. This is much faster than running the full workflow repeatedly. Try a few test prompts to verify the agent understands your intent.",
+            "type": "callout",
+            "title": "Use n8n's AI chat to test your system message"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-7",
+        "title": "7. Connect the Contacts Tool",
+        "subtitle": "Give the agent a controlled list of people it's allowed to invite — so it never invents an email address",
+        "children": [
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Add a **Data Table Tool** node from the AI Agent's Tool connector",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Tool Description: **Set Manually**",
+                      "Description: `Get list of contacts and use the names to select the email to invite to events.`",
+                      "Operation: **Get** | Data Table: select your `contacts` table | Return All: **on**"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Add a contacts rule to your system message inside the AI Agent node",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "System message: Contacts tool rule",
+                    "prompt": "Tool: Get_Contacts\nCall it BEFORE creating an event whenever the user mentions\npeople by name. Match names case-insensitive. If a name is not\nfound in the table, ask the user for the email. Never invent\nemail addresses.",
+                    "prompt_note": "Hallucinated email invites are the kind of bug clients remember forever. The rule is explicit, the data source is controlled, and the fallback is a clarifying question — not a guess."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "title": "The agent invents email addresses",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "Either the system prompt doesn't instruct it to call Get_Contacts first, or the data table tool isn't connected to the agent. Check both.",
+                "type": "prose"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-8",
+        "title": "8. Build the Output Layer",
+        "subtitle": "The agent produces a text reply, but Telegram in MarkdownV2 mode is strict about special characters",
+        "children": [
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Add a Telegram node after the AI Agent",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Operation: **Send Message**",
+                      "Chat ID: `={{ $('Telegram Trigger').item.json.message.chat.id }}`",
+                      "Additional Fields → Append Attribution: **off** | Parse Mode: **MarkdownV2**"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Paste the MarkdownV2 escape expression into the Text field",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Text expression",
+                    "prompt": "={{ $json.output.replace(/([_*\\[\\]()~`>#+\\-=|{}.!\\\\])/g, '\\\\$1') }}",
+                    "prompt_note": "Telegram's MarkdownV2 mode requires escaping a long list of reserved characters. Without this regex, the agent will eventually output a date like 15/05/2026 or a sentence ending in a period, and Telegram will silently reject the whole message."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "title": "Messages are missing characters or formatting is broken",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "You forgot the MarkdownV2 escape regex, or you switched parse mode without updating it. Either fix the regex or switch parse mode to plain text.",
+                "type": "prose"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-9",
+        "title": "9. Test It",
+        "subtitle": "Activate the workflow and run the smoke test sequence to verify each part of the system",
+        "children": [
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Toggle the workflow to **Active/Published** in the top right — the Telegram Trigger only fires when active",
+                    "type": "prose"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Send these messages to your bot in order",
+                    "type": "prose"
+                  },
+                  {
+                    "head": [
+                      "Message",
+                      "What to verify"
+                    ],
+                    "rows": [
+                      [
+                        "`hi`",
+                        "Friendly reply, no calendar tool fired (check execution log)"
+                      ],
+                      [
+                        "`what's my day look like?`",
+                        "Tool fired with today's date window, sensible summary"
+                      ],
+                      [
+                        "`am I free at 3pm?`",
+                        "Reuses memory if possible, otherwise fetches"
+                      ],
+                      [
+                        "`add a call with <real contact name> tomorrow at 10`",
+                        "Get_Contacts fires first, then Create with the right email"
+                      ],
+                      [
+                        "`add a call with Nonexistent Person tomorrow at 10`",
+                        "Asks for the email — doesn't invent one"
+                      ],
+                      [
+                        "`delete the call tomorrow at 10`",
+                        "Asks for confirmation, waits for 'yes'"
+                      ],
+                      [
+                        "`yes`",
+                        "Deletes, confirms"
+                      ]
+                    ],
+                    "type": "table"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "For each run, open the execution view and check",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "The AI Agent's input (your message + system prompt + memory context)",
+                      "Which tools the agent decided to call — and which it skipped",
+                      "The tool outputs",
+                      "The final reply"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "If something's wrong, open n8n's AI builder chat (the chat icon in the editor) and tell it what's happening. It can run through your entire flow, spot missing connections, catch logic errors, and even suggest fixes. It's like having a debugger that understands your workflow.",
+            "type": "callout",
+            "title": "Use n8n's AI builder chat to debug your entire workflow"
+          },
+          {
+            "text": "Spend 10 minutes scrolling through five executions and you'll understand the system prompt's effect better than any documentation.",
+            "type": "callout",
+            "title": "The executions view is where you learn how the agent thinks"
+          },
+          {
+            "type": "toggle",
+            "title": "The bot doesn't reply to anything",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "Check that the workflow is active — the Telegram Trigger only fires when active. Also verify the IF node: the `from.id` comparison fails silently if your chat ID is off by one digit.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "title": "The agent calls the calendar tool for 'hi'",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "Your 'When NOT to call' rules in the system prompt are too weak. Add explicit example phrases. The model needs concrete examples, not abstract categories.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "title": "Dates resolve to the wrong year",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "Pin the year explicitly in the `start` and `end` parameter descriptions, and inject `{{ $now }}` at the top of the system prompt. Both layers matter.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "title": "'Working on it!' arrives after the agent's reply",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "Network jitter — Telegram doesn't guarantee message order across separate API calls. If it bothers you, drop the confirmation message and keep just the typing action.",
+                "type": "prose"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "wrap",
+        "title": "Workshop recap & next steps",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "A secure entry layer that filters by chat ID at the canvas level",
+              "A parallel feedback layer for instant UX — zero latency added to the agent's answer",
+              "An AI Agent with a structured system prompt, dynamic date injection, and per-chat memory",
+              "Five tools wired through `$fromAI` with carefully written parameter descriptions",
+              "A controlled contacts source that prevents hallucinated email invites",
+              "An output layer that handles Telegram's MarkdownV2 escape rules"
+            ],
+            "title": "What you built today"
+          },
+          {
+            "text": "**Four production-ready patterns in every build**\n\nYou also learned the patterns that show up in every serious AI agent:\n\n1. **Security at the canvas level** — not only in the prompt\n2. **Feedback in parallel** — never in series with the slow path\n3. **Memory keyed by a real session boundary** — never global\n4. **Tool descriptions as prompt engineering** — not as docstrings\n\nThat's the foundation. Everything else is variation.",
+            "type": "prose"
+          },
+          {
+            "type": "toggle",
+            "title": "Production checklist",
+            "children": [
+              {
+                "text": "- Replace Simple Memory with Postgres-backed memory so context survives restarts\n- Replace the hardcoded chat ID with a lookup against a user table\n- Add error handling on tool nodes\n- Set a model fallback if your primary model is down\n- Log conversations to a database for quality review\n- Rate-limit per user to prevent runaway costs\n- Lock down credentials with proper OAuth scopes (read-only where possible)\n- Document the system prompt in version control so changes are reviewable\n- Test the MarkdownV2 escape with unusual characters in event titles",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "title": "Where to go next",
+            "children": [
+              {
+                "text": "**Quick wins on this workflow**\n\n- **Add voice input.** Telegram sends voice notes. Add an OpenAI Whisper transcription step before the agent.\n- **Add proactive reminders.** A scheduled trigger that runs every morning and pushes a daily briefing.\n- **Add a second calendar.** Extend the system prompt with a 'which calendar?' rule, then add a parallel set of tools.\n- **Replace Telegram.** Swap the trigger and output nodes for Slack or WhatsApp. The agent core stays the same.\n\n**This is a pattern**\n\nWhat you built is a calendar agent. What you actually built is a pattern: a chat entrypoint, a security gate, an AI Agent with a structured system prompt and memory, a set of tools, an output layer. The only thing that changes is the toolbox.\n\nEvery agent follows the same shape: entrypoint → security gate → structured prompt → model → memory → tools → output. Once you internalize this, every new agent is the same workflow with different parts swapped in.",
+                "type": "prose"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

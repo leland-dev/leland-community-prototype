@@ -1,0 +1,209 @@
+{
+  "id": "urn:contentEntry:6ab9ae48b059a9e8cae225b7",
+  "title": "Build a financial model and runway tracker",
+  "resourceType": "TUTORIAL",
+  "description": "A system that turns your raw revenue and expense numbers into one running cash-flow model showing burn rate and runway.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae48b059a9e8cae225b7",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "read-only": {
+      "title": "Read-only",
+      "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Entrepreneurship"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Running out of capital is the most commonly cited proximate cause of startup shutdown. But per [CB Insights' research on why startups fail](https://www.cbinsights.com/research/report/startup-failure-reasons-top/), it's usually the end point of a problem that was visible earlier, like weak unit economics. This system takes your raw revenue and expense numbers, scattered across a bank account, a spreadsheet, and a payment processor, and turns them into one running cash-flow [model](#tooltip-model) showing burn rate and runway.",
+          "type": "prose"
+        },
+        {
+          "text": "A founder who knows an exact runway in weeks can make a hiring or spending decision with real information instead of a gut feeling. A model rebuilt from scratch every time it's needed arrives stale, since the numbers have already moved by the time a decision needs them.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a monthly paste-in [prompt](#tooltip-prompt), a saved skill, or a scheduled [agent](#tooltip-agent) that updates the model whenever a new month closes. Every version stays [read-only](#tooltip-read-only) against your bank and payment accounts.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming where your numbers live, your update cadence, the calculations that must stay separate, and who else sees the model.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that takes my raw revenue and expense numbers and turns them into a running cash-flow model showing my burn rate and runway. Ask me questions, one at a time, about where my revenue and expense numbers currently live, how often those numbers change enough to matter, what decisions I'm actually trying to make with this model, and who else needs to see it. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview surfaces the update cadence and audience decisions before you build, and the scope document becomes the brief for every run after it."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where the source numbers live and how clean they are, a real accounting system or a manual bank export.",
+            "The update cadence that matches how fast your cash position moves.",
+            "Who besides you sees the model, since sharing an exact runway is a different call each time."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your bank or accounting tool (QuickBooks, Wave), your payment processor for revenue data (Stripe, PayPal), and a spreadsheet or doc to hold the running model (Google Sheets, Excel). The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Start building the system your scope document describes, and test it on a real month of numbers. The prompt below is an example of the core task. Your scope document will give you a version shaped to your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Update my cash-flow model with this month's actual revenue and expenses, and recalculate current burn rate and runway in weeks.\n\nContext: Revenue and expense data come from [bank export, accounting tool, or manual entry]. My model tracks monthly recurring revenue, one-time revenue, fixed costs, and variable costs separately. Current cash balance is [describe where this number comes from].\n\nRules:\n- Never round runway to the nearest month if the actual number is closer to weeks; precision matters more as runway gets shorter.\n- Flag any month where actual spend diverged meaningfully from the prior projection, and state why if the reason is known.\n- Keep one-time revenue or expenses clearly separated from recurring ones in every calculation.\n- Output both a plain-language summary (burn rate, runway, one risk to watch) and the full number table.",
+          "prompt_note": "How this prompt works: explicit rules on rounding and on separating one-time from recurring revenue keep the runway number honest instead of flattering."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Recurring and one-time revenue kept separate, runway precise, one risk named?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what went wrong and fold each correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Add a scenario toggle that shows runway under a hiring decision before it's made.",
+            "Build a simple investor-ready one-pager that pulls straight from the same model.",
+            "Add an alert that flags when runway drops below a threshold you set.",
+            "Track actual-versus-projected accuracy over time."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft it and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each monthly model update, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, runway calculated, variance from the prior projection, whether one-time revenue was separated correctly, and what rule I changed. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make a drifting projection visible after a few months of entries."
+        },
+        {
+          "text": "**Log** every run against the rubric. Note the date, which checks passed or failed, and what changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the rubric passes a few months straight, package the prompt and your corrected rules into a reusable AI skill, so every run starts from your defaults. A repeated failure earns its own skill. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. Mixing one-time revenue, a big annual contract or a grant, into a recurring-revenue calculation makes runway look longer than it is.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[CB Insights, Why Startups Fail](https://www.cbinsights.com/research/report/startup-failure-reasons-top/) — The capital-depletion-as-symptom claim."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a rolling cash flow forecast](/content/item/urn:contentEntry:6ab9ae410cf214bba2c1516c) · Finance",
+            "[Automate your budget vs. actuals reporting](/content/item/urn:contentEntry:6ab9ae40e7196c57e98f073a) · Finance",
+            "[Startup Financial Modeling](/content/item/urn:contentEntry:6ab9ae5fa543a1ee682e5bc9), [Financial Operations Expert](/content/item/urn:contentEntry:6ab9ae5218f60ab384a8df58), and [Investor Revenue Report](/content/item/urn:contentEntry:6ab9ae553149d018b07cf693) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

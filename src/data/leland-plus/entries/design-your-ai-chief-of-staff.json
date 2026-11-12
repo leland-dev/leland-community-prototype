@@ -1,0 +1,238 @@
+{
+  "id": "urn:contentEntry:6ab9ae461b3e0a3396c3a1f7",
+  "title": "Design your AI chief of staff",
+  "resourceType": "TUTORIAL",
+  "description": "A system that pulls your calendar, inbox, Slack, and dashboards into one short briefing naming what needs your decision.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae461b3e0a3396c3a1f7",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "pull": {
+      "title": "Pull",
+      "content": "Downloading the latest changes from GitHub to your computer so your local copy is up to date. Claude pulls before starting work to make sure it's building on the newest version, not an old one."
+    },
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "slack": {
+      "title": "Slack",
+      "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+    },
+    "stack": {
+      "title": "Stack",
+      "content": "The set of tools something is built with or that you work with. An app's stack is its languages and services, from database to frontend (the Leland Courses stack is Astro, Tailwind, Cloudflare, and Supabase). Your AI stack is the toolkit you've assembled for your own work — chat tools, agents, automations, and the connectors that tie them together."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "triage": {
+      "title": "Triage",
+      "content": "Sorting items by urgency or importance to decide what gets attention first. Your email-manager skill triages your inbox — it separates messages that need a real reply from noise you can ignore."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "context": {
+      "title": "Context",
+      "content": "Everything Claude can 'see' in a given session — your messages, files you've shared, instructions, and conversation history. The more relevant context you give Claude, the better its output."
+    },
+    "routine": {
+      "title": "Routine",
+      "content": "A cloud-based scheduled task that runs automatically even when your computer is off. Routines have access to tool connectors (Gmail, Slack, etc.) and can run on any schedule you set. In Level 3, routines are the heartbeat for Claude Code Dispatch agents — created via `/schedule` or `CronCreate`, they translate to standard cron syntax under the hood."
+    },
+    "read-only": {
+      "title": "Read-only",
+      "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Leadership"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Most executives run a fragmented [AI stack](#tooltip-stack), a chat tool here, a notetaker there, an inbox assistant, a docs AI, none of them talking to each other. Leadership support predicts whether an AI rollout succeeds at all. Per [Prosci's change-management research](https://www.prosci.com/ai-change-management), organizations with smooth AI rollouts score leadership support at +1.65 on a scale running -2 to +2, while struggling ones score -1.50. Running this system yourself, daily, makes that support visible.",
+          "type": "prose"
+        },
+        {
+          "text": "97% of executives say they personally benefit from AI, but only 29% see meaningful organizational ROI, per [WRITER's 2026 enterprise AI adoption research](https://writer.com/blog/enterprise-ai-adoption-2026/). A personal chief-of-staff system is the kind of individual win that can spread across a team once it exists.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a daily paste-in [prompt](#tooltip-prompt), a saved skill, or a scheduled [agent](#tooltip-agent) that reads your calendar, inbox, [Slack](#tooltip-slack), and dashboards and posts a private briefing. Every version stays [read-only](#tooltip-read-only) against your systems.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming which sources feed the briefing, how often it runs, what counts as needing your decision, and what never gets summarized without you seeing the raw version first.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that acts as my chief of staff, pulling together what's in my calendar, inbox, Slack, and dashboards into one triaged briefing. Ask me questions, one at a time, about which sources matter most to me, how often I want this (daily, weekly), what counts as something that needs my attention versus something that can just be logged, and what should never be summarized without me seeing the raw version. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview forces you to name your real sources and thresholds up front, so the scope document becomes the brief every build session works from."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Which sources feed the system versus which stay manual.",
+            "How confidential material gets filtered before it reaches the model.",
+            "Whether this runs for you alone or also feeds your EA."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common connectors are your calendar (Google Calendar, Outlook), your inbox (Gmail, Outlook), your team comms (Slack, Microsoft Teams), and your project and metrics tools ([Notion](#tooltip-notion), Linear, Asana, a BI dashboard). The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Build the system your scope document describes, and test it on a real [pull](#tooltip-pull) from your sources. The prompt below is an example. Your scope document gives you a version for your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Produce a [daily/weekly] briefing that tells me what needs my decision, what's moving, and what's stuck, from across [my calendar, inbox, Slack, dashboards].\n\nContext: Here's what matters most to me right now: [current priorities, initiatives, people to watch]. Here's what to ignore: [routine notifications, FYI-only threads].\n\nRules: Separate output into three sections: Needs my decision today, Worth knowing, No action needed. Never draft a response or take an action on my behalf without flagging it first. If something looks urgent but you're not confident why, say so instead of guessing. Keep the whole briefing under [300] words.",
+          "prompt_note": "How this prompt works: naming what to ignore keeps the briefing from filling up with [routine](#tooltip-routine) noise, and the three-way split does the [triage](#tooltip-triage) for you before you read a word."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Three clear sections, nothing drafted or sent on your behalf, under the word limit?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what it missed or misjudged, and fold each correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Connect your sources through [tool connectors](#tooltip-tool-connectors) and have the briefing arrive on schedule.",
+            "Add a weekly reflection pass on what you acted on versus what you ignored.",
+            "Let it draft routine replies for you to send yourself.",
+            "Connect it to your KPI dashboard so it can explain what changed and why."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "Skip the feel check. **Measure** with a [rubric](#tooltip-rubric). Have your AI chat turn the scope bar into pass/fail checks and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each briefing, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, items flagged as needing a decision, items that turned out to matter, items that were noise, and what rule I changed. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make a pattern of misfires visible after a couple weeks of entries."
+        },
+        {
+          "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the rubric passes two weeks straight, package the prompt, sources, and rules into a skill. [Claude](#tooltip-claude)'s skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. It can't tell what counts as urgent unless you give it your rubric, so hand it that [context](#tooltip-context) every run.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Prosci, AI Adoption: Driving Change With a People-First Approach](https://www.prosci.com/ai-change-management) — The leadership-support stat.",
+            "[WRITER, Enterprise AI Adoption in 2026](https://writer.com/blog/enterprise-ai-adoption-2026/) — The individual-vs-organizational ROI gap."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Design an AI personal assistant for your life](/content/item/urn:contentEntry:6ab9ae39728238bde8667dee) · Life & Personal",
+            "[Create board updates from your operating data](/content/item/urn:contentEntry:6ab9ae464312b8f229471292) · Leadership",
+            "[Weekly Recap](/content/item/urn:contentEntry:6ab9ae61f68999a1ef52821b), [Slack Digest](/content/item/urn:contentEntry:6ab9ae5ecf30b8c16a8a74b2), and [Project Status](/content/item/urn:contentEntry:6ab9ae59ec9a474d457bfc5f) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

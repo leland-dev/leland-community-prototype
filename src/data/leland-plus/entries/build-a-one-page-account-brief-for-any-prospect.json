@@ -1,0 +1,170 @@
+{
+  "id": "urn:contentEntry:6aecf9035a622097531bc3e5",
+  "title": "Build a one-page account brief for any prospect",
+  "resourceType": "TUTORIAL",
+  "description": "Builds a single shareable web page for a prospect with a company snapshot, likely pains, three talking points, and the questions you still need to ask, with a source after each fact.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6aecf9035a622097531bc3e5",
+  "viewableFile": "build-a-one-page-account-brief-for-any-prospect.mp4",
+  "thumbnail": "build-a-prospect-one-pager.png",
+  "body": {
+  "tooltips": {},
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Sales"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "children": [
+        {
+          "text": "Before a first call, most reps open the prospect's website, skim a LinkedIn page, search for recent news, and keep the highlights in their head or in a scattered note. This build puts that research on one web page you can open in a browser and send to a teammate. You start with the prospect's website, a few recent news items, and your own product notes, and your AI reads what it needs and builds a page with a company snapshot, the pains that company likely has, three talking points tied to what you sell, the questions you still need to ask, and a sources list.\n\nFirst you'll answer a few questions so it understands what you sell and what a good brief looks like to you. Then it builds the brief page from your answers, and you run it once on a real prospect and fix whatever looks off. Plan on about 45 minutes the first time.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "setup",
+      "title": "Setup",
+      "children": [
+        {
+          "head": [
+            "You need",
+            "Why",
+            "How to set it up"
+          ],
+          "rows": [
+            [
+              "A real prospect you plan to talk to",
+              "The brief is built around one real account",
+              "Pick one account with a call coming up, and have the company name and website address ready"
+            ],
+            [
+              "Research on the prospect",
+              "The brief uses only facts found in the research",
+              "Turn on web search (see below), or paste their About page text, two recent news items, and a few lines from LinkedIn"
+            ],
+            [
+              "Notes on your own product",
+              "The talking points tie their situation to what you sell",
+              "Paste a one-pager, a pitch deck outline, or a few lines on who you sell to and what you solve"
+            ]
+          ],
+          "type": "table",
+          "first_column_bold": true
+        },
+        {
+          "text": "**Nice to have:** Web search lets your AI read the prospect's site and news itself, so you paste less. In Claude, choose Web search under the tools button in the chat box. In ChatGPT, choose Search (the globe icon) under the + in the chat box. In Gemini, search is on by default. Paste the LinkedIn lines even with search on, such as the company description or your contact's title, because AI tools often can't read LinkedIn pages directly. If you have a design skill, a design guide, or your company's brand colors and fonts, call or attach it so the page matches your other sales documents. Without one, the page uses a clean default look.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build it with this prompt",
+      "children": [
+        {
+          "text": "Paste this into a new chat in your AI tool. It asks about your role and your work first, then builds, then tests what it built with you.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "label": "Prompt",
+          "prompt": "I want to build a one-page account brief for a prospect, as a single web page I can open in a browser and share, for my work. First, ask me what my role is and what I work on. Then walk me through it in three stages: Scope, Build, and Evaluate. Use whatever you can reach from this chat, like web search, file uploads, and any connector that fits, and if my tool can show the page as an artifact or canvas, build it there. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. Who will read the brief, and what should it include, in what order? For example a company snapshot, likely pains, three talking points, and open questions.\n2. What will I give you for each prospect, and where does it live today? For example a website address, news links, text from LinkedIn, and my product notes. Tell me which of these you will look up yourself and which I'll paste. If I'm not sure, say what you can do from this chat. If you can't browse from this chat, tell me to expect pasted text.\n3. How should you pick the pains and the three talking points: by the prospect's industry, by their size, by recent news, or by which of my products fits best? If I'm not sure, suggest one and tell me why.\n4. How often will I build one, and who will see the page besides me?\n5. What should the brief never do or assume? For example, no guessing a company's revenue, headcount, or tools when the site doesn't say, and no claims about a person I haven't confirmed.\n6. What would make the page good? Help me turn my answer into three checks I can answer yes or no, each one something you can point to a line for.\nThen write a short spec with my answers and the three checks. Put in it what you'll look up yourself and what I'll paste by hand. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, build the brief page for one real prospect with me.\n- Ask me for everything you need in one message, then wait for my reply. Likely items: the website address, news links, text from LinkedIn, and my product notes. If web search is off or a page won't open, I'll paste the text.\n- Read what you find before you write anything, and use only facts that appear in it.\n- Write a company snapshot with the source after each fact. Never state revenue, headcount, funding, or tools unless a source says so.\n- Write likely pains as likely, not certain, and say what in the research points to each one.\n- If two sources disagree, like two different employee counts, show both and name the sources.\n- If the prospect is a subsidiary, a very small company, or has almost no public information, say so on the page and keep the brief short instead of padding it.\n- Never copy details from my product notes into the snapshot as if they were about the prospect.\n- Write exactly three talking points that connect something in the research to something I sell, chosen the way I said in Scope.\n- Put anything you could not find, and anything about a person I haven't confirmed, in a list of open questions for the call.\n- Show each missing item once, as a labeled gap in the open questions list, never as a made-up fact.\n- If you're unsure about something, ask me instead of guessing.\n- Output: one complete, self-contained HTML file, with the styles inside the file, sections in this order: company snapshot, likely pains, three talking points, open questions, sources. If my tool can show it as an artifact or canvas, show it there. Otherwise give me the code in one block and tell me to save it as a file ending in .html and open it in my browser. If I have a design skill, a design guide, or brand colors and fonts, ask me to attach or name them and match them. Otherwise use a clean default look.\n\nStage 3: Evaluate\nGrade the brief page you just made from my real prospect against my three checks. Mark each one yes or no and quote the line that proves it. If any check fails, tell me the one change that would fix the most misses, make it, and run it again on the same prospect. When you rebuild, change only the lines that failed and tell me which. After a rebuild, send the page in one block, then mark each check yes or no with its quote. When all three pass, give me the instructions as one block I can paste into a new chat or a project, so I can build a new brief for every prospect."
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "steps",
+      "title": "Steps",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "title": "Scope",
+              "children": [
+                {
+                  "text": "Your AI starts by asking about your role, then six questions one at a time. It wants to know who reads the brief, what you'll give it for each prospect, how it should choose the pains and talking points, who else sees the page, what it should never claim, and what makes the page good. After your answers, it writes a short spec with three yes/no checks, and you confirm it before anything gets built.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** When it asks how to pick talking points, say what usually opens a conversation for you, like a recent funding round or a new executive. That tells it which research matters.",
+                    "**Tip:** Write one check about invented facts, such as \"every number in the snapshot has a source next to it.\" A wrong number is the mistake that costs you the most on a call."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "title": "Build",
+              "children": [
+                {
+                  "text": "With the spec confirmed, your AI asks for the prospect's website, any news links, and your product notes in one message, then reads them and builds the page. It marks each pain as a likely one and lists what it could not find. You end up with one HTML file you can open in a browser and send to a teammate.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Run it on a prospect you already know well. You'll spot a wrong fact right away, which tells you how far to trust it on a company you've never researched.",
+                    "**Tip:** If your AI shows the page in a preview pane, open it in a full browser tab before you share it, so you see what your teammate will see."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "title": "Evaluate",
+              "children": [
+                {
+                  "text": "Last, your AI grades the page it just built against your three checks, quoting the line that shows each one passing or failing. If one fails, it fixes the biggest miss and rebuilds the page for the same prospect.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Read the open questions first. They show where the research ran out, and they are usually the best things to ask on the call.",
+                    "**Tip:** Keep the instructions block it gives you. Before your next call, paste it into a new chat with the next prospect's website and get a fresh brief."
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a pre-call research briefing agent](/content/item/urn:contentEntry:6ab9ae3cdbb6bf0b8f44fbae) · Sales",
+            "[Build a cold outreach personalization engine](/content/item/urn:contentEntry:6ab9ae3bd8306bee4e72681e) · Sales",
+            "[Create competitor comparison sheets for your sales team](/content/item/urn:contentEntry:6ab9ae3c7739139b9eeef6cb) · Sales",
+            "[Account Qualification](/content/item/urn:contentEntry:6ab9ae5017e2a223459f3d5c) and [Meeting Prep](/content/item/urn:contentEntry:6ab9ae575970ee9cdf0c866b) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

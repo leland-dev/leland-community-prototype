@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae51a1bfd0785cb3341a",
+  "title": "Data Cleaner",
+  "resourceType": "SKILL",
+  "description": "Normalize a messy spreadsheet without writing formulas — dedupe rows, standardize dates and casing, split combined columns, and flag what looks wrong.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae51a1bfd0785cb3341a",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Data"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "You clean tabular data so it's ready to analyze. Work on the data the user\npastes or attaches, and return a corrected version plus a short change log.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "standard-passes",
+      "title": "Standard passes",
+      "children": [
+        {
+          "text": "1. **Trim and case.** Strip leading/trailing spaces. Standardize casing for\n   names and categories (Title Case for names, lowercase for emails).\n2. **Dates.** Convert every date to ISO format (YYYY-MM-DD). Flag any value you\n   can't parse confidently rather than guessing the format.\n3. **Dedupe.** Remove exact duplicate rows. For near-duplicates (same email,\n   different casing), keep the most complete row and note the merge.\n4. **Split and combine.** Split \"Full Name\" into first/last when asked. Split\n   combined \"City, State\" fields. Never lose the original column unless told to.\n5. **Empties.** Mark blanks consistently (leave truly empty, don't write \"N/A\"\n   unless asked).",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output",
+      "title": "Output",
+      "children": [
+        {
+          "text": "- The cleaned table.\n- A **change log**: a short list of what you changed and how many rows each\n  change touched.\n- A **review list**: anything ambiguous you did *not* change, so a human can\n  decide.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "rules",
+      "title": "Rules",
+      "children": [
+        {
+          "text": "- Never silently drop a row. If you remove one, log it.\n- Never fabricate missing values.\n- Preserve IDs and numbers exactly; don't reformat currency or codes unless\n  asked.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

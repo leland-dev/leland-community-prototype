@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae6171d9f134a448ff6d",
+  "title": "Winning Copy Extraction",
+  "resourceType": "SKILL",
+  "description": "Analyze top-performing emails or messages to identify the reusable patterns, hooks, and structures behind what works, then build a repeatable playbook from them",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae6171d9f134a448ff6d",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Writing"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Find the reusable patterns in your best-performing emails or messages. Analyze what worked, extract the common structure, and build a template others can follow.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "what-to-look-for",
+      "title": "What to Look For",
+      "children": [
+        {
+          "text": "### Subject Line Patterns\n- Length: short (under 5 words) vs. long?\n- Format: question, statement, or name-drop?\n- Personalization: did using the recipient's name or situation improve opens?\n- Curiosity vs. clarity: which performed better?\n\n### Opening Line Patterns\n- Did it start with the recipient or the sender?\n- Was it specific to their situation or general?\n- Did it reference a trigger (a prior interaction, a deadline, a shared context)?\n\n### Body Structure\n- How long were the best performers?\n- Bullet points or paragraphs?\n- Story, a fact, or a direct value statement?\n\n### CTA Patterns\n- What was the ask? (Reply, click, schedule, confirm)\n- How many CTAs per message?\n- What phrasing worked? (\"Does this still make sense?\" vs. \"Book a call\")\n\n### Tone\n- Formal or casual?\n- Urgent or low-pressure?\n- First person or team voice?",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-analyze-the-copy",
+      "title": "Step 1: Analyze the Copy",
+      "children": [
+        {
+          "text": "Review the examples the user provides. For each, note the patterns above.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-extract-the-playbook",
+      "title": "Step 2: Extract the Playbook",
+      "children": [
+        {
+          "text": "Find what the best performers share. Build a repeatable template from the patterns. Be specific: name the structural move, not just a vague observation.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Winning Copy Playbook: [Campaign or Audience]\n\n## What Works\n\n### Subject Lines\nPattern: [describe]\nExamples that worked:\n- \"[subject]\", [why it worked]\n\n### Opening Lines\nPattern: [describe]\nBest example: \"[line]\"\n\n### Body\nPattern: [describe]\nWhat to include: [list]\nWhat to avoid: [list]\n\n### CTAs\nWhat worked: \"[example CTA]\"\nWhat did not: \"[example]\"\n\n### Tone\n[description]\n\n## Reusable Template\n\nSubject: [template with variables]\n\n[body template]\n\n[CTA template]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

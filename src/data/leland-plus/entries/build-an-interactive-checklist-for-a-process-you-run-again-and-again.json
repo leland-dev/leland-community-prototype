@@ -1,0 +1,165 @@
+{
+  "id": "urn:contentEntry:6aecf95b77d17e22e9a3438a",
+  "title": "Build an interactive checklist for a process you run again and again",
+  "resourceType": "TUTORIAL",
+  "description": "Turns a process doc, your notes, or a recorded walkthrough into one shareable web page with a checkbox, an owner, and a notes field on every step.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6aecf95b77d17e22e9a3438a",
+  "viewableFile": "build-an-interactive-checklist-for-a-process-you-run-again-a.mp4",
+  "thumbnail": "build-an-interactive-sop-checklist.png",
+  "body": {
+  "tooltips": {},
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Operations"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "children": [
+        {
+          "text": "Most recurring processes, like closing the month, onboarding a vendor, or running a weekly launch review, get written down once in a document that nobody has open while the work is happening. This build turns one of them into a checklist page you can open in a browser and send to your team. You start with the process doc, your own notes, or the transcript of a recorded walkthrough. Your AI reads it and builds one HTML page where each step has a checkbox, an owner, and a notes field, so whoever runs the process can work through it and see what is done. It uses whatever your AI tool can reach, like file uploads and any connector that fits, and shows the page as an artifact or canvas if your tool has one.\n\nFirst you'll answer a few questions so it understands how the process runs and who does what. Then it builds the checklist page from your answers, and you run it once on a real process and fix whatever looks off. Plan on about 45 minutes the first time.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "setup",
+      "title": "Setup",
+      "children": [
+        {
+          "head": [
+            "You need",
+            "Why",
+            "How to set it up"
+          ],
+          "rows": [
+            [
+              "One recurring process you know well",
+              "The steps have to match how the work is really done",
+              "Pick something that runs weekly or monthly, with a clear start and finish."
+            ],
+            [
+              "A process doc, rough notes, or a walkthrough transcript",
+              "Every step on the page comes from this material",
+              "Paste the text, copy it out of a Google Doc, or attach a PDF or Word file. For a recording, export the transcript from Zoom, Loom, or Teams and paste it."
+            ]
+          ],
+          "type": "table",
+          "first_column_bold": true
+        },
+        {
+          "text": "**Nice to have:** A list of the people or roles who touch the process, such as Finance lead or Store manager, so each step gets an owner. Without it, every step shows \"to assign\" and you fill in owners on the page. If you have a design skill, a design guide, or your company's brand colors and fonts, call it or attach it in the chat so the page matches your other process docs. Without one, the page uses a clean default look.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build it with this prompt",
+      "children": [
+        {
+          "text": "Paste this into a new chat in your AI tool. It asks about your role and your work first, then builds, then tests what it built with you.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "label": "Prompt",
+          "prompt": "I want to build an interactive checklist page for one process I run again and again, as a single web page I can open in a browser and share, for my work. First, ask me what my role is and what I work on. Then walk me through it in three stages: Scope, Build, and Evaluate. Use whatever you can reach from this chat, like file uploads and any connector that fits, and show the page as an artifact or canvas if you can. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. Which process is this, and where does it start and finish? Then pick what each step shows from this menu: a checkbox, an owner, a notes field, a due date, or something else I name.\n2. What will I give you: a process doc, my own notes, or a walkthrough transcript? Also ask which people or roles take part, so owners can come from my answer.\n3. Which steps have to happen in order, which can happen in parallel, and which only apply sometimes?\n4. How often is this process run, and who will use the page besides me?\n5. What should the checklist never do or assume? For example, no steps that aren't in my material, and no owner assigned to a step unless I said who does it.\n6. What would make the page good? Help me turn my answer into three checks I can answer yes or no.\nThen write a short spec with my answers and the three checks. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, build the checklist page.\n- Ask me to paste or attach what I named in question 2, one thing at a time, and wait for it. If a connector can reach my document, use it.\n- Break my material into numbered steps, each one an action starting with a verb. Keep my own wording for names of tools, forms, and systems.\n- Use only what is in my material and my answers. Never invent a step, a deadline, a tool, or a name.\n- If a step has no owner in my material, set the owner to \"to assign\" instead of picking one.\n- If my notes repeat a step or mix two steps into one, list those cases for me and ask how to handle them.\n- If my material mentions something that must happen but has no step of its own, ask me whether to add it.\n- If my material contradicts itself, like two different deadlines for the same step, show both and ask me which is right.\n- If a step depends on another, show the dependency in the step. If a step only applies sometimes, label the condition.\n- Put a checkbox, an owner field, and a notes field on every step, and show a count of steps done at the top of the page.\n- Add a button that saves the checkboxes and notes to a file, and a button that loads that file back, since a closed page forgets them.\n- If I have a design skill, design guide, or brand colors and fonts, use them. Otherwise use a clean default design.\n- If you're unsure about something, ask me instead of guessing.\n- Output: one complete, self-contained HTML file with the styles and the checkbox behavior inside it. If my tool can show it as an artifact or canvas, show it there. Otherwise give me the code in one block and tell me to save it as a file ending in .html, using Notepad or TextEdit, and open it in my browser. If the save button doesn't work in the preview, tell me to save the page as a .html file and open it in my browser. Ask me first about anything you split, merged, or found missing. After the page, list what you changed based on my answers, the steps marked \"to assign\", and the questions I still need to answer.\n\nStage 3: Evaluate\nGrade the checklist page you just built from my real process against my three checks. Mark each one yes or no and quote the line that proves it. For a check about missing or out-of-order steps, compare the step order to my answer to question 3 and say it is only confirmed after I run the page once. If any check fails, tell me the one change that would fix the most misses, make it, and run it again on the same material. Do not say all three pass while the missing-step check is unconfirmed. When all three pass, give me the instructions as one block I can paste into a new chat or a project, so I can build a checklist for the next process."
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "steps",
+      "title": "Steps",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "title": "Scope",
+              "children": [
+                {
+                  "text": "Your AI starts by asking about your role, then six questions one at a time. The third is the one that shapes the page: you tell it which steps must happen in order, which can run side by side, and which only apply sometimes. It then writes a short spec with three yes/no checks, and you confirm it before it builds anything.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** When it asks about order, name the one step people most often do out of sequence. The page can then call it out where it matters.",
+                    "**Tip:** Write one check about owners, such as \"no step has an owner I didn't name.\" A wrong name on a step causes more confusion than a blank one."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "title": "Build",
+              "children": [
+                {
+                  "text": "With the spec confirmed, your AI asks for your process doc, notes, or transcript, one thing at a time. It breaks the material into numbered steps with a checkbox, an owner, and a notes field on each, and it lists any step it split or any place the material contradicted itself. You end up with one HTML file you can open in a browser and share. The page also has buttons to save your progress to a file and load it back, because the checkmarks disappear when you close the tab.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Record yourself talking through the process and give your AI the transcript along with the doc, because people mention the awkward steps out loud and leave them out of documents.",
+                    "**Tip:** Read the list of split or merged steps first. It shows where the old document was vague, and that is where the checklist helps most."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "title": "Evaluate",
+              "children": [
+                {
+                  "text": "Last, your AI grades the page it just built against your three checks and quotes the line that shows each one passing or failing. It fixes the biggest miss and rebuilds the page from the same material.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Try the page once on a real run of the process, checking boxes as you go. You'll find a missing or out-of-order step faster than you would by reading it.",
+                    "**Tip:** Keep the instructions block it gives you and paste it into a new chat the next time you want a checklist for another process, along with that process's doc."
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Automate a repetitive process from a recorded walkthrough](/content/item/urn:contentEntry:6ab9ae4037b8bb0628150b48) · Operations",
+            "[Automate project status updates](/content/item/urn:contentEntry:6ab9ae403408c56238d5888f) · Operations",
+            "[Build an agent that finds where work gets stuck](/content/item/urn:contentEntry:6ab9ae40662f2c57cbffcf43) · Operations",
+            "[SOP Creator](/content/item/urn:contentEntry:6ab9ae5e6dea06cc86f4baa1) and [Project Status](/content/item/urn:contentEntry:6ab9ae59ec9a474d457bfc5f) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

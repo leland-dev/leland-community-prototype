@@ -1,0 +1,217 @@
+{
+  "id": "urn:contentEntry:6ab9ae39d840e3f8fcd83c6d",
+  "title": "Create a system that optimizes ad spend",
+  "resourceType": "TUTORIAL",
+  "description": "A system that checks your ad spend every night and drafts a reallocation recommendation waiting for you by morning.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae39d840e3f8fcd83c6d",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "pull": {
+      "title": "Pull",
+      "content": "Downloading the latest changes from GitHub to your computer so your local copy is up to date. Claude pulls before starting work to make sure it's building on the newest version, not an old one."
+    },
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "slack": {
+      "title": "Slack",
+      "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "calibration": {
+      "title": "Calibration",
+      "content": "Checking your LLM judge against your own judgment before trusting it: score five outputs by hand, have the judge score the same five, compare. If you disagree, fix the rubric or the judge prompt — don't ship an eval you haven't calibrated."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Marketing"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Ad accounts drift before anyone notices. Low-quality inventory alone pulls 1.3 to 2.4% of open-web programmatic spend, per [TAG, ANA, and Fiducia's Programmatic Transparency Benchmark](https://www.tagtoday.net/insights/ai-slop-industry-briefing-q1-2026), a share comparable to the industry's exposure to made-for-advertising sites. This system pulls last night's spend and performance data from your ad platforms, flags the campaigns that moved outside their normal range, and drafts a reallocation recommendation waiting in your inbox by morning. It never touches a budget on its own.",
+          "type": "prose"
+        },
+        {
+          "text": "CMOs now put 15.3% of marketing budget toward AI, but only 30% call their organization's AI use mature, per Gartner's 2026 CMO Spend Survey. Spend is scaling faster than the discipline to watch it.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a nightly paste-in [prompt](#tooltip-prompt), a saved [skill](#tooltip-skill), or a scheduled [agent](#tooltip-agent) that posts to [Slack](#tooltip-slack) or email each morning. Every version stops at a recommendation, never an executed spend change.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your ad platforms and metrics, your anomaly thresholds, what needs your judgment, and how urgently you want to be notified.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that checks our ad spend and performance data every night and flags anything unusual before I look at it in the morning. Ask me questions, one at a time, about which ad platforms and metrics I actually want watched, what counts as a real anomaly versus normal day-to-day noise for our account size, what I want the system to recommend versus what always needs my judgment, and how urgently I want to be notified. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview forces you to define \"anomaly\" before you build around it, so thresholds come from your own account instead of a generic template."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Which ad platforms and metrics need watching, and where the nightly data [pull](#tooltip-pull) comes from.",
+            "What counts as a real anomaly versus normal noise for your account size.",
+            "Who has authority to act on a flagged recommendation, and how fast."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your ad platforms (Google Ads, Meta Ads Manager, LinkedIn Campaign Manager), a data pull or reporting layer if you have one (a BI tool, a spreadsheet export), and your alert channel (Slack, email). The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Build the system your scope document describes, and test it on last night's actual export, every active campaign included. The prompt below is an example. Your scope document gives you a version for your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Review last night's ad spend and performance data and flag anomalies.\n\nContext: [Paste or link the export: spend, CPC, conversions by campaign.] Our normal range for [metric] is typically [range, based on the last 30-90 days].\n\nRules:\n- Only flag a genuine deviation from that normal range, not routine daily variance.\n- For each flag, state the metric, the size of the deviation, and a plausible cause if one is visible in the data.\n- Never recommend pausing or reallocating budget without stating this needs human approval first.\n\nOutput format: a ranked list of anomalies with metric, deviation size, likely cause, and a suggested next step marked as a recommendation, not an action.",
+          "prompt_note": "How this prompt works: naming your own 30 to 90 day range instead of a fixed percentage keeps a small account's normal swings from reading as anomalies."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Deviation sizes stated, causes plausible, nothing framed as done rather than proposed?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what went wrong (\"that CPC swing is normal for us on weekends\") and fold the correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Keep a running log of past anomalies and what caused them to sharpen future detection.",
+            "Extend the watcher to also flag creative fatigue.",
+            "Connect flagged anomalies to a competitor ad teardown to check if a competitor move explains the shift."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft the rubric and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each anomaly flag, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, anomalies flagged, flags confirmed real, false positives, and which threshold I adjusted. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make a miscalibrated threshold visible after a couple weeks of entries."
+        },
+        {
+          "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the system passes the rubric a few runs straight, package the prompt, thresholds, and output format into a reusable AI skill. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write the skill for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. A threshold copied from a generic template misreads your account's own normal swings as anomalies, so [calibrate](#tooltip-calibration) it against your account's own historical data.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[TAG, ANA, and Fiducia, Programmatic Transparency Benchmark (Q1 2026)](https://www.tagtoday.net/insights/ai-slop-industry-briefing-q1-2026) — The AI-slop ad-spend share.",
+            "Gartner, 2026 CMO Spend Survey (May 2026) — The AI budget-vs-readiness gap."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a churn-risk watcher](/content/item/urn:contentEntry:6ab9ae479b58a5b0600ca5c9) · Entrepreneurship",
+            "[Build an agent that finds where work gets stuck](/content/item/urn:contentEntry:6ab9ae40662f2c57cbffcf43) · Operations",
+            "[Revenue Monitor](/content/item/urn:contentEntry:6ab9ae5c212a6fc781df1125) and [Performance Analysis](/content/item/urn:contentEntry:6ab9ae588f4cd522c944f170) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

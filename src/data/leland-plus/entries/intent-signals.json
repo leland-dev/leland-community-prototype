@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae546e0753a6988a33c0",
+  "title": "Intent Signals",
+  "resourceType": "SKILL",
+  "description": "Score and rank prospects by in-market behavior signals to identify who to contact now, who to monitor, and who to deprioritize.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae546e0753a6988a33c0",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Research"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Detect which prospects are showing in-market behavior and should be contacted now.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "signal-types",
+      "title": "Signal Types",
+      "children": [
+        {
+          "text": "### First-Party Signals (strongest)\nActions taken directly with your product or content:\n- Submitted an application or inquiry\n- Opened an offer email, especially multiple times\n- Clicked a pricing link\n- Responded to any previous message\n- Visited the site recently (if trackable)\n\n### Behavioral Signals\nPatterns that indicate active consideration:\n- Multiple emails opened but no reply (reading but hesitating)\n- Application submitted but offer not acknowledged\n- Responded then went quiet (had interest, hit an obstacle)\n\n### Situational Triggers\nEvents that create urgency:\n- Deadline or enrollment window approaching (within 30 days)\n- Previously said \"contact me later\" and that date has passed\n- Career transition or life change signal\n- Prior opportunity expired and is a reactivation candidate\n\n### Negative Signals (deprioritize)\n- No opens on last 3 or more emails\n- Explicitly said not interested\n- Contact info bouncing\n- Stage stuck for 30 or more days with no engagement",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "signal-scoring",
+      "title": "Signal Scoring",
+      "children": [
+        {
+          "text": "| Signal | Weight |\n|--------|--------|\n| Application or inquiry submitted | +5 |\n| Offer email opened 2 or more times | +4 |\n| Prior reply, now quiet | +3 |\n| Reactivation date passed | +3 |\n| Deadline within 14 days | +3 |\n| Deadline 14 to 30 days out | +2 |\n| No opens in 14 or more days | -3 |",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-score-the-prospects",
+      "title": "Step 1, Score the Prospects",
+      "children": [
+        {
+          "text": "From the input provided, evaluate each prospect against the signal list and produce a ranked priority list.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Intent Signal Report, [Date]\n\n## Priority 1, Contact Now\n| Prospect | Score | Top Signal | Action |\n|----------|-------|-----------|--------|\n| [name] | [n] | [signal] | [what to do] |\n\n## Priority 2, Contact This Week\n| Prospect | Score | Top Signal | Action |\n|----------|-------|-----------|--------|\n\n## Deprioritize\n| Prospect | Reason |\n|----------|--------|\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

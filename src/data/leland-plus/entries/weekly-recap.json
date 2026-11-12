@@ -1,0 +1,107 @@
+{
+  "id": "urn:contentEntry:6ab9ae61f68999a1ef52821b",
+  "title": "Weekly Recap",
+  "resourceType": "SKILL",
+  "description": "Pull your week together from tasks, messages, and email into a structured Friday summary covering what shipped, decisions made, blockers, and next week priorities",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae61f68999a1ef52821b",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Generate a structured end-of-week summary ready to share with a manager or use as a personal record. Ask the user to provide context from their task manager, Slack or team chat, and email threads. Work with whatever they provide.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-gather-completed-and-in-progress-tasks",
+      "title": "Step 1, Gather Completed and In-Progress Tasks",
+      "children": [
+        {
+          "text": "Ask for, or work from, tasks completed or in progress this week (Monday through Friday):\n- Task name and status (completed, in progress)\n- Associated projects or work areas\n- Any blockers or notes",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-surface-key-decisions-and-updates",
+      "title": "Step 2, Surface Key Decisions and Updates",
+      "children": [
+        {
+          "text": "Scan any Slack exports, chat logs, or notes the user provides for:\n- Decisions made (keywords: \"decided\", \"approved\", \"confirmed\", \"green light\")\n- Things shipped or launched\n- Blockers or risks (\"blocked\", \"stuck\", \"waiting on\", \"delayed\")\n- Important context from managers or teammates",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-check-for-resolved-email-threads",
+      "title": "Step 3, Check for Resolved Email Threads",
+      "children": [
+        {
+          "text": "From any email context provided, look for:\n- Threads that concluded or got a final reply this week\n- Decisions or approvals from stakeholders\n- Project milestones or blockers that were addressed",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-4-synthesize-and-format",
+      "title": "Step 4, Synthesize and Format",
+      "children": [
+        {
+          "text": "Compile everything into the template below. Be specific: name every project, person, and outcome. Nothing vague.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-template",
+      "title": "Output Template",
+      "children": [
+        {
+          "text": "```\nWEEKLY RECAP, WEEK OF [DATE RANGE]\n\nSHIPPED THIS WEEK\n- [Project name]: [What shipped, specific output]\n- [Project name]: [What shipped]\n\nIN PROGRESS\n- [Project]: [Task name], [status or blocker]\n- [Project]: [Task name], [status]\n\nKEY DECISIONS MADE\n- [Decision]: [Who decided, what was approved, outcome]\n- [Decision]: [Details]\n\nBLOCKERS\n- [Blocker]: [What's blocked, why, who needs to unblock it]\n\nNEXT WEEK PRIORITIES\n1. [Project / task]: [What needs to happen, why it matters]\n2. [Project / task]: [Details]\n3. [Project / task]: [Details]\n```",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-rules",
+      "title": "Output Rules",
+      "children": [
+        {
+          "text": "- Specificity is credibility. Name every project and outcome.\n- One line per item. Add a brief detail line below only if needed.\n- Focus on impact, not task completion for its own sake.\n- If waiting on someone for a blocker, name them.\n- Each next-week priority should have a clear owner and action.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

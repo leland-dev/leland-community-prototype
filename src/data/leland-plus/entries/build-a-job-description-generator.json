@@ -1,0 +1,214 @@
+{
+  "id": "urn:contentEntry:6ab9ae44b898aa5eccb908c7",
+  "title": "Build a job description generator",
+  "resourceType": "TUTORIAL",
+  "description": "A system that turns a rough role brief into a polished, bias-checked job description ready to post.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae44b898aa5eccb908c7",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "slack": {
+      "title": "Slack",
+      "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "HR & Recruiting"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Writing job descriptions is the single most common AI use case in recruiting, used by 66% of AI-adopting teams, per [SHRM's Recruiting Executives Priorities and Perspectives 2026](https://www.shrm.org/topics-tools/research/recruiting-executives-priorities-perspectives-2026/repp26-full-report) report. This system takes a rough role brief, a few bullets, a [Slack](#tooltip-slack) message, a past posting, and turns it into a polished, structured draft with a bias check on the wording built in.",
+          "type": "prose"
+        },
+        {
+          "text": "Recruiting executives expect generative AI use for job descriptions to keep growing over the next few years, per the same SHRM report. A posting with gendered or exclusionary language narrows the applicant pool before anyone even applies.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a paste-in [prompt](#tooltip-prompt) every time a requisition opens, a saved skill your team reuses across roles, or a scheduled [agent](#tooltip-agent) that drafts a description the moment a role opens in your tracker.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming where a rough brief usually lands on your desk, the sections your descriptions always need, your company's tone, and the language you want flagged.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that turns a rough role brief into a finished job description. Ask me questions, one at a time, about how a requisition usually reaches me (a hiring manager's notes, a past posting, a Slack thread), what sections my job descriptions always need, what tone or template my company expects, and what language I want it to catch and flag. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview surfaces the sections and tone rules you already follow out of habit, and the scope document becomes the brief for every draft after it."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where the rough brief usually originates, a hiring manager's doc, a Slack thread, or last year's posting.",
+            "Whether legal or comp and benefits needs to review before anything gets published.",
+            "Whether there's an existing brand template the draft has to match."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather the [connectors](#tooltip-tool-connectors) it calls for, typically your ATS or job board (Greenhouse, LinkedIn, Indeed), your doc or brand-template source (Google Docs, [Notion](#tooltip-notion), a shared drive folder), and your comp and benefits data if the posting includes a range. The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Build and test the system on a real, unedited brief. The prompt below is one example; your scope document has the full version.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Turn the rough brief below into a polished job description for [role name] ready to post.\n\nContext: Brief: [paste notes/bullets]. Company voice/template: [link or pasted example]. Level and reporting line: [detail].\n\nRules:\n- Include sections for role summary, responsibilities, must-have and nice-to-have qualifications, and what makes this role different from similar postings elsewhere.\n- Flag any word or phrase with known gendered or exclusionary connotations and suggest a neutral replacement.\n- Never invent a salary range, benefit, or requirement not present in the brief.\n- Output the final posting plus a short \"flagged language\" list.",
+          "prompt_note": "How this prompt works: the rule against inventing details keeps the draft honest to the brief, and the flagged-language list makes the bias check visible instead of silent."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Every section present, flagged language reasonable, nothing invented that wasn't in the brief?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what went wrong (\"this flagged word isn't a problem in our field\") and fold each correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Build a requisition-to-post pipeline that starts from a hiring manager's raw notes instead of a cleaned-up brief.",
+            "Generate tone variants, formal, casual, technical, and let the hiring manager pick.",
+            "Turn the language-bias check into a standing rubric the tool applies on every posting.",
+            "Pair it with an interview scorecard generator so the posting's must-haves become the scoring rubric automatically."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat turn the scope bar into pass/fail checks and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each job description draft, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, role, flagged terms caught, edits made before posting, and whether legal or comp reviewed it. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make a drifting tone or a missed flag visible after a few postings."
+        },
+        {
+          "text": "**Log** every run. Note the date, which rubric checks passed or failed, and what changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the rubric passes a few postings straight, package the prompt and corrected rules into a skill, so every run starts from your defaults. A repeated failure earns its own skill. [Claude](#tooltip-claude)'s skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. A generator trained on your past postings will happily repeat whatever bias was already baked into them. Review the flagged-language list yourself before the posting goes live.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[SHRM, Recruiting Executives Priorities and Perspectives 2026](https://www.shrm.org/topics-tools/research/recruiting-executives-priorities-perspectives-2026/repp26-full-report) — Supports the job-description adoption figures."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Automate resume screens](/content/item/urn:contentEntry:6ab9ae4432d50d2a64f3992c) · HR & Recruiting",
+            "[Create interview scorecards for every role](/content/item/urn:contentEntry:6ab9ae44695832290068a37d) · HR & Recruiting",
+            "[Build a job search agent](/content/item/urn:contentEntry:6ab9ae4a5e36bda156cf6a1b) · Life & Personal",
+            "[Word Documents](/content/item/urn:contentEntry:6ab9ae61798a2883f8bb8d9b) and [Humanize Writing](/content/item/urn:contentEntry:6ab9ae5366b7c1942a3d3696) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

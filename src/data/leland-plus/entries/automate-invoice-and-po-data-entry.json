@@ -1,0 +1,217 @@
+{
+  "id": "urn:contentEntry:6ab9ae3f9d989c5117dc791d",
+  "title": "Automate invoice and PO data entry",
+  "resourceType": "TUTORIAL",
+  "description": "A system that pulls vendor, amount, line items, and dates off invoices or POs and gets them into your tracker without you typing each one in by hand.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae3f9d989c5117dc791d",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "slack": {
+        "title": "Slack",
+        "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "workflow": {
+        "title": "Workflow",
+        "content": "A multi-step process Claude runs to accomplish a goal — for example: read emails → filter by topic → summarize → post to Slack. Workflows can be run manually or on a schedule."
+      },
+      "batch-api": {
+        "title": "Batch API",
+        "content": "A way to send a big pile of requests to Claude at once and get the results back later (usually within 24 hours) at a discount. Good for one-time bulk jobs like classifying 10,000 customer support tickets."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Operations"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "Keying in invoices by hand is expensive work. [Ardent Partners' AP Metrics That Matter research](https://www.apexanalytix.com/resources/blog/ardent-partners-key-ap-metrics-2025/) puts the average all-in cost to process a single invoice at $9.40, against $2.78 for best-in-class AP teams, and the gap tracks with how much of the process still runs by hand.",
+            "type": "prose"
+          },
+          {
+            "text": "This system reads a [batch](#tooltip-batch-api) of invoices or POs, whatever format they arrive in, and pulls vendor, amount, line items, and dates into rows that match your tracker's exact columns. It cross-checks the invoice total against the line items and flags anything it can't read clearly. It never marks anything approved or paid. Extraction only, approval stays with a person.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a paste-in [prompt](#tooltip-prompt) against a single batch, a saved [skill](#tooltip-skill) for the recurring run, or a scheduled [agent](#tooltip-agent) watching a shared inbox or vendor portal. Every version stops at the flag. It doesn't touch your accounting system.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming where your invoices come from, the exact fields you need extracted, your tracker's column order, and what happens when something looks off.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that pulls vendor, amount, line items, and dates off invoices or POs and gets them into my tracker without me typing each one in by hand. Ask me questions, one at a time, about where invoices come from, what format they arrive in, what fields I need extracted, where the data ends up, and what should happen when something looks off. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview surfaces the exact fields and edge cases you'd otherwise discover mid-build, and the scope document becomes the brief for every run after it."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Where invoices land today, before deciding how to feed them in.",
+              "Your tracker's exact required fields and column order.",
+              "Who reviews flagged extractions, and how fast."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your document source (a shared inbox, a vendor portal, a scanned-document folder), your tracker or accounting system (a spreadsheet, QuickBooks, NetSuite), and your approval [workflow](#tooltip-workflow) ([Slack](#tooltip-slack), email, an approval tool). The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Build and test the system on a real batch of invoices or POs. The prompt below is one example; your scope document has the full version.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Extract structured data from my invoices or POs and enter it into my tracker without manual re-typing.\n\nContext: [Documents arrive via a shared inbox, vendor portal, or scanned folder. Note the exact format: PDF, scanned, or email attachment. Required fields: vendor name, invoice number, date, line items, amount, PO number. Paste your tracker's columns in exact order.]\n\nRules:\n- Flag any document where a required field can't be read clearly. Don't guess.\n- Cross-check the invoice total against the sum of line items and flag any mismatch.\n- Never mark anything approved or paid. Extraction only.\n- Output one row per invoice matching the tracker's exact columns, plus a separate list of flagged items.",
+            "prompt_note": "How this prompt works: cross-checking the total against the line items catches an OCR error math would otherwise hide, and flagging beats guessing on any field that's unclear."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. Every field traceable to the source, mismatches caught, nothing marked paid?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what went wrong (\"this vendor's PO number sits in a different spot, look there instead\") and fold the correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Add a vendor-terms check that flags invoices not matching agreed pricing.",
+              "Build a duplicate-invoice check across a batch before double entry.",
+              "Extend it to draft the payment approval request once extraction is trusted.",
+              "Track flagged-for-review rate over time as your reliability signal."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric), skip the feel check. Have your AI chat draft the rubric and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each batch of extracted invoice data, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, invoices processed, fields flagged, flags that turned out to be real errors, and what rule I changed. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call on what counts as a clean extraction, and the log columns make a pattern of bad flags visible after a week of runs."
+          },
+          {
+            "text": "**Log** every run. Note the date, which rubric checks passed or failed, and what changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the rubric passes a few runs straight, package the prompt and corrected rules into a skill, so runs start from your defaults. A repeated failure earns its own skill. [Claude](#tooltip-claude)'s skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. OCR reads a blurry character wrong with total confidence, so any extracted amount needs a sanity check against line-item math before it's trusted. A missing PO number or mismatched vendor name has to get flagged loudly, never filled in silently.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Ardent Partners, AP Metrics That Matter in 2025](https://www.apexanalytix.com/resources/blog/ardent-partners-key-ap-metrics-2025/) — The cost-per-invoice benchmark, manual versus best-in-class."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Automate expense categorization](/content/item/urn:contentEntry:6ab9ae417f1c80ad957192d1) · Finance",
+              "[Automate your invoice bookkeeping](/content/item/urn:contentEntry:6ab9ae41e85e62d98b89da14) · Finance",
+              "[PDF Toolkit](/content/item/urn:contentEntry:6ab9ae58254e58c5b5d3bee6), [Data Cleaner](/content/item/urn:contentEntry:6ab9ae51a1bfd0785cb3341a), and [Excel Spreadsheets](/content/item/urn:contentEntry:6ab9ae522638a4b47c5afeb2) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

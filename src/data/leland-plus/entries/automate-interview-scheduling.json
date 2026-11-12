@@ -1,0 +1,212 @@
+{
+  "id": "urn:contentEntry:6ab9ae44dffbbd4e8a632590",
+  "title": "Automate interview scheduling",
+  "resourceType": "TUTORIAL",
+  "description": "A system that checks interviewer and candidate availability, proposes times across a full panel, and locks a confirmed schedule.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae44dffbbd4e8a632590",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "notion": {
+        "title": "Notion",
+        "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "context": {
+        "title": "Context",
+        "content": "Everything Claude can 'see' in a given session — your messages, files you've shared, instructions, and conversation history. The more relevant context you give Claude, the better its output."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "HR & Recruiting"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "Coordinating a multi-person interview panel across calendars is one of the most time-consuming, least differentiated tasks in a recruiter's week. This system reads interviewer availability, candidate constraints, and panel requirements, then proposes and locks a set of times across everyone involved. The output is a confirmed schedule with calendar invites attached.",
+            "type": "prose"
+          },
+          {
+            "text": "Per [Korn Ferry's TA Trends 2026 report](https://www.kornferry.com/insights/featured-topics/talent-recruitment-articles/ai-in-recruitment-trends), 52% of talent acquisition leaders plan to add autonomous AI agents to their teams in 2026, and scheduling is a common entry point because it's high-volume, low-judgment work.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a per-candidate paste-in [prompt](#tooltip-prompt), a saved skill, or a scheduled [agent](#tooltip-agent) that watches interviewer calendars and confirms rounds without a recruiter kicking each one off by hand. Every version should escalate to a person instead of guessing when no time works.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming where availability lives, your panel rules, and how confirmations get sent.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that coordinates interview scheduling across candidates and multiple interviewers. Ask me questions, one at a time, about where interviewer availability lives today, how many people typically sit on a panel, what has caused scheduling to break down before, and how confirmations and reminders currently get sent. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: it surfaces the panel and reschedule rules before you build, so the scope document becomes the brief every run after it follows."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Where interviewer and candidate availability lives today, a shared calendar, a scheduling tool, or manual email threads.",
+              "Whether candidates schedule themselves through a link or a recruiter proposes times.",
+              "What counts as an acceptable notice window for a reschedule."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your calendar (Google Calendar, Outlook), a scheduling tool if you use one (Calendly, a native ATS scheduler), and your ATS for logging round completion (Greenhouse, Lever). The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Start building the system your scope document describes, and test it on the next candidate who advances to a new round. The prompt below is an example of the core task. Your scope document will give you a version shaped to your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Find and confirm interview times for [candidate name] with [list of interviewers] for a [duration]-minute [round name] within the next [timeframe].\n\nContext: [Interviewer calendars are in: tool. Candidate availability: paste or link. Panel composition rules, e.g. must include a peer and a manager.]\n\nRules:\n- Never double-book an interviewer or schedule outside their working hours.\n- Propose no more than three time options to the candidate at once.\n- Confirm a hold as tentative until every panelist accepts.\n- Send a calendar invite with the job title, round name, and a prep note only after every panelist confirms.\n- Escalate to a human instead of guessing if no overlapping time exists within the timeframe.",
+            "prompt_note": "How this prompt works: hard rules on working hours and confirmation order keep it from locking a time that quietly falls apart later."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. No double-booking, tentative holds confirmed before the invite goes out, no more than three options offered at once?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what broke (\"that panelist's afternoons are blocked, stop proposing them\") and fold each correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Add automatic rescheduling logic for when an interviewer cancels last-minute.",
+              "Build a no-show follow-up sequence for candidates who miss a scheduled slot.",
+              "Extend it to auto-update the ATS stage the moment a round is confirmed, closing the loop between scheduling and pipeline tracking."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft the rubric and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each scheduling run, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for candidate, round, interviewers involved, time to confirm, whether it escalated, and what rule I changed. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make recurring scheduling breakdowns visible after a few rounds."
+          },
+          {
+            "text": "**Log** every run against the rubric. Note the date, which checks passed or failed, and what changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the rubric passes a few rounds straight, package the prompt and your corrected rules into a reusable AI skill, so every run starts from your defaults. A repeated failure earns its own skill. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. An agent that schedules aggressively can burn goodwill fast if it ignores an interviewer's real working hours or time zone. Give it hard boundaries and keep them as fixed [context](#tooltip-context) every run.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Korn Ferry, TA Trends 2026: Human-AI Power Couple](https://www.kornferry.com/insights/featured-topics/talent-recruitment-articles/ai-in-recruitment-trends) — The autonomous-agent adoption figure."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Automate interview debrief summaries](/content/item/urn:contentEntry:6ab9ae43c5f7e67a49fb2dc8) · HR & Recruiting",
+              "[Build a new hire onboarding assistant](/content/item/urn:contentEntry:6ab9ae44453159773c5ae7dd) · HR & Recruiting",
+              "[Meeting Prep](/content/item/urn:contentEntry:6ab9ae575970ee9cdf0c866b) and [Notion Task Manager](/content/item/urn:contentEntry:6ab9ae584ab0c4b844679dcb) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

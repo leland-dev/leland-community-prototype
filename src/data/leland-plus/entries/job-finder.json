@@ -1,0 +1,118 @@
+{
+  "id": "urn:contentEntry:6ab9ae560ef0d286e7c54c5b",
+  "title": "Job Finder",
+  "resourceType": "SKILL",
+  "description": "Search for job listings by industry, level, and location, deduplicate against a running tracker sheet, append new results, and send a digest email for review.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae560ef0d286e7c54c5b",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Find job listings matching the user's industry, level, and location. Deduplicates against a running Google Sheet, appends new jobs, and sends a Gmail digest for review.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "when-to-use-this-skill",
+      "title": "When to Use This Skill",
+      "children": [
+        {
+          "text": "Trigger when the user says: \"find me jobs,\" \"search for jobs,\" \"job search,\" \"look for jobs,\" \"job opportunities,\" or \"find job listings.\"\n\nDo not trigger for general career advice, resume help, or interview prep.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-collect-parameters",
+      "title": "Step 1, Collect Parameters",
+      "children": [
+        {
+          "text": "First, check for a saved Sheet ID in `~/.claude/skills/job-finder/config.md`. If it exists and contains a `sheet_id`, use that value automatically. If not, a new sheet will be created on first run.\n\nAsk the user for:\n1. **Industry** (e.g. \"Product Management,\" \"Software Engineering,\" \"UX Design\")\n2. **Level:** intern / entry-level / mid-level / senior / executive\n3. **Location:** a city or region, or \"remote\"\n4. **Email:** address to send the digest to",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-search-for-jobs",
+      "title": "Step 2, Search for Jobs",
+      "children": [
+        {
+          "text": "Run the following web search queries, replacing placeholders with the user's inputs:\n\n```\n1. site:linkedin.com/jobs [INDUSTRY] [LEVEL] [LOCATION]\n2. site:greenhouse.io [INDUSTRY] [LEVEL] [LOCATION]\n3. site:lever.co [INDUSTRY] [LEVEL] [LOCATION]\n4. [INDUSTRY] [LEVEL] jobs [LOCATION] [current year]\n5. [INDUSTRY] [LEVEL] hiring [LOCATION]\n```\n\nFor remote searches, add \"remote\" to each query and remove the location from queries 1 through 3.\n\nFrom each result, extract:\n- **Job Title**\n- **Company**\n- **Location** (as listed)\n- **URL** (direct link to the posting)\n- **Summary:** 1 to 2 sentences on the role and key requirements\n- **Date Posted:** if available\n\nAim for 15 to 30 unique results across all queries. Discard duplicates by URL before proceeding. Respect each job board's terms of service.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-deduplicate-against-the-tracker-sheet",
+      "title": "Step 3, Deduplicate Against the Tracker Sheet",
+      "children": [
+        {
+          "text": "If a Sheet ID was loaded from config:\n1. Read the sheet and extract all URLs from the URL column\n2. Remove any job from your results whose URL already exists in the sheet\n\nIf no Sheet ID was found, skip deduplication. All results are new.\n\nTrack `new_count` (jobs passing deduplication) and `skipped_count` (duplicates removed).",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-4-update-the-google-sheet",
+      "title": "Step 4, Update the Google Sheet",
+      "children": [
+        {
+          "text": "Column layout: Date Found | Job Title | Company | Location | Level | URL | Summary | Status\n\nStatus for all new rows defaults to `New`.\n\n**First run (no Sheet ID):**\n- Create a new Google Sheet named: `Job Tracker, [INDUSTRY] [LEVEL], [today's date]`\n- Write the header row and all new job rows\n- Save the returned Sheet ID to `~/.claude/skills/job-finder/config.md`\n\n**Subsequent runs:**\n- Download the current sheet content\n- Append new rows after the last existing row\n- Re-upload the updated content\n- Update `last_run` in config.md to today's date",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-5-send-gmail-digest",
+      "title": "Step 5, Send Gmail Digest",
+      "children": [
+        {
+          "text": "Create a Gmail draft for user review before sending.\n\nSubject: `Job Digest, [INDUSTRY] [LEVEL], [today's date]`\n\nBody format:\n```\nHi there,\n\nHere's your job digest for [INDUSTRY] [LEVEL] roles in [LOCATION].\n\n[JOB TITLE], [COMPANY]\n[LOCATION] · [LEVEL]\n[1-2 sentence summary]\nApply: [URL]\n\n[repeat for each new job]\n\n[new_count] new jobs found. [skipped_count] duplicates skipped.\n\nView your full tracker: https://docs.google.com/spreadsheets/d/[SHEET_ID]\n```\n\nIf `new_count` is 0, skip the email and tell the user: \"No new jobs found this run. All results were already in your tracker.\"",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-6-report-back",
+      "title": "Step 6, Report Back",
+      "children": [
+        {
+          "text": "Summarize:\n- Total jobs found across all searches\n- New vs. duplicate count\n- The Google Sheet link\n- That a Gmail draft is ready for their review",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

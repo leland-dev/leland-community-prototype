@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae5017e2a223459f3d5c",
+  "title": "Account Qualification",
+  "resourceType": "SKILL",
+  "description": "Score any prospect across four dimensions using the FITS framework to decide whether to pursue, nurture, or disqualify.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5017e2a223459f3d5c",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Research"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Run a prospect through the FITS framework to determine whether to pursue, nurture, or disqualify.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "fits-framework",
+      "title": "FITS Framework",
+      "children": [
+        {
+          "text": "### F, Fit\nDoes this person match the profile of someone who succeeds with your product or offer?\n- Do they have the background or context to get value?\n- Is there a mismatch that would set them up to fail?\n\n### I, Intent\nHow serious are they about moving forward?\n- Did they initiate contact, or were they reached out to?\n- Are they asking specific questions or vague ones?\n- Have they engaged with prior messages?\n\n### T, Timing\nCan they realistically start or buy now?\n- Do they have scheduling or budget constraints?\n- Are there urgency signals (deadline, life event, trigger)?\n\n### S, Situation\nIs their current situation compatible with committing?\n- Do they have competing priorities or blockers?\n- Do they have the support or resources needed to follow through?",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "scoring",
+      "title": "Scoring",
+      "children": [
+        {
+          "text": "Each dimension: 3 (strong), 2 (moderate), 1 (weak).\n\n| Score | Recommendation |\n|-------|----------------|\n| 10-12 | Pursue actively, high priority |\n| 7-9 | Qualified, standard follow-up |\n| 4-6 | Nurture, check back in 60-90 days |\n| Below 4 | Disqualify, do not invest further |",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-qualify-the-prospect",
+      "title": "Step 1, Qualify the Prospect",
+      "children": [
+        {
+          "text": "From `$ARGUMENTS`, extract the prospect information and score each dimension. Explain your reasoning briefly for each score.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Qualification: [Prospect Name or Description]\n\n| Dimension | Score | Reasoning |\n|-----------|-------|-----------|\n| Fit       | /3    | [why]     |\n| Intent    | /3    | [why]     |\n| Timing    | /3    | [why]     |\n| Situation | /3    | [why]     |\n| **Total** | **/12** |         |\n\n## Recommendation\n[Pursue / Nurture / Disqualify + one sentence why]\n\n## Next Action\n[Specific next step based on score]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

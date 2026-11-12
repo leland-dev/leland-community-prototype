@@ -1,0 +1,232 @@
+{
+  "id": "urn:contentEntry:6ab9ae39368c9c2f3c8d6b81",
+  "title": "Build a deal follow-up reminder agent",
+  "resourceType": "TUTORIAL",
+  "description": "A system that checks your pipeline every day and sends you a short message naming the deals that need a follow-up, and why.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae39368c9c2f3c8d6b81",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "api": {
+        "title": "API (Application Programming Interface)",
+        "content": "A way for two programs to talk to each other. When a tool says 'connect via API,' it means software can send requests and get data back automatically — no manual copy-paste needed."
+      },
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "slack": {
+        "title": "Slack",
+        "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+      },
+      "action": {
+        "title": "Action",
+        "content": "A step an automation performs after the trigger fires — like 'send a Slack message' or 'create a Notion page.' One workflow can chain a dozen actions off a single trigger."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "context": {
+        "title": "Context",
+        "content": "Everything Claude can 'see' in a given session — your messages, files you've shared, instructions, and conversation history. The more relevant context you give Claude, the better its output."
+      },
+      "hubspot": {
+        "title": "HubSpot",
+        "content": "A CRM and marketing platform used by sales, marketing, and customer success teams. Common target for AI automations — students connect it to draft outreach, enrich contacts, or sync data with other tools."
+      },
+      "read-only": {
+        "title": "Read-only",
+        "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Sales"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "Deals rarely die all at once. [Gong's deal-intelligence research](https://www.gong.io/blog/sales-pipeline-tracking) treats engagement drop-off, vague next steps, and single-threaded deals as the core signals that predict a stall before it becomes a loss. This system watches for those signals and sends you a daily message naming the deals to touch, with the reason for each. Acting on it is still your call.",
+            "type": "prose"
+          },
+          {
+            "text": "Reps spend roughly 30% of their week actually selling, per [Salesforce's State of Sales research](https://www.salesforce.com/sales/state-of-sales/sales-statistics/), and complex B2B deals typically involve 6 to 10 decision-makers, per Gartner's buying-committee research, which is why single-threaded deals get extra weight.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a weekly paste-in [prompt](#tooltip-prompt), a saved skill, or a scheduled [agent](#tooltip-agent) that posts to [Slack](#tooltip-slack). Every version stays [read-only](#tooltip-read-only) against your CRM.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your data source, your stall rules, the message contents, and the delivery channel.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that watches my sales pipeline for deals that need follow-up and sends me a short message every day naming the deals to touch and why. Ask me questions, one at a time, about how I want this system to work. Cover where my pipeline data lives, what counts as a stalled deal for my sales motion, what the daily message should include, and how I want it delivered. When you have what you need, write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview surfaces decisions you didn't know you needed to make, and the scope document becomes the brief for every build session after it."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Which CRM or spreadsheet holds your pipeline, and how to get a clean export out of it.",
+              "What \"stalled\" means for your cycle length.",
+              "Whether your activity logging is clean enough for \"days since last touch\" to mean anything."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common connectors are your CRM (Salesforce and [HubSpot](#tooltip-hubspot) publish official connectors and [API](#tooltip-api) docs) and Slack or email for the message. The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Start building the system your scope document describes, and test it on a real export, every open deal included. The prompt below is an example. Your scope document will give you a version shaped to your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Review my pipeline and tell me which deals need a follow-up today, and why.\n\nContext: [Paste your pipeline export: deal name, stage, deal amount, last activity date, expected close date, and number of distinct contacts engaged, if you have it. Also note your normal deal cycle length, e.g. \"45 days average,\" and the stage names your pipeline uses.]\n\nRules:\n- Flag a deal if any of these are true: no logged activity in more than 14 days, expected close date has already passed, the deal has been in its current stage more than 1.5x the normal time for that stage, or only one contact has ever been engaged.\n- For each flagged deal, state the specific reason(s), not just \"at risk.\"\n- Rank flagged deals by dollar amount, highest first.\n- Do not flag a deal I've noted as intentionally paused (e.g. \"waiting on customer's budget cycle\").\n- Output as a short daily message: deal name, amount, reason, and one suggested next step per deal.",
+            "prompt_note": "How this prompt works: explicit numeric stall criteria keep the output consistent from day to day instead of a gut-check the AI is guessing at."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. Specific reasons, ranked by amount, paused deals skipped?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what went wrong (\"14 days is too aggressive here, use 21\") and fold each correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Schedule it. Connect the CRM through a [tool connector](#tooltip-tool-connectors) and have the message arrive each morning.",
+              "Have it draft the follow-up email for each flagged deal.",
+              "Add win/loss history so flags cite the pattern behind past losses.",
+              "Add a by-rep rollup for pipeline reviews."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric), not a feel check. Have your AI chat turn the scope bar into pass/fail checks and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each daily follow-up message, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, deals flagged, flags that turned out to be real, false positives, and what rule I changed. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make recurring misfires visible after a week of entries."
+          },
+          {
+            "text": "**Log** every run against the rubric. Note the date, which checks passed or failed, and what changed. After a week or two it shows which flags were real and which thresholds cry wolf. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the rubric passes a few weeks straight, package the prompt and your corrected rules into a reusable AI skill, so every run starts from your defaults. A repeated failure earns its own skill. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. It can't tell a deal paused on purpose from a neglected one unless you tell it, so give it that [context](#tooltip-context) every run.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Salesforce, 40 Sales Statistics to Watch for in 2026](https://www.salesforce.com/sales/state-of-sales/sales-statistics/) — The 30% selling-time figure.",
+              "Gartner, B2B buying-committee research — The 6 to 10 decision-maker figure.",
+              "[Gong, Sales Pipeline Tracking: Avoiding Risks That Cost You Deals](https://www.gong.io/blog/sales-pipeline-tracking) — The core stall signals.",
+              "[Anthropic, Claude Academy use cases by role](https://academy.claude.com/courses/claude-101/claude-in-action-use-cases-by-role) — Pipeline reporting as a recognized sales use case."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Accurate financial reports](/content/item/urn:contentEntry:6ab9ae39145f62682627ec04) · Finance",
+              "[AI personal assistant](/content/item/urn:contentEntry:6ab9ae39728238bde8667dee) · Life & Personal",
+              "[Deal Action Engine](/content/item/urn:contentEntry:6ab9ae51650d788b29cb12d1), [Opportunity Tracker](/content/item/urn:contentEntry:6ab9ae58eed4be81c3fc7192), and [Agent Spec Writer](/content/item/urn:contentEntry:6ab9ae500c926f41bf699e8b) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

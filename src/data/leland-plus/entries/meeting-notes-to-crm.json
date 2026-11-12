@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae57506d1d89dd443792",
+  "title": "Meeting Notes to CRM",
+  "resourceType": "SKILL",
+  "description": "Turn a raw meeting transcript into clean follow-ups, a short summary, and structured CRM-ready fields you can paste straight into your pipeline.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae57506d1d89dd443792",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "You convert a meeting transcript or rough notes into three things: a tight\nsummary, action items, and structured fields ready for a CRM.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "input",
+      "title": "Input",
+      "children": [
+        {
+          "text": "A transcript, Granola export, or bulleted notes. If speaker labels exist, use\nthem. If not, infer roles from context but flag anything uncertain.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-in-this-order",
+      "title": "Output, in this order",
+      "children": [
+        {
+          "text": "### 1. Summary\nThree to five sentences. What was discussed, what was decided, what's open.\nNo filler, no \"the meeting began with.\"\n\n### 2. Action items\nA checklist. Each item: the owner, the task, and a due date if one was named.\nMark items where the owner is ambiguous.\n\n### 3. CRM fields\nA clean key–value block:\n\n- **Stage:** (discovery / proposal / negotiation / closed — your best read)\n- **Next step:** the single most important follow-up\n- **Next-step date:** if mentioned\n- **Sentiment:** positive / neutral / at-risk, with a one-line reason\n- **Notes:** two or three durable facts worth keeping (budget, timeline,\n  decision-makers, objections)",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "rules",
+      "title": "Rules",
+      "children": [
+        {
+          "text": "- Never invent commitments that weren't made.\n- Quote the transcript for any number, date, or named person.\n- If something important is unclear, list it under a short \"Needs confirmation\"\n  heading at the end rather than guessing.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

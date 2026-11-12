@@ -1,0 +1,370 @@
+{
+  "id": "urn:contentEntry:6ab9ae4e21bc76c28b6312e7",
+  "title": "Competitive Research Agent",
+  "resourceType": "TUTORIAL",
+  "description": "Build an agent that pulls live competitor data from web search and Facebook Ads, stores findings in Notion, and generates a living dashboard.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4e21bc76c28b6312e7",
+  "viewableFile": "build session18.mp4",
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "meta": {
+    "mins_total": 60
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "outcomes",
+      "children": [
+        {
+          "text": "Led by **D'Aaron**",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A working agent that pulls live competitor intelligence from web search and via the Apify connector for Facebook Ads",
+            "A Notion database that stores every brief with a unique ID, and a living HTML dashboard that updates as you add more competitors"
+          ],
+          "title": "What you'll build",
+          "variant": "check"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "intro",
+      "title": "Workshop intro",
+      "subtitle": "What you need and what you are building today",
+      "children": [
+        {
+          "text": "**What you need for this session**",
+          "type": "prose"
+        },
+        {
+          "text": "Make sure you have these ready before starting.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Close everything you don't need so your AI tool can run faster",
+            "A paid Claude account and access to Claude Cowork",
+            "A free Apify account to use the Apify Connector",
+            "A real business or competitor URL and Meta Ad URL you want to research",
+            "A Notion account - for Build 2 you'll need the Notion connector active in your project"
+          ],
+          "variant": "check"
+        },
+        {
+          "text": "**What you're building**",
+          "type": "prose"
+        },
+        {
+          "text": "Today we're building a competitive research agent in Claude Cowork. You'll drop two URLs and get your competitor's playbook from their website and their Meta Ad copy and creatives.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Build 1:** A working agent that pulls live competitor intelligence from web search and via the Apify connector for Facebook Ads",
+            "**Build 2:** A Notion database that stores every brief with a unique ID, and a living HTML dashboard that updates as you add more competitors"
+          ],
+          "title": "By the end of this workshop, you'll have:"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-1",
+      "title": "1. Get Live Data with Web Search and Connectors",
+      "subtitle": "Set up a Claude Cowork project with the Apify connector so your agent can pull competitor intelligence from their website and active Meta ads in parallel.",
+      "children": [
+        {
+          "text": "**Claude Web Search**",
+          "type": "prose"
+        },
+        {
+          "text": "When you make a request, your AI tool can either decide to search the internet on its own or you can direct it to perform a search. It sends the query to a search engine, which returns the top ~10 results including titles, URLs, and text snippets. Your AI tool cannot access information behind logins or paywalls and it respects copyright.",
+          "type": "prose"
+        },
+        {
+          "text": "**Enriching Data with Connectors**",
+          "type": "prose"
+        },
+        {
+          "text": "Web search won't give you everything. We'll use connectors to pull in data you can't get with web search - specifically the **Apify Facebook Ads Library Scraper**, which gives your AI tool access to ads a competitor is actively running across Meta platforms. Adding this connector means our agent can pull paid creative data, ad copy, CTAs, and how long each ad has been running - insights you can't get from a website visit.",
+          "type": "prose"
+        },
+        {
+          "text": "**Running subagents for parallel tasks**",
+          "type": "prose"
+        },
+        {
+          "text": "Since our data sources don't depend on each other, we can run them all at the same time instead of one after another. We do this by initializing subagents - these are separate agents each given a single job and the tools needed to complete it. Like \"scrape the ad data from this Meta page\" or \"pull intelligence from this URL.\" Each subagent works in its own context window, so raw scraped data never clutters the main agent's window. When the job is done, each subagent returns a clean summary back to the main agent, which uses all the results together to assemble the final brief.",
+          "type": "prose"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "We're going to build our competitive analyst agent so it knows how to run research, synthesize raw data, and read and write to our active database and dashboard. To do this, set up a new Claude Cowork project. This lets you store context and file outputs, control which tools the agent can access, and define its goal and role clearly through the project instructions.\n\nProject instructions work like a permanent briefing for your agent in this specific project. They should state clearly what the goal of your agent is and how it should achieve it.\n\nTry writing your project instructions on your own first. If you get stuck, the example below is there to help. Open a new Claude Cowork project and paste your prompt into the project instructions field.",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "prompt": "# Competitive Intelligence Analyst\nYou are a competitive intelligence analyst. When given a competitor's URL and Meta Ad URL, your job is to research the competitor's website using web search and the Apify Facebook Ads Library Scraper found at apify/facebook-ads-scraper via the Apify connector. Your output is not a report — it is a unified source of truth. All findings from the website scrape and the Meta Ad Library scrape are merged, deduplicated, and synthesized into structured data.\nFormat in markdown\n\n---\n## Data to Extract Per Competitor\n- **Positioning** — How do they describe themselves? What's the core value prop?\n- **Messaging** — Key phrases, taglines, tone of voice\n- **Target Audience** — Who are they clearly speaking to?\n- **Pricing Language** — How do they talk about cost, tiers, or value?\n- **CTAs** — What actions are they pushing visitors toward?\n- **Ad Intelligence** — What creatives are they running? What hooks and formats are they testing? How long have the ads been active?\n- **Strategic Gaps** — What are they NOT saying? Where do they seem weak?\n\n---\n## Execution Strategy\nRun the Facebook Ad analysis in the main agent and spin out a subagent for web search to keep our context clean. Always use web search to go beyond the home page — look through blogs, products, press, and any other section.",
+                  "prompt_note": "The project instructions are the job description for this agent. They define the seven fields we're extracting upfront, so your AI tool knows exactly what to look for and how to structure the output as markdown. The Apify instruction points it to the Facebook Ads Library Scraper via the connector, so it pulls real ad data instead of just describing what it would find. The execution strategy runs the ad analysis and a web-search subagent in parallel and pushes the agent past the home page into blogs, products, and press."
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "In order to use the Facebook ad analyzer, you need an Apify account.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Open [https://apify.com/](https://apify.com/) and sign in or create an account.",
+                    "Create an API key at: **Settings → API & Integrations → Create a new token**.",
+                    "The tool you'll use is the [Facebook Ads Library Scraper](https://console.apify.com/actors/JJghSZmShuco4j9gJ/input), built and maintained by Apify.",
+                    "Save your API key - you'll add it to your project via the Connector in the next step."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Connect the Apify connector to your project. Go to project settings, find the **Connectors** tab, and enable Apify. You'll need your Apify API token from your Apify account settings. Once connected, the Facebook Ads Library Scraper is available as a tool your agent can call.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Add a competitor URL and their Meta Ad Library URL into the chat and let the agent run. Watch how your AI tool decides what to search, what it fetches from Apify, and how it assembles the output. Use a real business and avoid news sites or anything behind a login or paywall.",
+                  "type": "prose"
+                },
+                {
+                  "text": "_Voice mode: Try saying this out loud. Use Wispr Flow, your AI tool's built-in voice, or Mac dictation (press Fn twice) instead of typing._",
+                  "type": "callout"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Review the output. Pick one thing that's missing or off - a section that's too vague, an ad field that wasn't populated - and add a single instruction to your project instructions to fix it. Run it again.",
+                  "type": "prose"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Output is too shallow or sections are empty",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Your AI tool may not have found enough indexed content. Try: (1) adding explicit instructions to search the `/pricing` and `/blog` paths, (2) removing any instruction that limits response length, or (3) switching to a competitor with a more public web presence. If Apify isn't returning ad data, confirm the connector is enabled in your project and that the Meta Ad Library URL is for an active advertiser.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "label": "Level 2",
+          "title": "Scoring and Comparison",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "Ask it to score each competitor on a 1-5 scale across key dimensions and explain the rating. You can add that score to your database. Tell the agent to compare what it finds against a description of your own product. Add an instruction to surface how long each ad has been running as a signal of what's converting.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "tags": [
+            {
+              "text": "Model: Sonnet"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-2",
+      "title": "2. Create Storage, Memory, and a Living Dashboard",
+      "subtitle": "Connect your agent to Notion for persistent memory and build an HTML dashboard that visualizes your competitive intelligence over time.",
+      "children": [
+        {
+          "text": "**Persistent memory through structured storage**",
+          "type": "prose"
+        },
+        {
+          "text": "Right now, every time you run the agent it produces a brief you can view - and that's where it stops. It doesn't remember that it ran this competitor last month. We're now going to give our agent the ability to remember what competitors it's analyzed and track campaigns over time.\n\nTo build this we'll connect the agent to a Notion database. The database becomes the agent's memory - every brief gets written in as a row, with a UUID (a unique ID) tied to the competitor's domain. The next time you run the agent on the same company, it finds that UUID, pulls the existing record, and updates it rather than creating a duplicate. Over time you're not just collecting snapshots - you're building a record that shows how competitors change.",
+          "type": "prose"
+        },
+        {
+          "text": "**The agent as a writer and a reader**",
+          "type": "prose"
+        },
+        {
+          "text": "Before creating any new entry, the agent checks the Notion database: does a row already exist for this competitor domain? If yes, it retrieves the record and decides whether to update it or flag it for review. If no, it creates a new entry with a fresh UUID.\n\nSetting a read-before-write process changes our agent from a one-time use platform to a tool that gets better over time.\n\nWe'll also ask your AI tool to build the Notion database itself, using the extraction fields from Build 1 as the column schema. Consider the data you are asking to scrape in your prompt - that will shape how your AI tool designs your Notion database.",
+          "type": "prose"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "In Build 1 you defined what data you care about. In Build 2 we're going to turn that into infrastructure - a Notion database that stores every brief and remembers what the agent has already seen, and an HTML dashboard that visualizes your competitive intelligence over time.\n\nAsk your AI tool to create your Notion database. Paste this into the chat:",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "prompt": "Using the Notion connector, create a new database called \"Competitive Intelligence\" with the following properties:\n- Name (title) - competitor name\n- Domain (URL) - competitor website\n- UUID (text) - a unique identifier, auto-populated as a slug of the domain + today's date\n- Positioning (text)\n- Messaging (text)\n- Target Audience (text)\n- Pricing Language (text)\n- CTAs (text)\n- Ad Intelligence (text)\n- Strategic Gaps (text)\n- Last Updated (date)\n- Status (select) - options: New, Updated, Stale\n\nReturn the database URL when done.",
+                  "prompt_note": "The UUID instruction gives the agent a consistent way to identify competitors across runs. Without a consistent key, every run creates a new row and the database fills with duplicates."
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Add the following block to the end of your project instructions from Build 1:",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "prompt": "After completing your research, use the Notion connector to save the brief to the Competitive Intelligence database.\n\nBefore writing a new entry:\n- Search the database for an existing row matching this competitor's domain.\n- If a match exists, update that row and set Status to \"Updated\" and Last Updated to today's date.\n- If no match exists, create a new row with a UUID formatted as [domain]-[YYYY-MM-DD], set Status to \"New\", and populate all fields.\n\nNever create duplicate entries for the same domain.",
+                  "prompt_note": "The read-before-write block is what creates memory: without it, every run would create a new row and the database fills with duplicates."
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Run the agent on a real competitor. Confirm the entry appears correctly in your Notion database before moving on.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Now ask your AI tool to build the dashboard. Paste this into the chat:",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "prompt": "Using the data in my Competitive Intelligence Notion database, create a single HTML artifact that works as a living competitive intelligence dashboard. This HTML file should be static data baked into its code from the Notion database.\n\n**Layout and structure:**\n- A header with the title \"Competitive Intelligence\" and a \"Generated [today's date] · View in Notion ↗\" link in the top right\n- Four summary stat cards below the header: Total Tracked (competitor count), Updated (30D) (briefs updated in the last 30 days), Status: New (first-time entries), and Stale / Review (entries older than 30 days)\n- A search bar and status filter dropdown below the stat cards, with a competitor count on the right\n- A sortable table with the following columns: Competitor (name + domain as a clickable link), Positioning, Key CTAs, Strategic Gaps, Status (badge: New / Updated / Stale), Last Updated (date, sorted descending by default)\n\n**Data behavior:**\n- Pull all fields from the Notion database: Name, Domain, Positioning, CTAs, Strategic Gaps, Status, and Last Updated\n- When a new competitor entry is added to the Notion database, update the existing HTML artifact - do not create a new file\n- Truncate long text fields in the table with \"...\" so rows stay scannable - full content should be accessible on row click or hover\n- Status badges should be color coded: New in blue, Updated in green, Stale in amber\n\n**Design:**\n- Clean, minimal, white background\n- Sans-serif typography, left-aligned text\n- Table rows should have subtle hover states\n- Make it look like something you'd share with a team, not a prototype",
+                  "prompt_note": "The dashboard prompt specifies the audience (\"shareable with a team\") so your AI tool makes design decisions that match the actual use case, not just what looks impressive in isolation."
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Review the dashboard. Check that it reflects your Notion data accurately. If a section looks off, identify which field is the problem and adjust the prompt.\n\nOnce the dashboard looks right, add this final instruction to your project instructions so the agent keeps it updated automatically:",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "prompt": "When finished with your analysis, check the Competitive Intelligence Notion database for new or updated entries, and update the file ci-dashboard.html to match the data held in the Notion database.",
+                  "prompt_note": "This instruction turns the dashboard from a one-time output into a living document. Every future run checks the database and updates the file automatically."
+                },
+                {
+                  "text": "By now you should have: a Notion database with your first competitor entry and a UUID, and an HTML dashboard that visualizes your competitive intelligence.",
+                  "type": "callout"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Notion connector isn't creating entries",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Make sure the Notion connector is enabled in your project settings and that your AI tool has been granted access to the specific database. If your AI tool can't find the database, paste its Notion URL directly into the chat. If duplicate entries are appearing, check that the domain field is being populated consistently - variations like `example.com` vs `www.example.com` will be treated as different entries.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "label": "Level 2",
+          "title": "Brand Styling and Comparison Reports",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "Ask your AI tool to add a chart to the dashboard showing how many ads each competitor is actively running. Build a \"Changes\" view that highlights what's different between the current entry and the previous run. Add a second prompt that takes two competitor rows and outputs a side-by-side comparison brief. Ask your AI tool to flag any competitor whose Status has been \"Stale\" for more than 30 days.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "tags": [
+            {
+              "text": "Model: Sonnet"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "share",
+      "title": "Share what you built",
+      "children": [
+        {
+          "text": "During the session, we'll have volunteers share their competitive dashboard - either the live Notion database or the HTML artifact.\n\nIf you didn't share in the session, drop a screenshot of your Notion database with at least one entry, or a link to your HTML dashboard, in your cohort's Slack channel.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "wrap",
+      "title": "Workshop recap",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "A competitive research agent that pulls live data from web search and from Facebook Ads via the Apify Connector",
+            "A Notion database that stores every brief with a unique ID and prevents duplicate entries",
+            "A living HTML dashboard that visualizes your competitive intelligence over time"
+          ],
+          "title": "What you built today"
+        },
+        {
+          "text": "To be considered, share your work in your cohort's Slack channel.",
+          "type": "prose",
+          "variant": "footnote"
+        }
+      ]
+    }
+  ]
+}
+}

@@ -1,0 +1,107 @@
+{
+  "id": "urn:contentEntry:6ab9ae5254bac698edfe450a",
+  "title": "Email Manager",
+  "resourceType": "SKILL",
+  "description": "Triage an inbox, sort by urgency, and produce reply drafts in the user's voice without sending anything until they approve",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5254bac698edfe450a",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Read the user's inbox, sort every email into the right bucket, and produce ready-to-review reply drafts. Never send anything. Every output is a draft for the user's approval.\n\nBefore drafting a single word, search the workspace for a voice guide (look for any file matching `*voice*guide*.md`). Apply its rules to every draft. If no voice guide exists, use a direct, friendly register with short sentences.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-pull-emails",
+      "title": "Step 1: Pull Emails",
+      "children": [
+        {
+          "text": "Use the Gmail MCP to fetch unread emails from the last 24 hours. Pull the full thread for each where possible, since context affects the reply.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-sort-into-buckets",
+      "title": "Step 2: Sort Into Buckets",
+      "children": [
+        {
+          "text": "Classify every email before drafting anything.\n\n### SKIP: no draft, no mention\n- Newsletters and digests (any \"unsubscribe\" footer present)\n- Automated system notifications (no-reply senders, app alerts)\n- Cold outreach and spam from unknown senders\n- Marketing emails of any kind\n\n### FLAG: surface it, no draft\n- Meeting requests: show the request, note the proposed time, ask what the user wants to do.\n- Emails where the user is CC'd: list in a separate section, no drafts.\n\n### DRAFT: write a reply\n- Direct questions from real people\n- Decisions the user needs to make\n- Relationship emails (check-ins, thank-yous, follow-ups from known contacts)\n- Anything mentioning a deadline or time pressure from a real person\n- Any email from a known organization contact where a reply is clearly expected",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-urgency-ranking",
+      "title": "Step 3: Urgency Ranking",
+      "children": [
+        {
+          "text": "Within the DRAFT bucket, order by urgency.\n\n**URGENT** (surface first, bold the sender name):\n- Mentions a specific deadline or time pressure from a real person\n- Missing a response today has a concrete consequence\n\n**STANDARD**: everything else, numbered sequentially below urgent items.\n\nIf nothing is urgent, say so plainly. Do not manufacture urgency.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-4-draft-replies",
+      "title": "Step 4: Draft Replies",
+      "children": [
+        {
+          "text": "For each email in the DRAFT bucket, format each reply block like this:\n\n---\n**[NUMBER]. From: [Sender Name], [Subject line]**\n*Received: [time or date]*\n*Why I'm drafting this: [one sentence on what makes it reply-worthy]*\n\n**Draft:**\n> [reply in the user's voice]\n\n**Assumed:** [any decisions or gaps you filled in, and why]\n**Need from the user:** [specific missing info, if any]\n\n---\n\n### Decision rules\n- If you can make a reasonable inference from context, make it and note the assumption.\n- If the email asks for a date or time, flag it rather than draft a reply.\n- If the email contains a complaint or sensitive issue, draft a reply and flag it: \"**Flag: sensitive, review carefully before sending.**\"\n\n### Tone rules\n- Open with \"Hey [First Name]!\"\n- One thought per paragraph\n- Number multi-item lists\n- No em-dashes\n- State facts, not pleasantries\n- Close with the user's standard sign-off\n- Zero hedging. \"I'll have this to you by Thursday\" not \"I might be able to get this to you sometime this week.\"",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-5-output-format",
+      "title": "Step 5: Output Format",
+      "children": [
+        {
+          "text": "Present results in this exact order:\n\n### URGENT REPLIES NEEDED\n[numbered list of urgent drafts]\n\n### REPLIES NEEDED\n[numbered list of standard drafts]\n\n### MEETING REQUESTS: YOUR CALL\n[sender, what they're asking, proposed time if given, one line of context]\n\n### CC'D: NO ACTION NEEDED\n[sender, subject, one-sentence summary]\n\n### SKIPPED\n[single line: \"Skipped X emails: Y newsletters, Z automated notifications, W cold outreach.\" No details unless the user asks.]",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "final-check-before-delivering",
+      "title": "Final Check Before Delivering",
+      "children": [
+        {
+          "text": "- Does every draft open with \"Hey [First Name]!\"?\n- Are there any em-dashes anywhere? Delete them.\n- Does every draft close with the user's standard sign-off?\n- Are all assumptions explicitly noted?\n- Are urgent emails actually time-sensitive, or did you inflate urgency?\n- Did you skip every newsletter, notification, and cold email without mentioning them in DRAFT or FLAG?\n\n**Never send anything. Every output is a draft for the user's review.**",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

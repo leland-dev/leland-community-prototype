@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae5e6dea06cc86f4baa1",
+  "title": "SOP Creator",
+  "resourceType": "SKILL",
+  "description": "Turn a process description into a clean, scannable standard operating procedure with numbered steps, verification criteria, and a troubleshooting table.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5e6dea06cc86f4baa1",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Productivity"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Turn a process description into a clean, scannable SOP that people actually follow.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-understand-the-process",
+      "title": "Step 1: Understand the Process",
+      "children": [
+        {
+          "text": "Read the user's process description. If it is vague or missing key steps, ask up to 3 clarifying questions:\n- Who performs this process and how often?\n- What does \"done\" look like? What is the output or end state?\n- Are there any tools, systems, or accounts involved?",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-build-the-sop",
+      "title": "Step 2: Build the SOP",
+      "children": [
+        {
+          "text": "Structure it as follows:\n\n### Header\n- **Process name**\n- **Owner** (who is responsible)\n- **Frequency** (daily / weekly / per event / etc.)\n- **Tools required**\n- **Last updated**\n\n### Purpose\nOne sentence. What problem does this process solve?\n\n### Prerequisites\nWhat needs to be true or ready before starting?\n\n### Steps\nNumbered, imperative (\"Go to...\", \"Click...\", \"Enter...\"). Each step should be:\n- One action only\n- Specific enough that someone new could follow it\n- Include examples or notes where helpful\n\nUse sub-bullets for optional variations or important warnings. Bold critical warnings.\n\n### Verification\nHow do you know it worked? What does success look like?\n\n### Troubleshooting\n2-3 most common failure modes and how to fix them.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# [Process Name]\n**Owner:** [name/role] | **Frequency:** [how often] | **Tools:** [list] | **Updated:** [date]\n\n## Purpose\n[one sentence]\n\n## Prerequisites\n- [ ] [thing that must be ready]\n\n## Steps\n1. [Action]\n   - Note: [important detail]\n2. [Action]\n3. ...\n\n## Verification\n[How to confirm it worked]\n\n## Troubleshooting\n| Problem | Fix |\n|---------|-----|\n| [issue] | [solution] |\n```\n\nKeep language plain. No jargon. Write for someone doing this for the first time.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

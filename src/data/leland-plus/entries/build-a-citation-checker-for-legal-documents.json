@@ -1,0 +1,215 @@
+{
+  "id": "urn:contentEntry:6ab9ae458e47898a1b509dd1",
+  "title": "Build a citation checker for legal documents",
+  "resourceType": "TUTORIAL",
+  "description": "A system that checks every citation in a draft against a live source before the document goes out.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae458e47898a1b509dd1",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "pull": {
+        "title": "Pull",
+        "content": "Downloading the latest changes from GitHub to your computer so your local copy is up to date. Claude pulls before starting work to make sure it's building on the newest version, not an old one."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "database": {
+        "title": "Database",
+        "content": "An organized place to store and retrieve data — like a spreadsheet on steroids. When Claude builds an app that remembers users or saves entries, it's reading from and writing to a database (often Supabase or Postgres)."
+      },
+      "workflow": {
+        "title": "Workflow",
+        "content": "A multi-step process Claude runs to accomplish a goal — for example: read emails → filter by topic → summarize → post to Slack. Workflows can be run manually or on a schedule."
+      },
+      "read-only": {
+        "title": "Read-only",
+        "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+      },
+      "hallucination": {
+        "title": "Hallucination",
+        "content": "When an AI confidently states something false as if it were fact. Not lying — the model doesn't know it's wrong. Always verify important claims, especially specific facts, dates, or citations."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Legal & Compliance"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "A public tracker maintained by legal researcher [Damien Charlotin](https://www.damiencharlotin.com/hallucinations) has logged 1,668 court decisions worldwide, 1,163 of them in the US, involving AI-hallucinated material, with new cases arriving at roughly eight per day as of mid-2026. A citation check run before a document ships catches that miscite before a judge does.",
+            "type": "prose"
+          },
+          {
+            "text": "The tools built specifically for legal research aren't a safety net on their own. A Stanford RegLab/HAI study found Lexis+ AI hallucinated in more than 17% of the queries it checked, and Westlaw AI-Assisted Research in more than 34%. The label \"legal AI\" doesn't stand in for a verification pass. ABA Formal Opinion 512 treats that verification as a duty the lawyer holds personally.",
+            "type": "prose"
+          },
+          {
+            "text": "Given a draft, this system checks each citation against a live source, confirms it exists, is still good law, and supports the point it's attached to, then flags anything it can't verify. Run it as a paste-in [prompt](#tooltip-prompt) before a document goes out, a saved skill you run before every filing, or a [tool connector](#tooltip-tool-connectors)-based gate wired into your document [workflow](#tooltip-workflow). Every version stays [read-only](#tooltip-read-only) against your source systems.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming the documents that get this treatment, your verification sources, and who signs off before something ships.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that checks every citation in a draft before it goes out, confirming each one exists, is still good law, and actually supports the point it's attached to. Ask me questions, one at a time, about what kinds of documents get this treatment, what sources I have access to for verification, how I want unverifiable citations flagged versus documents that pass clean, and who signs off before something ships. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview forces you to name your actual verification sources before you build."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Which verification sources you have licensed access to.",
+              "The threshold for mandatory human review versus a clean pass.",
+              "Where verified citations get logged so they aren't re-checked from scratch."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document, then gather any access it calls for. Common connectors are your legal research platform (Westlaw, Lexis, Fastcase), your document management system (iManage, NetDocuments, Clio) for [pulling](#tooltip-pull) the draft, and a court's public docket or PACER for filing-specific checks. The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Build your system and test it on a real draft. The prompt below is an example. Your scope document gives a version for your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Check every citation in [the attached draft] against a live source and report which ones are verified, which are stale or wrong, and which you couldn't confirm.\n\nContext: This document is for [internal memo/client-facing filing/brief]. Verification sources available: [Westlaw, Lexis, PACER, a specific court's public docket, primary statute text]. Prior drafts and their citation notes are in [location].\n\nRules:\n- Never confirm a citation exists based on how plausible it looks. Check the actual source text every time.\n- For each citation, report the exact language it's meant to support and whether the cited authority actually says that.\n- Flag anything you cannot independently verify as unverified, not as low-confidence, so it can't be missed.\n- Never soften a \"could not verify\" into an assumption.\n- Output as a table: citation, status (verified/stale/unverifiable), what it's cited for, and the source checked.",
+            "prompt_note": "How this prompt works: forcing a status label instead of a confidence score keeps an unverified citation from quietly reading as good enough."
+          },
+          {
+            "text": "**Review.** Check the table against your scope. Every citation checked against a live source, unverifiable ones flagged rather than softened?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what went wrong and fold each correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Build a running log of already-verified citations so repeat cites don't need a fresh check every time.",
+              "Add a jurisdiction-currency check that flags citations to law that's since been amended or overturned.",
+              "Extend the protocol to non-legal factual claims in the same document.",
+              "Add a pre-filing gate that blocks submission until the check has run."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat turn the scope bar into pass/fail checks and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each citation check, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, document checked, citations flagged, flags that turned out to be real problems, false positives, and what rule I changed. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make a flaky source or a noisy threshold visible after a few filings."
+          },
+          {
+            "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from the log. Once the rubric passes a few filings straight, package the prompt and rules into a skill. A check that keeps failing is a candidate for its own skill. [Claude](#tooltip-claude)'s skill-creator skill writes it, and a custom GPT does the same in ChatGPT.",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. Treating a single pass as sufficient is the same mistake that produced the sanctioned filings in the Charlotin [database](#tooltip-database). Build the check as a habit that runs every time.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Damien Charlotin, AI Hallucination Cases Database](https://www.damiencharlotin.com/hallucinations) — Case count and growth rate.",
+              "[Stanford RegLab, Hallucination-Free? Assessing the Reliability of Leading AI Legal Research Tools](https://reglab.stanford.edu/publications/hallucination-free-assessing-the-reliability-of-leading-ai-legal-research-tools) — [Hallucination](#tooltip-hallucination) rates by tool.",
+              "American Bar Association, Formal Opinion 512 (2024) — The lawyer's personal verification duty."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Build a system that summarizes contract changes](/content/item/urn:contentEntry:6ab9ae45ba94dffd909934ff) · Legal & Compliance",
+              "[Create financial reports with accurate data and formatting](/content/item/urn:contentEntry:6ab9ae39145f62682627ec04) · Finance",
+              "[PDF Toolkit](/content/item/urn:contentEntry:6ab9ae58254e58c5b5d3bee6) and [Research Brief](/content/item/urn:contentEntry:6ab9ae5a7cac5cd407ea82ef) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

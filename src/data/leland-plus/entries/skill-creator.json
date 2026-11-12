@@ -1,0 +1,107 @@
+{
+  "id": "urn:contentEntry:6ab9ae5e0956b5bf90dfec41",
+  "title": "Skill Creator",
+  "resourceType": "SKILL",
+  "description": "Build, test, evaluate, and iteratively improve agent skills, from capturing intent and writing a draft to running evals, reviewing outputs, and optimizing the trigger description.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5e0956b5bf90dfec41",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Coding"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Build new agent skills and iteratively improve them through a structured draft-test-evaluate-improve loop.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "the-core-loop",
+      "title": "The Core Loop",
+      "children": [
+        {
+          "text": "1. Understand what the skill should do\n2. Write a draft of the skill\n3. Run test prompts and evaluate results, both qualitatively and quantitatively\n4. Revise based on feedback\n5. Repeat until the skill performs well\n6. Optimize the description for reliable triggering\n\nFigure out where the user is in this process and jump in. If they have an idea, start from scratch. If they have a draft, go straight to testing.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "creating-a-skill",
+      "title": "Creating a Skill",
+      "children": [
+        {
+          "text": "### Capture Intent\n\nIf the current conversation already contains a workflow to capture (the user says \"turn this into a skill\"), extract the tools used, the sequence of steps, corrections made, and input/output formats from the history. Fill gaps with the user before proceeding.\n\nAnswer these:\n1. What should this skill enable the agent to do?\n2. When should it trigger? (what user phrases or contexts)\n3. What is the expected output format?\n4. Does the skill have objectively verifiable outputs? If yes, suggest setting up test cases. If outputs are subjective, qualitative review is usually enough.\n\n### Interview and Research\n\nAsk about edge cases, input/output formats, example files, success criteria, and dependencies before writing test cases. Check available tools and docs in parallel if relevant.\n\n### Write the SKILL.md\n\nFill in these components:\n\n- **name**: skill identifier\n- **description**: when to trigger and what it does. Make it slightly \"pushy\" to avoid undertriggering. Include specific contexts and user phrases.\n- **body**: the instructions, organized for clarity\n\n#### Skill File Structure\n\n```\nskill-name/\n├── SKILL.md (required)\n│   ├── YAML frontmatter (name, description required)\n│   └── Markdown instructions\n└── Bundled Resources (optional)\n    ├── scripts/    - executable code for repetitive tasks\n    ├── references/ - docs loaded into context as needed\n    └── assets/     - files used in output\n```\n\n#### Progressive Disclosure\n\nSkills use three levels:\n1. Metadata (name + description): always in context\n2. SKILL.md body: loaded when the skill triggers, keep under 500 lines\n3. Bundled resources: loaded as needed, unlimited\n\nKeep the SKILL.md body under 500 lines. If approaching the limit, split into reference files and add pointers.\n\n#### Writing Patterns\n\n- Use the imperative form in instructions.\n- Explain the *why* behind rules rather than just issuing commands.\n- Use examples. Format them as Input/Output pairs or labeled blocks.\n- Keep the prompt lean. Remove anything that is not pulling its weight.\n- Avoid ALL CAPS MUSTS where possible. Explain the reasoning instead.\n\n### Test Cases\n\nWrite 2-3 realistic test prompts. Share them with the user for approval, then run them.\n\nSave test cases to `evals/evals.json`:\n\n```json\n{\n  \"skill_name\": \"example-skill\",\n  \"evals\": [\n    {\n      \"id\": 1,\n      \"prompt\": \"User's task prompt\",\n      \"expected_output\": \"Description of expected result\",\n      \"files\": []\n    }\n  ]\n}\n```",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "running-and-evaluating-test-cases",
+      "title": "Running and Evaluating Test Cases",
+      "children": [
+        {
+          "text": "### Step 1: Spawn Runs\n\nFor each test case, spawn two subagents in the same turn: one with the skill, one without (baseline). Do not spawn with-skill runs first and come back for baselines.\n\nOrganize results in a workspace directory next to the skill:\n```\nskill-name-workspace/\n  iteration-1/\n    eval-0/\n      with_skill/outputs/\n      without_skill/outputs/\n      eval_metadata.json\n```\n\n### Step 2: Draft Assertions While Runs Are in Progress\n\nWrite quantitative assertions for each test case. Good assertions are objectively verifiable and have descriptive names. Subjective skills are better evaluated qualitatively. Update `eval_metadata.json` with assertions once drafted.\n\n### Step 3: Capture Timing Data\n\nWhen each subagent completes, save the timing notification data to `timing.json` in the run directory. This is the only opportunity to capture it.\n\n### Step 4: Grade, Aggregate, and Launch the Viewer\n\n1. Grade each run against assertions. Save results to `grading.json`. Use exact field names: `text`, `passed`, `evidence`.\n2. Aggregate results into `benchmark.json` and `benchmark.md` using the aggregation script.\n3. Do an analyst pass: flag assertions that always pass regardless of skill (non-discriminating), high-variance evals (possibly flaky), and time/token tradeoffs.\n4. Launch the eval viewer so the user can review outputs and leave feedback before you make revisions.\n\nTell the user: \"I've opened the results. The Outputs tab lets you click through each test case and leave feedback. The Benchmark tab shows the quantitative comparison. Come back when you're done.\"\n\n### Step 5: Read Feedback\n\nRead `feedback.json` when the user returns. Empty feedback means the output was fine. Focus improvements on test cases with specific complaints.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "improving-the-skill",
+      "title": "Improving the Skill",
+      "children": [
+        {
+          "text": "### How to Think About Improvements\n\n1. **Generalize from feedback.** The skill will run many times across many prompts. Avoid narrow, overfitted fixes. If a stubborn issue persists, try different metaphors or different structural patterns.\n2. **Keep the prompt lean.** Read the test transcripts, not just the final outputs. If the skill is causing the agent to waste time on unproductive steps, remove those parts.\n3. **Explain the why.** Transmit your understanding of the task into the instructions. When you explain reasoning, the agent can adapt intelligently rather than following brittle rules.\n4. **Bundle repeated work.** If all test runs independently wrote the same helper script, add it once to `scripts/` and tell the skill to use it.\n\n### The Iteration Loop\n\nAfter improving the skill:\n1. Apply improvements\n2. Rerun all test cases into a new `iteration-N+1/` directory, including baseline runs\n3. Launch the viewer with `--previous-workspace` pointing at the previous iteration\n4. Wait for user review\n5. Read feedback, improve, repeat\n\nStop when: the user is satisfied, all feedback is empty, or you are not making meaningful progress.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "description-optimization",
+      "title": "Description Optimization",
+      "children": [
+        {
+          "text": "After the skill is finalized, offer to optimize the description for better triggering accuracy.\n\n### Generate Trigger Eval Queries\n\nCreate 20 eval queries: a mix of should-trigger and should-not-trigger. Make them realistic and concrete, not abstract. Include file paths, user context, casual phrasing, and edge cases.\n\n```json\n[\n  {\"query\": \"the user prompt\", \"should_trigger\": true},\n  {\"query\": \"another prompt\", \"should_trigger\": false}\n]\n```\n\nThe most valuable negative cases are near-misses: queries that share keywords but need a different skill.\n\n### Review with User\n\nPresent the eval set and let the user edit it before running optimization. Bad eval queries produce bad descriptions.\n\n### Run the Optimization Loop\n\nRun the description optimization script with the eval set and skill path. It splits the set into train/test, evaluates the current description, proposes improvements, and iterates. The output includes a `best_description` selected by test score to avoid overfitting.\n\n### Apply the Result\n\nUpdate the skill's frontmatter with the best description. Show before/after and report scores.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "claude-ai-adaptations",
+      "title": "Claude.ai Adaptations",
+      "children": [
+        {
+          "text": "If subagents are not available:\n- Run test cases one at a time instead of in parallel\n- Skip baseline runs\n- Present results directly in the conversation instead of launching the viewer\n- Skip quantitative benchmarking\n- Skip description optimization (requires CLI tooling)\n- Packaging still works if Python is available",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

@@ -1,0 +1,170 @@
+{
+  "id": "urn:contentEntry:6aecf95b729c9f8dfbc9f6c9",
+  "title": "Build a one-page launch page for a new feature",
+  "resourceType": "TUTORIAL",
+  "description": "Builds one shareable web page from your release notes or PRD that says what changed, who it's for, how to use it, and what's next, plus a list of the internal tickets it left out and the questions you still need to answer.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6aecf95b729c9f8dfbc9f6c9",
+  "viewableFile": "build-a-one-page-launch-page-for-a-new-feature.mp4",
+  "thumbnail": "build-a-feature-launch-page.png",
+  "body": {
+  "tooltips": {},
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Product"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "children": [
+        {
+          "text": "When a feature ships, the people who have to explain it, like sales, support, and customers, usually get a ticket list or a PRD written for the team that built it. This build turns your release notes into one page you can open in a browser and share with them. You start with the release notes, a PRD, or a ticket export for one feature. Your AI reads them and builds a launch page that covers what changed, who the feature is for, how to use it step by step, and what's coming next. Anything your notes don't say becomes a question for you instead of a guess on the page, and it tells you which internal tickets it set aside.\n\nFirst you'll answer a few questions so it understands the feature and who will read the page. Then it builds the launch page from your answers, and you run it once on a real feature and fix whatever looks off. Plan on about 45 minutes the first time.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "setup",
+      "title": "Setup",
+      "children": [
+        {
+          "head": [
+            "You need",
+            "Why",
+            "How to set it up"
+          ],
+          "rows": [
+            [
+              "Release notes, a PRD, or a ticket list for one feature",
+              "Everything on the page comes from this material",
+              "Paste the text, or attach a PDF or Word file. For tickets, export a CSV from Jira, Linear, or your tracker."
+            ],
+            [
+              "The click path for each thing the feature does",
+              "Release notes often say what shipped, not how to use it, and the how-to steps come only from your material",
+              "Have the menu path or steps for each capability, or a short screen recording. Without them, the how-to keeps a labeled placeholder for each missing step."
+            ],
+            [
+              "The feature name, the release date or version, and who gets it",
+              "The page names the audience and says when the feature is available",
+              "Know which customers or plans get it. If the notes don't say, your AI asks you."
+            ]
+          ],
+          "type": "table",
+          "first_column_bold": true
+        },
+        {
+          "text": "**Nice to have:** If you have a design skill, a design guide, or your company's brand colors and fonts, call it or attach it in the chat so the page matches your docs and your app. Without one, the page uses a clean default look. Have screenshots of the feature ready by file name. Without them, the page keeps a labeled placeholder where each one belongs. If you have no real feature handy, ask your AI for a realistic set of release notes and practice on that.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build it with this prompt",
+      "children": [
+        {
+          "text": "Paste this into a new chat in your AI tool. It asks about your role and your work first, then builds, then tests what it built with you.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "label": "Prompt",
+          "prompt": "I want to build a one-page launch page for a new feature, as a single web page I can open in a browser and share, for my work. First, ask me what my role is and what I work on. Then walk me through it in three stages: Scope, Build, and Evaluate. Use whatever you can reach from this chat, like web search, file uploads, and any connector that fits, and show the page as an artifact or canvas if you can. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. What should the page include and in what order? For example what changed, who it's for, how to use it, and what's next.\n2. What will I give you: release notes, a PRD, or a ticket export? Ask me to paste or attach what I have now, and if I don't know where something is, note it and keep going. Also ask me for the feature name, the release date or version, and who gets it.\n3. Who reads this page first, and what do they need most: customers learning to use the feature, sales explaining it, or support answering questions?\n4. How often will I build one, and who sees the page besides me?\n5. What should the page never do or assume? For example, no dates, pricing, or availability that aren't in my notes, and no promises about features that are still being planned.\n6. What would make the page good? Help me turn my answer into three checks I can answer yes or no.\nThen write a short spec with my answers and the three checks. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, build the launch page.\n- Ask whether I have a design skill, a design guide, or brand colors and fonts I want the page to use, and tell me how to attach or call it. If I don't, use a clean default look.\n- Write for the reader I named. Use plain words and the product's own feature names.\n- Describe what changed in a short paragraph, in terms of what the reader can now do.\n- Write how-to steps only from steps in my material. If the notes don't say how something works, add a question to a list for me.\n- If the material mixes shipped and planned work, the \"what's next\" section may include only items my notes call planned, and each must be marked as not committed. If my notes are unclear about whether something is planned, ask me.\n- If tickets are internal, like refactors or bug fixes with no user effect, leave them out and tell me which ones.\n- If my sources disagree on a date, name, or plan, ask me which one is right.\n- If the notes name several audiences or plans, show who gets what in a short list, and ask me when it is unclear.\n- Never invent dates, pricing, plan names, availability, or numbers. If something is missing, put a labeled placeholder on the page and add it to my list.\n- Leave a clearly labeled placeholder where a screenshot belongs. Do not describe an image you haven't seen.\n- If I haven't given you something you need, ask me for it once and wait. Likely sources: release notes, a PRD as a PDF or Word file, and a ticket export as CSV.\n- Ask whether I have screenshots, and tell me how to attach them and place each one by file name. If my chat can't take attachments, ask me to paste the text and give the screenshot file names.\n- If you're unsure about something, ask me instead of guessing.\n- Output: one complete, self-contained HTML file in a single code block, with the styles inside the file. If my tool can show it as an artifact or canvas, show it there. Otherwise tell me to save the code as a file ending in .html and open it in my browser. After the code, list every ticket you left out and every ticket you used with the line each one supports, then the placeholders on the page, and the questions I still need to answer.\n\nStage 3: Evaluate\nGrade the launch page you just made from my real release notes against my three checks. Mark each one yes or no and quote the line that proves it. If any check fails, tell me the one change that would fix the most misses, make it, and run it again on the same notes. When all three pass, give me a reusable prompt, with my spec and my three checks, that I can paste into a new chat or a project to build a page for any future launch."
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "steps",
+      "title": "Steps",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "title": "Scope",
+              "children": [
+                {
+                  "text": "Your AI starts by asking about your role, then six questions one at a time. The third is where you choose who reads the page first, and that choice shapes everything after it. Once you've answered, it writes a short spec with three yes/no checks, and you confirm it before it builds anything.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Pick one primary reader. A page for customers and a page for support start from different questions, so write the one you need most and build the other later.",
+                    "**Tip:** Write one check about the \"what's next\" section, such as \"nothing appears there that my notes don't call planned.\" It is where launch pages most often over-promise."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "title": "Build",
+              "children": [
+                {
+                  "text": "With the spec confirmed, your AI asks whether you have a design guide or brand colors, then asks for your release notes, PRD, or tickets. It writes what changed in terms of what users can do now, builds the how-to from your own steps, and keeps a list of the internal tickets it left out and the questions it couldn't answer. You end up with one HTML page you can open in a browser and share.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Paste the PRD along with the release notes when you have both. The notes say what shipped, and the PRD usually says who it's for and why.",
+                    "**Tip:** Answer its open questions before you share the page. Each one marks a place where the notes were silent and a reader would have had to guess."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "title": "Evaluate",
+              "children": [
+                {
+                  "text": "Last, your AI grades the page it just built against your three checks and quotes the line that shows each one passing or failing. It fixes the biggest miss and rebuilds the page from the same notes, then hands you a reusable prompt.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Walk through the how-to steps in the real product once. If a step doesn't match what you see, tell your AI which one so it fixes the page, and fix your notes too.",
+                    "**Tip:** Keep the reusable prompt it gives you. At the next launch, paste it into a new chat with the new release notes and get a page back."
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a landing page generator](/content/item/urn:contentEntry:6ab9ae4888b15b8d44d92975) · Product",
+            "[Build an idea-to-PRD generator](/content/item/urn:contentEntry:6ab9ae43fd30fff006b1a5c7) · Product",
+            "[Build a feedback theme tracker](/content/item/urn:contentEntry:6ab9ae42324ca1079e90c3a6) · Product",
+            "[Frontend Design](/content/item/urn:contentEntry:6ab9ae532e3c8f48ccd36daf) and [Web Design Guidelines](/content/item/urn:contentEntry:6ab9ae61a504335da054eb3e) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

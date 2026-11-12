@@ -1,0 +1,225 @@
+{
+  "id": "urn:contentEntry:6ab9ae46ec5756f65592aa7e",
+  "title": "Build a 1:1 prep assistant",
+  "resourceType": "TUTORIAL",
+  "description": "A system that pulls prior notes, goals, and open commitments for one person before your 1:1 and hands you a short brief.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae46ec5756f65592aa7e",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "pull": {
+        "title": "Pull",
+        "content": "Downloading the latest changes from GitHub to your computer so your local copy is up to date. Claude pulls before starting work to make sure it's building on the newest version, not an old one."
+      },
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "notion": {
+        "title": "Notion",
+        "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "context": {
+        "title": "Context",
+        "content": "Everything Claude can 'see' in a given session — your messages, files you've shared, instructions, and conversation history. The more relevant context you give Claude, the better its output."
+      },
+      "trigger": {
+        "title": "Trigger",
+        "content": "The event that kicks off an automation, like 'new email received' or 'row added to a sheet.' Every Zapier or n8n workflow starts with a trigger and then runs the actions that follow."
+      },
+      "read-only": {
+        "title": "Read-only",
+        "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Leadership"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "Most 1:1 prep is just remembering what happened last time. A December 2025 Gartner survey found managers saved an average of four hours across the performance-management process when using AI to assist, per [Gartner's HR Leaders research](https://www.gartner.com/en/newsroom/press-releases/2026-4-22-hr-leaders-must-evolve-pay-for-performance-in-the-age-of-ai). This system does that assembly work for one recurring meeting. It pulls prior notes, stated goals, and open commitments for the person you're about to sit down with, then hands you a short brief on what changed and what to ask about.",
+            "type": "prose"
+          },
+          {
+            "text": "The system assembles [context](#tooltip-context), it never invents it. No history about a person should appear in the brief unless it came from an actual prior note, and if there isn't enough written down, the brief says so instead of guessing.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a paste-in [prompt](#tooltip-prompt) before each 1:1, a saved [skill](#tooltip-skill), or a scheduled [agent](#tooltip-agent) triggered off your calendar. Every version stays [read-only](#tooltip-read-only) against your notes.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming where your 1:1 notes live, what the brief should include and exclude, and how far back it should look.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that prepares me for each 1:1 by pulling together prior notes, goals, and open commitments for that person. Ask me questions, one at a time, about where my 1:1 notes currently live, what I want the brief to include and exclude, how far back it should look, and what should never be summarized without me double-checking it first. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview forces you to name what counts as real context before you ever see a brief, so nothing gets summarized that you haven't already vetted."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Where 1:1 notes live today, a shared doc, [Notion](#tooltip-notion), or your own scratch notes.",
+              "How far back the system should pull from.",
+              "Whether this tool touches anything beyond your own notes or stays scoped to 1:1 history alone."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your notes tool (Notion, Google Docs, or a notetaker like Fathom or Otter), your calendar to [trigger](#tooltip-trigger) prep on schedule, and your task tracker if commitments live there instead of in notes. The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Start building the system your scope document describes, and test it on the actual notes for the person you're about to meet. The prompt below is an example. Your scope document will give you a version shaped to your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Build a short pre-1:1 brief for [person's name] using only what's in their notes history.\n\nContext: Their notes live in [Notion / Google Docs / a spreadsheet]. Their current goals are [list, or \"pull from most recent notes\"]. Last 1:1 was [date].\n\nRules:\n- Only use information that appears in the actual notes provided.\n- Never infer or assume anything about performance, sentiment, or history that isn't written down.\n- Structure the brief as: Open commitments from last time, What's changed since, Suggested topics to raise.\n- Keep it under 150 words.\n- If there's not enough prior context, say so instead of filling gaps.",
+            "prompt_note": "How this prompt works: restricting it to only what's in the notes keeps the brief from turning into a guess dressed up as memory."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. Only sourced facts, right structure, under the word limit?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what went wrong and fold the correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Add a pattern-spotting pass across several 1:1s for recurring themes and stalled commitments.",
+              "Build a parallel version for skip-levels.",
+              "Add a privacy filter for what should never enter the tool at all.",
+              "Run it again right after the meeting to prep your own notes."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric), not a feel check. Have your AI chat draft the rubric and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each pre-1:1 brief, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, person, commitments surfaced, anything flagged as unsupported, and what I changed in the rules. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks catch invented context immediately, and the log surfaces a pattern of padded detail before it does damage."
+          },
+          {
+            "text": "**Log** every run against the rubric. Note the date, what passed or failed, and what changed. It shows whether the brief is [pulling](#tooltip-pull) from your notes. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from the log. Once the rubric passes a few weeks straight, package the prompt and corrected rules into a reusable AI skill. A check that keeps failing is your next candidate. [Claude](#tooltip-claude)'s skill-creator skill interviews you and writes it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. It has to say when there isn't enough history, because a brief that fills gaps with a plausible-sounding guess about a person is worse than no brief at all.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Gartner, HR Leaders Must Evolve Pay for Performance in the Age of AI](https://www.gartner.com/en/newsroom/press-releases/2026-4-22-hr-leaders-must-evolve-pay-for-performance-in-the-age-of-ai) — The time-saved stat."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Automate action items from your meeting notes](/content/item/urn:contentEntry:6ab9ae3f6e098a0cda79a8fd) · Operations",
+              "[Automate interview debrief summaries](/content/item/urn:contentEntry:6ab9ae43c5f7e67a49fb2dc8) · HR & Recruiting",
+              "[Meeting Prep](/content/item/urn:contentEntry:6ab9ae575970ee9cdf0c866b) and [Meeting Analyzer](/content/item/urn:contentEntry:6ab9ae572155c4d377d9627e) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

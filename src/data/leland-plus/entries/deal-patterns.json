@@ -1,0 +1,96 @@
+{
+  "id": "urn:contentEntry:6ab9ae5173f3cd3982700b2c",
+  "title": "Deal Patterns",
+  "resourceType": "SKILL",
+  "description": "Analyze 12 variables across closed deals to identify what predicts wins and losses, so you can replicate what works and cut what doesn't",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5173f3cd3982700b2c",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Data"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Find the variables that predict whether a deal closes. Work from the deal data the user provides or pastes.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "the-12-variables",
+      "title": "The 12 Variables",
+      "children": [
+        {
+          "text": "| # | Variable | What to Measure |\n|---|----------|----------------|\n| 1 | Time to first reply | How quickly did they respond to the initial offer? |\n| 2 | Email open count | How many times did they open emails? |\n| 3 | Price sensitivity | Did the deal close at ask price, or require drops? |\n| 4 | Number of price drops | How many drops before close or loss? |\n| 5 | Days in pipeline | Total time from offer to close or loss |\n| 6 | Stage velocity | How long did the deal sit in each stage? |\n| 7 | Product category | Which categories have the highest win rate? |\n| 8 | Deal size | Do larger or smaller deals close at higher rates? |\n| 9 | Inbound vs. triggered | Did they initiate, or were they reactivated? |\n| 10 | Objection count | How many objections were raised? |\n| 11 | Thread activity | Active exchange or one-sided communication? |\n| 12 | Deadline proximity | Did timing or urgency correlate with close? |",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-gather-the-deals",
+      "title": "Step 1, Gather the Deals",
+      "children": [
+        {
+          "text": "Ask the user to provide closed-won and closed-lost deal data for the time range or segment they want to analyze. Collect as many of the 12 variables as available for each deal.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-compare-won-vs-lost",
+      "title": "Step 2, Compare Won vs. Lost",
+      "children": [
+        {
+          "text": "For each variable, compare averages between won and lost deals. Flag variables where the gap is significant.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-identify-predictors",
+      "title": "Step 3, Identify Predictors",
+      "children": [
+        {
+          "text": "Determine which 3-4 variables most clearly separate wins from losses. These are the leading indicators.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Deal Pattern Analysis: [Segment / Time Range]\n[N] won | [N] lost analyzed\n\n## Variable Comparison\n\n| Variable | Won Avg | Lost Avg | Predictive? |\n|----------|---------|----------|-------------|\n| Time to first reply | [n days] | [n days] | Yes/No |\n| Price drops before close | [n] | [n] | Yes/No |\n| Days in pipeline | [n] | [n] | Yes/No |\n| [etc.] | | | |\n\n## Top Predictors of a Win\n1. [variable], [what the data shows]\n2. [variable], [what the data shows]\n3. [variable], [what the data shows]\n\n## Top Predictors of a Loss\n1. [variable], [what the data shows]\n\n## Recommended Changes\n1. [specific change to process, sequence, or qualification]\n2. [specific change]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

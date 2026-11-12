@@ -1,0 +1,213 @@
+{
+  "id": "urn:contentEntry:6ab9ae4741630527e17420c2",
+  "title": "Create a running record of your team's strategic decisions",
+  "resourceType": "TUTORIAL",
+  "description": "A system that turns meeting transcripts into a searchable log of what your team decided, who owns it, and what's still open.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4741630527e17420c2",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    },
+    "personal-knowledge-base": {
+      "title": "Personal Knowledge Base",
+      "content": "A store of your own accumulated knowledge — notes, decisions, references — organized so an AI can search and use it. The difference from a pile of documents: structure and maintenance. Level 2 builds one as a wiki."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Leadership"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Oracle research cited in [Deloitte's 2026 Global Human Capital Trends](https://www.deloitte.com/us/en/insights/topics/talent/human-capital-trends/2026/decision-making-with-ai.html) found 72% of leaders say data overload and a lack of trust in their own data has stalled decisions entirely. Much of that is a memory problem. This system reads a meeting transcript or your notes and adds one entry to a running decision log, naming what was decided, who owns it, the deadline, and what's still open.",
+          "type": "prose"
+        },
+        {
+          "text": "As AI takes on more of the analysis behind a decision, the paper trail of what a team committed to becomes the thing that stops settled questions from getting reopened.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a paste-in [prompt](#tooltip-prompt) right after any meeting that ends in a real call, a saved [skill](#tooltip-skill) your whole team can invoke, or a scheduled [agent](#tooltip-agent) that pulls from your meeting notetaker on its own. Every version writes into your existing [knowledge base](#tooltip-personal-knowledge-base) rather than a new tool to check.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming which meetings feed the log, where the record lives, what counts as a real decision, and who can search it.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that turns our meeting transcripts and notes into a running record of the strategic decisions we've made. Ask me questions, one at a time, about which meetings should feed this, where the record should live, what counts as a real decision versus just a discussion, and who needs to be able to search it later. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview forces you to define \"a real decision\" before the tool ever sees a transcript, so the log doesn't fill up with things that were only discussed."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where the record itself lives and who can search it.",
+            "Whether it's fed from raw transcripts or from someone's cleaned-up notes.",
+            "How far back you backfill versus starting fresh from today."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common connectors are your meeting notetaker (Fathom, Otter, Fireflies) for the transcript, your knowledge base ([Notion](#tooltip-notion), Confluence) to host the log, and your task tracker (Asana, Linear) if an owner needs a linked task. The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Start building the system your scope document describes, and test it on a real transcript or a fresh set of notes. The prompt below is an example. Your scope document will give you a version shaped to your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Extract the actual decisions from this meeting transcript and add them to our running decision log.\n\nContext: Here's the transcript or notes: [paste]. Our log format tracks: date, decision, owner, deadline, and open questions.\n\nRules:\n- Only log something as a decision if the group committed to it, not if it was floated or debated without resolution.\n- Separate decisions from action items, they're not the same thing.\n- Flag anything that sounded like a decision but had no clear owner assigned.\n- Output in a format I can paste directly into [Notion / a spreadsheet].",
+          "prompt_note": "How this prompt works: separating decisions from action items keeps the log from filling with tasks, and the missing-owner flag catches decisions that would otherwise quietly die for lack of an owner."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Real decisions only, owners flagged when missing, format ready to paste in?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what it missed or over-logged, and fold the correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Connect it through a [tool connector](#tooltip-tool-connectors) so entries log right after each meeting.",
+            "Add a quarterly review pass that surfaces decisions nobody followed up on.",
+            "Build a check that flags when a new decision contradicts a past one.",
+            "Tag decisions by initiative so a new hire can read one project's history."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft the rubric and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each decision-log entry, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for meeting date, decisions logged, decisions missing an owner, decisions later contradicted, and what I changed. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call on what counts as a decision, and the log columns surface missing owners and contradictions after a few weeks of entries."
+        },
+        {
+          "text": "**Log** every entry against the rubric. Note the date and what changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from the log. Once the rubric passes a few weeks straight, package the prompt and rules into a reusable AI skill. A repeated miss is your next candidate. [Claude](#tooltip-claude)'s skill-creator skill interviews you and writes it; a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. It can't tell a real decision from a discussion unless you draw that line for it, so don't let it fill in an owner or a deadline that was never assigned.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Deloitte, 2026 Global Human Capital Trends](https://www.deloitte.com/us/en/insights/topics/talent/human-capital-trends/2026/decision-making-with-ai.html) — The data-overload, stalled-decisions stat."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a decision memo system](/content/item/urn:contentEntry:6ab9ae473114f3949ff76459) · Leadership",
+            "[Automate action items from your meeting notes](/content/item/urn:contentEntry:6ab9ae3f6e098a0cda79a8fd) · Operations",
+            "[Meeting Analyzer](/content/item/urn:contentEntry:6ab9ae572155c4d377d9627e) and [Notion Task Manager](/content/item/urn:contentEntry:6ab9ae584ab0c4b844679dcb) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

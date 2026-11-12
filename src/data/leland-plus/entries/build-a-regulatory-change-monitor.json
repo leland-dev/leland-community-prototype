@@ -1,0 +1,234 @@
+{
+  "id": "urn:contentEntry:6ab9ae4631f07f264a42e01b",
+  "title": "Build a regulatory change monitor",
+  "resourceType": "TUTORIAL",
+  "description": "A system that scans the regulatory sources you track and sends a short cited digest of what changed and why it matters.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4631f07f264a42e01b",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "n8n": {
+      "title": "n8n",
+      "content": "A workflow automation tool (pronounced \"n-eight-n\") that chains apps together on a trigger — like Zapier or Make. Used in Level 2 to run multi-step automations across Gmail, Slack, Notion, and other apps without writing code."
+    },
+    "cron": {
+      "title": "Cron",
+      "content": "A scheduler that runs a task on a repeating clock — like 'every weekday at 9am' or 'the first of every month.' When you set up an automation to email you a daily report, a cron job is what fires it off."
+    },
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "slack": {
+      "title": "Slack",
+      "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "zapier": {
+      "title": "Zapier",
+      "content": "A no-code automation tool that connects apps with simple triggers and actions. The most popular workflow builder for non-technical users. Similar to Make and n8n, with the largest app library and the friendliest interface."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "context": {
+      "title": "Context",
+      "content": "Everything Claude can 'see' in a given session — your messages, files you've shared, instructions, and conversation history. The more relevant context you give Claude, the better its output."
+    },
+    "routine": {
+      "title": "Routine",
+      "content": "A cloud-based scheduled task that runs automatically even when your computer is off. Routines have access to tool connectors (Gmail, Slack, etc.) and can run on any schedule you set. In Level 3, routines are the heartbeat for Claude Code Dispatch agents — created via `/schedule` or `CronCreate`, they translate to standard cron syntax under the hood."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Legal & Compliance"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Regulations change on their own schedule. The [Claude Legal plugin](https://claude.com/plugins/legal) already ships a /brief command that generates contextual daily briefings, and [Thomson Reuters](https://www.thomsonreuters.com/en-us/posts/technology/ai-guide-for-legal-professionals-foundational-overview) calls ongoing regulatory monitoring a baseline expectation for legal teams now.",
+          "type": "prose"
+        },
+        {
+          "text": "This system scans the sources you name, an agency's rulemaking page, a state register, a trade group bulletin, on a schedule you set. Each run produces a short cited [digest](#tooltip-context) of what changed and why it might matter to your organization.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a weekly paste-in [prompt](#tooltip-prompt), a saved [skill](#tooltip-skill), or a scheduled [agent](#tooltip-agent) that posts to [Slack](#tooltip-slack) or lands in a shared doc. A digest that shows up on its own catches a source you'd otherwise forget to check.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your sources, your cadence, and your delivery channel.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that watches specific regulatory or legal sources and sends me a short digest of what changed and why it matters to my organization. Ask me questions, one at a time, about which sources I need to watch, how often changes actually happen there, who on my team needs to see this and how they want to receive it, what counts as relevant versus noise, and what happens when something urgent shows up outside the normal schedule. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: separating cadence from urgency keeps it from missing a real deadline or paging you for [routine](#tooltip-routine) noise."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Which sources update often enough to justify a scheduled check.",
+            "Where the digest should land, based on how your team already reads things like this.",
+            "Who owns updating the source list as your regulatory footprint changes."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first in a fresh session or a different [model](#tooltip-model) and ask it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your scheduling tool ([n8n](#tooltip-n8n), [Zapier](#tooltip-zapier), a [cron job](#tooltip-cron)), your team chat (Slack, Microsoft Teams) for delivery, and a document store (Google Drive, [Notion](#tooltip-notion), SharePoint) for the digest archive. The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Start building the system your scope document describes, and test it on your actual source list. The prompt below is an example of the core task. Your scope document will give you a version shaped to your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Scan [list your specific regulatory sources, e.g. a state agency's rule-change page, the Federal Register API, a specific trade association bulletin] for anything published since the last run, and produce a short cited digest of what's new and why it matters to [your organization/team].\n\nContext: We operate in [industry/jurisdiction]. Prior digests and a running log of already-flagged items are in [folder/tool]. Our internal policies these changes might touch live in [location].\n\nRules:\n- Only include items published or updated since the last run date.\n- Quote the exact source language for anything you flag as a change, with a link.\n- Never summarize a rule from memory; pull the current text each time.\n- If a source is unreachable, say so explicitly rather than skipping it silently.\n- Flag anything that looks urgent (short compliance deadline, enforcement action) at the top, separate from routine items.\n- Output format: one paragraph per item with source name, what changed, why it matters, and a direct link, newest first.",
+          "prompt_note": "How this prompt works: requiring a quote and a link for every flagged change keeps the digest checkable instead of asking anyone to take a summary on faith."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Urgent items separated out, every change quoted and linked, no source skipped?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what went wrong and fold the correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Add a second pass that drafts a one-paragraph impact note for each flagged item.",
+            "Build a searchable archive of past digests so patterns over time become visible.",
+            "Add a jurisdiction filter so a multi-state team only sees what applies to their footprint.",
+            "Wire an escalation path that pings a specific owner when something hits a hard deadline."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft the rubric and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each digest, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, sources checked, items flagged, items that turned out to matter, false positives, and what rule I changed. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make recurring noise visible after a few weeks of runs."
+        },
+        {
+          "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the system passes the rubric a few weeks straight, package the prompt and your corrected rules into a reusable AI skill, so every run starts from your defaults instead of a blank chat. When the log shows the same check failing again and again, that gap is a candidate for a skill of its own. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write the skill for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. A monitor that fires but nobody reads becomes worse than no monitor, because it creates false confidence that someone is watching. Keep the source list and relevance rules current as your business changes.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Anthropic, Claude Legal plugin](https://claude.com/plugins/legal) — Confirms the /brief command as a shipped feature for scheduled legal briefings.",
+            "[Thomson Reuters Institute, AI Guide for Legal Professionals: A Foundational Overview](https://www.thomsonreuters.com/en-us/posts/technology/ai-guide-for-legal-professionals-foundational-overview) — Supports the framing that ongoing monitoring is now baseline practice."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build an audit evidence collector](/content/item/urn:contentEntry:6ab9ae4429ab70d81848c1fd) · Legal & Compliance",
+            "[Create a weekly competitor research report](/content/item/urn:contentEntry:6ab9ae4225cab744782f9dbf) · Product & R&D",
+            "[Slack Digest](/content/item/urn:contentEntry:6ab9ae5ecf30b8c16a8a74b2) and [Research Brief](/content/item/urn:contentEntry:6ab9ae5a7cac5cd407ea82ef) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

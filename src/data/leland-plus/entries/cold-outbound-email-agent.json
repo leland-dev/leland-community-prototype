@@ -1,0 +1,550 @@
+{
+  "id": "urn:contentEntry:6ab9ae4e8de3334917ca9d31",
+  "title": "Cold Outbound Email Agent",
+  "resourceType": "TUTORIAL",
+  "description": "Build an agent that researches prospects, writes personalized first-touch emails, and queues them for your review. No code required.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4e8de3334917ca9d31",
+  "viewableFile": "buil session17.mp4",
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "meta": {
+    "mins_total": 60
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "outcomes",
+      "children": [
+        {
+          "text": "Led by **Jonathan McLemore**",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Understand the difference between chatting with AI and running a repeatable agent workflow",
+            "Connect Claude Cowork to a workspace folder and lead list file",
+            "Build a reusable Cold Outbound Email Agent using plain English, no code required",
+            "Run the agent on real prospects and review a queue of personalized first-touch emails",
+            "Apply the human review gate and understand the path from queue to live campaign"
+          ],
+          "title": "What you'll build",
+          "variant": "check"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "intro",
+      "title": "Session intro",
+      "children": [
+        {
+          "text": "**What to have ready before we start**",
+          "type": "prose"
+        },
+        {
+          "text": "A few things to prepare before the build begins. Send the pre-work checklist to attendees 3–4 days ahead so no one is installing software during session time.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Claude desktop app installed and signed in (claude.ai/download)",
+            "Cowork mode available on your Claude account",
+            "A folder named cold-outbound-agent created on your Desktop",
+            "A leads.csv file with 3–5 real prospects inside that folder (template in Build 1)",
+            "One or two sentences ready describing what you sell or offer"
+          ],
+          "variant": "check"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-1",
+      "title": "1. Connect Cowork to Your Workspace",
+      "subtitle": "Open Cowork, connect your folder, add your lead list, and verify the connection",
+      "children": [
+        {
+          "text": "**Chat vs. agent: what's the difference?**",
+          "type": "prose"
+        },
+        {
+          "text": "When you chat with Claude, you send one message and get one response. That's useful for one-off questions, but it doesn't scale.\n\nAn agent is different. You give it a list and a set of instructions, and it processes every row the same way: researching each person, writing each email, saving each file, without you manually prompting each step.\n\nToday you're building the second kind: a workflow that handles the repetitive work of outbound research and personalization at scale, with you in control of what goes out.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Web research**: Claude searches public sources for each prospect. No paid data tools required.",
+            "**File access**: Claude reads your lead list CSV and writes finished emails to your folder",
+            "**Skills**: saved, reusable workflow definitions you can run on any future list"
+          ],
+          "title": "What Cowork makes possible"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Open Cowork",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Launch the Claude desktop app",
+                    "Switch on Cowork mode"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Connect your workspace folder",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Click the folder icon or \"Add Folder\" option in Claude",
+                    "Navigate to your cold-outbound-agent folder and select it",
+                    "Claude now has permission to read from and write to this folder"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Make sure your lead list is in the folder",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Drop your leads.csv file inside the cold-outbound-agent folder",
+                    "Each row should have: name, title, company, website",
+                    "Three to five prospects is plenty for the live session"
+                  ]
+                },
+                {
+                  "text": "[Download sample leads.csv](https://public-shareable-files.s3.us-west-2.amazonaws.com/ai-builder/downloads/cold-outbound-sample-leads.csv)",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Test the connection",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "label": "Test prompt",
+                  "prompt": "Read leads.csv in this folder and tell me how many prospects are in it.",
+                  "prompt_note": "If Claude reports the correct count, your workspace and lead list are connected. You're ready to build."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "No lead list yet? Let Claude create one",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "type": "prompt",
+              "prompt": "Create a file called leads.csv in this folder with these sample rows:\n\nname,title,company,website\nJane Doe,VP Operations,Acme Logistics,acmelogistics.com\nSam Lee,Director of Marketing,Brightpath Co,brightpath.co\nAlex Kim,Founder,Northwind Studio,northwindstudio.com\n\nI'll replace these with my actual prospects before running the agent.",
+              "prompt_note": "Claude creates the file in your connected folder. Swap in your real prospects before you run the agent."
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Claude says it can't find the file",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Make sure leads.csv is directly inside the folder you connected, not inside a subfolder. If Claude still can't see it, disconnect and reconnect the folder, then ask: \"What files do you see in this folder?\"",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Cowork mode isn't available on my account",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Cowork mode requires a Claude Pro or Team account. If it's not showing, check that you're signed in and that your plan includes Cowork. Free accounts don't have access.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Using Codex Desktop or another AI platform?",
+          "children": [
+            {
+              "text": "The steps are nearly identical — the only difference is naming. Where these instructions say \"Cowork,\" Codex Desktop calls it \"Projects.\" Where we say \"Skills,\" Codex uses custom instructions saved to a file. All the prompts copy over as-is.",
+              "type": "prose"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-2",
+      "title": "2. Build the Agent",
+      "subtitle": "Paste the build prompt, fill in your offer and name, and let Claude create the reusable skill",
+      "children": [
+        {
+          "text": "**What is a \"skill\" in Cowork?**",
+          "type": "prose"
+        },
+        {
+          "text": "A skill is a saved, reusable workflow definition inside Claude Cowork. Once you create it, you can trigger it on any lead list without repasting the instructions.\n\nWhen you paste the prompt below, Claude will build the cold-outbound-agent skill in your workspace. After that, running it on a new list is as simple as: \"Run the cold outbound agent on [filename].\"",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Research**: public sources only. Company site, blog, recent news, LinkedIn, job postings, podcasts.",
+            "**Write**: one personalized first-touch email under 120 words, with one specific, genuine hook",
+            "**Save**: each email as its own file in a queue subfolder, named after the prospect",
+            "**Summarize**: a table of all queued emails when the full list is done"
+          ],
+          "title": "What this skill will do for every prospect"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Fill in the two bracketed lines with your own offer and name, then paste the full prompt into Claude.",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "label": "Build prompt",
+                  "prompt": "Create a reusable skill called \"cold-outbound-agent\".\n\nWhat it should do: I will give you a lead list — a CSV file in this folder with one prospect per row (columns: name, title, company, website). For EACH prospect on the list:\n\n1. Research the person and their company using free, public web sources only — company website and blog, recent news, job postings, LinkedIn, podcasts, press. No paid data tools.\n2. Write one short, personalized first-touch cold email from me. Rules: under 120 words; open with one specific, genuine hook from your research — never generic flattery; connect that hook to what I offer; end with one low-friction question.\n3. Save the email as its own file in a \"queue\" folder inside this workspace, named after the prospect.\n\nMy offer: [one or two sentences on what you sell or do].\nSign emails from: [your name], [your company].\n\nWhen the whole list is done, show me a summary table of every queued email. Never send anything — I approve each email myself.",
+                  "prompt_note": "Replace [your offer] and [your name / your company] before sending. Everything else stays as written. Claude will confirm when the skill is ready."
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Review what Claude built",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Read Claude's response and verify the skill description matches your intent",
+                    "Check that the offer language sounds like you, not a template"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Adjust in plain English if anything is off",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "\"Make the tone more casual\"",
+                    "\"Always include the company name in the subject line\"",
+                    "\"Keep every email under 100 words\"",
+                    "You can refine as many times as you like before running the agent on your list"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "text": "The best hook is one specific thing you genuinely found: a recent blog post, a job posting that signals a priority, a podcast appearance, a product launch. Generic compliments like \"I loved your recent content\" read as automation. One real detail signals a person actually looked.",
+          "type": "callout",
+          "title": "What makes a strong hook"
+        },
+        {
+          "text": "If creating a named skill in Cowork is unavailable in your session, save the build prompt as a plain text file called agent-instructions.txt in your workspace folder. Then trigger runs by pasting: \"Follow the instructions in agent-instructions.txt and run on leads.csv.\"",
+          "type": "callout",
+          "title": "Fallback if skill creation is unavailable"
+        },
+        {
+          "type": "toggle",
+          "label": "Level 1",
+          "title": "Apply a voice filter to the output",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "Well-researched emails can still read as AI-written: overly clean, same rhythm, no texture. A humanize-writing skill catches the common tells: hollow phrases, over-hedged sentences, structural patterns that give it away.\n\nIf you built this skill in earlier levels or sessions (L1S2), you already have it. If not, get it from the [Humanize Writing skill page](/content/item/urn:contentEntry:6ab9ae5366b7c1942a3d3696) and upload it to Claude under Customize > Skills.",
+              "type": "prose"
+            },
+            {
+              "type": "prompt",
+              "label": "Apply humanize-writing",
+              "prompt": "Use my humanize-writing skill. Read each email file in the queue folder. For each one, apply the skill to strip AI tells and tighten the prose. Save the revised versions back to the same files.",
+              "prompt_note": "The skill strips hollow openers, over-hedged sentences, and structural patterns that read as AI-generated. It won't touch the research or the hook, just the prose quality."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-3",
+      "title": "3. Run the Agent on Your List",
+      "subtitle": "Trigger the agent, watch it work through each prospect, and review the queue",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Run the agent on your lead list",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "label": "Run prompt",
+                  "prompt": "Run the cold outbound agent on leads.csv.",
+                  "prompt_note": "That's all it takes. Claude will loop through every row in your CSV: researching each prospect, writing each email, saving each file to the queue folder."
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Watch it work through the list",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Claude will narrate its progress as it researches each prospect",
+                    "For each person: it searches public sources, identifies a specific hook, drafts the email, saves the file",
+                    "A list of 3–5 leads will typically finish in a few minutes"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Open the queue folder and read each email",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Open the queue subfolder inside cold-outbound-agent on your computer",
+                    "You'll find one file per prospect, named after them",
+                    "For each email ask: Is the hook specific and accurate? Does it sound like me? Is the ask easy to say yes to?"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Review the summary table",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "When the full list is done, Claude will show a summary table of every queued email",
+                    "Use this to spot patterns: which hooks feel strong, which emails need a rewrite, which prospects to skip"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "text": "(1) Is the hook specific to this person, something a human would actually notice? (2) Does it connect their situation to your offer without overselling? (3) Is the ask low enough friction that a busy person would reply?\n\nIf any answer is no, tell Claude what to fix before approving.",
+          "type": "callout",
+          "title": "Three questions for every email"
+        },
+        {
+          "type": "toggle",
+          "title": "Agent stops mid-list",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Long lists can hit Claude's response limit. If the agent stops before finishing, paste: \"Continue from [last prospect name].\" The queue folder will already contain the completed emails from the first pass; it won't duplicate them.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Queue folder wasn't created",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Ask Claude: \"Create a queue subfolder inside cold-outbound-agent and save each email there.\" On its first run, it may need explicit permission to create new folders in your workspace.",
+              "type": "prose"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-4",
+      "title": "4. Review Gate & Queue for Sending",
+      "subtitle": "Approve each email, rewrite what missed, and understand the path from queue to live campaign",
+      "children": [
+        {
+          "text": "**Why the human gate matters**",
+          "type": "prose"
+        },
+        {
+          "text": "The agent researches, drafts, and queues. It never sends on its own. That's by design.\n\nPersonalization makes outbound cheap to produce, but a bad email still damages a relationship. The review gate is where your judgment replaces the agent's: you catch hooks that missed the mark, tone that's off, and asks that are too heavy.\n\nOne well-crafted email beats ten mediocre ones. The agent handles volume; you handle quality control.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Approve**: email is ready as written. Move it to the send queue.",
+            "**Rewrite**: give Claude plain-English feedback and it will revise the file",
+            "**Skip**: some prospects aren't a fit right now. Removing them is the right call."
+          ],
+          "title": "Three actions at the review gate"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Approve or reject each email",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Read each queued email and decide: approve, rewrite, or skip",
+                    "Tell Claude which to keep and which to fix, for example:",
+                    "\"Approve the Acme and Northwind emails. Rewrite the Brightpath one: the hook is too generic, dig for something more specific from their site.\""
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Rewrite emails that missed",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Give Claude specific feedback: \"The opener sounds like a template\" or \"Make this warmer, less salesy\"",
+                    "Claude will revise and save the updated version back to the queue folder"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Queue approved emails for sending",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "The approved queue is your campaign input: human-reviewed, ready-to-send emails.",
+                    "Move them into a sending tool like Smartlead.ai, which sends from a warmed inbox",
+                    "The sending tool stages the campaign paused. Give it a final read and start it.",
+                    "The agent never sends on its own at any point in this workflow"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Personalization makes it cheap to write 50 emails. Warmed inboxes still cap safe sending at roughly 30 to 50 per day. A short list of well-researched prospects consistently outperforms a blasted list. Quality over volume.",
+          "type": "callout",
+          "title": "Keep volume responsible"
+        },
+        {
+          "type": "toggle",
+          "label": "Level 2",
+          "title": "Connect your queue to Smartlead.ai",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "Smartlead sends cold emails from warmed inboxes, which keeps your domain off spam blacklists. Once your queue folder has approved emails, the setup takes about 30 minutes.\n\n1. Sign up at smartlead.ai and complete inbox warm-up (Smartlead walks you through it on signup)\n2. Create a new campaign and add your approved email content\n3. Set a daily send limit of 30 to 50 per day for a warmed inbox\n4. Stage the campaign paused, do a final read, then start it\n\nThe human review gate you built today stays in place: the agent queues, you approve, Smartlead sends.",
+              "type": "prose"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "wrap",
+      "title": "Summary & next steps",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "Connected Claude Cowork to a workspace folder and a CSV lead list",
+            "Built a reusable Cold Outbound Email Agent using plain English, no code required",
+            "Ran the agent on real prospects and generated a queue of personalized first-touch emails",
+            "Applied the human review gate: approved, rejected, and rewrote emails as needed",
+            "Understood the path from review queue to warmed-inbox campaign via a sending tool"
+          ],
+          "title": "What you built today"
+        },
+        {
+          "text": "**After the session: what to do next**\n\n1. **Point the agent at a real list.** Replace the sample leads with your actual prospects and run a full queue.\n2. **Sharpen your offer.** Add a past win or a specific result so the agent writes with more credibility.\n3. **Set up Smartlead.ai.** Connect a warmed inbox and wire your approved queue into a live campaign (human review gate stays in place).\n4. **Scale when ready.** Grow the list and let the agent work longer batches. The workflow pattern is the same.",
+          "type": "prose"
+        },
+        {
+          "type": "toggle",
+          "title": "What else can this workflow pattern do?",
+          "children": [
+            {
+              "text": "The same pattern applies anywhere you do repetitive, personalized outreach: give an agent a list, let it research and write, review before sending.\n\n**Job applications**: research each company, draft a tailored cover letter, queue for your review.\n**Partnership outreach**: find a specific hook for each potential partner, draft the first message.\n**Investor updates**: pull public milestones for each portfolio company, draft context-aware updates.\n**Event follow-ups**: research attendees before a conference, draft personalized post-event messages.\n\nYou built the pattern today. Point it at a different list and it works the same way.",
+              "type": "prose"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

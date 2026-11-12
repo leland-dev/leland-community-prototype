@@ -1,0 +1,165 @@
+{
+  "id": "urn:contentEntry:6aecf927fb1c2834e44ec97e",
+  "title": "Build a one-page budget summary for your team",
+  "resourceType": "TUTORIAL",
+  "description": "Turns a budget export into one shareable web page that shows plan against actual, the five biggest lines, one callout on what stands out, and what comes next.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6aecf927fb1c2834e44ec97e",
+  "viewableFile": "build-a-one-page-budget-summary-for-your-team.mp4",
+  "thumbnail": "build-a-budget-one-pager.png",
+  "body": {
+  "tooltips": {},
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Finance"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "children": [
+        {
+          "text": "A budget export is built for the person who maintains it, so a department head who receives the full spreadsheet tends to look at the bottom line and close the file. This build turns one export into a page they can read in a minute. You start with a budget export for one team or department, from your finance system or from Excel or Google Sheets. Your AI reads it and builds a single web page that shows plan against actual, the five biggest lines, one callout about what stands out, and what comes next. You open the page in a browser and send it as a file or a link.\n\nFirst you'll answer a few questions so it understands how your budget is laid out and who reads the summary. Then it builds the page from your answers, and you run it once on your real export and fix whatever looks off. Plan on about 45 minutes the first time.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "setup",
+      "title": "Setup",
+      "children": [
+        {
+          "head": [
+            "You need",
+            "Why",
+            "How to set it up"
+          ],
+          "rows": [
+            [
+              "A budget export for one team or department",
+              "Every number on the page comes from this file",
+              "In Excel, choose **File** > **Save As** and pick CSV, or keep the .xlsx. In Google Sheets, choose **File** > **Download** and pick CSV or Excel"
+            ],
+            [
+              "A plan column and an actual column in that file",
+              "The page compares the two, so it needs both",
+              "If your export only has actuals, add the plan column from your budget file before you start"
+            ]
+          ],
+          "type": "table",
+          "first_column_bold": true
+        },
+        {
+          "text": "**Nice to have:** If you have a design skill, a design guide, or your company's brand colors and fonts, call it or attach it in the chat so the page matches your reports. Without one, your AI uses a clean default look. If you can't export a real budget, ask your AI for a realistic sample file with the same columns and practice on that. If your tool can't show a page as an artifact or canvas, your AI gives you the code to save as a file ending in .html, and you open that file in your browser.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build it with this prompt",
+      "children": [
+        {
+          "text": "Paste this into a new chat in your AI tool. It asks about your role and your work first, then builds, then tests what it built with you.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "label": "Prompt",
+          "prompt": "I want to build a one-page budget summary that I can open in a browser and share, for my work. First, ask me what my role is and what I work on. Then walk me through it in three stages: Scope, Build, and Evaluate. Use whatever you can reach from this chat, like web search, file uploads, and any connector that fits, and if you can show the page as an artifact or canvas, do that. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. Who reads this page, and what should it include and in what order? For example, plan against actual, the five biggest lines, one callout, and what's next. Also ask me for the owner, date, and decision for what's next, or tell me I can add them later.\n2. What will I give you? Ask me which columns hold plan and actual and which period the budget covers. Tell me the export itself comes in Stage 2. Tell me what you can reach from here, and if you can't read a file, tell me how to paste the rows.\n3. What counts as a notable variance for this reader? Ask me whether to use a percentage, a dollar amount, or both, and whether over budget is treated differently from under budget. If I'm not sure, suggest 10% or $5,000, either one, and once I've given you the file, show me which lines that catches before you build.\n4. How often will I build one, and who sees the page besides me? Ask me whether the page needs my company's look, and tell me I can attach a design skill, design guide, or brand colors and fonts if I have them. If I don't, say you'll use a clean default design.\n5. What should the page never do or assume? For example, no explaining why a line is off unless I told you the reason, and no forecast numbers I didn't give you. If an answer is about tone, ask me which wording to avoid.\n6. What would make the page good? Help me turn my answer into three checks I can answer yes or no.\nThen write a short spec with my answers and the three checks. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, build the budget page from my real export.\n- Tell me exactly what to upload, connect, or paste, one thing at a time, and wait for it.\n- Read the file and tell me what you found: the columns, the number of rows, and the period. Ask me to confirm before you continue.\n- Calculate the variance for every line yourself from the plan and actual columns, in dollars and in percent. Never type a number that is not in the file or calculated from it, and show the math for any total or percent.\n- If a row has a blank plan or actual, or the total row does not match the sum of the lines, list the problem for me, show me the gap and which lines could explain it, and ask how to treat it. Never treat a blank as zero.\n- If there are duplicate lines, subtotal rows mixed in with detail rows, or negative amounts, ask me before you include them. Leave out lines that have a plan and an actual of zero.\n- If a line has a plan of zero, show the dollar variance and write \"n/a\" for the percent instead of dividing.\n- Decide favorable or unfavorable from the line type: revenue above plan is favorable, and an expense above plan is unfavorable. Don't rely on the sign alone.\n- Pick the five biggest lines by actual amount unless I said otherwise in the spec. If the export mixes revenue and expense lines, ask me whether to rank expenses only, revenue only, or each separately.\n- If the export already has its own variance column, tell me you are ignoring it, and flag any line where it disagrees with your calculation.\n- Write one callout in plain words about the biggest variance over my threshold. State the number and its direction. Do not guess the cause unless I gave you one.\n- For what's next, use only what I told you in Scope or now, like owners, dates, or decisions. If I gave you nothing, write a labeled placeholder on the page, then list what I need to fill in. Never invent a name, a date, a forecast, or a link.\n- If you're unsure about something, ask me instead of guessing.\n- Output: one complete, self-contained HTML file in a single code block, with the styles inside the file and the numbers written into the page. It should read well on a phone and print on one page. Use my design skill, design guide, or brand colors and fonts if I attached them, and a clean default look if not. If you can show the page as an artifact or canvas, show it there. Otherwise tell me how to save the code as a file ending in .html and which program opens it. After the page, list the calculations you made, the rows you set aside, and any placeholders I still need to fill in.\n\nStage 3: Evaluate\nGrade the budget page you just built from my real export against my three checks. Mark each one yes or no and quote the line that proves it. If I said I would add the owner, date, and decision for what's next later, a placeholder there is expected on the first pass, so tell me what to fill in instead of failing the check. If any check fails, tell me the one change that would fix the most misses, make it, and run it again on the same export. When all three pass, give me the instructions as one block I can paste into a new chat or a project, so I can build a new page from each new export."
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "steps",
+      "title": "Steps",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "title": "Scope",
+              "children": [
+                {
+                  "text": "Your AI starts by asking about your role, then six questions one at a time. The third is the one that shapes the page: you set what counts as a notable variance, and your AI shows you which lines that would catch once it has your export, before it builds. Once you've answered, it writes a short spec with three checks, and you confirm it before it reads any numbers.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Give it the exact threshold you use, like \"anything over 10 percent or $5,000.\" Otherwise it picks its own, and its idea of notable won't match what your reader cares about.",
+                    "**Tip:** Write one check that every number on the page matches the export. A wrong figure in a budget summary costs you the reader's trust faster than a plain design does."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "title": "Build",
+              "children": [
+                {
+                  "text": "With the spec confirmed, your AI asks for the export, tells you the columns, row count, and period it found, and waits for your confirmation. It calculates every variance itself, sets aside rows it can't use, and builds the page with the five biggest lines and one callout. You end up with one page you can open in a browser and share, plus a list of the calculations, the skipped rows, and anything you still need to fill in.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Include the total row in your export. Your AI uses it to check that the lines add up, which catches a missing row before it reaches the page.",
+                    "**Tip:** If it asks about a subtotal or an odd blank, answer from what you know about the budget. Those questions come from the places where an export can mislead."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "title": "Evaluate",
+              "children": [
+                {
+                  "text": "Last, your AI grades the page it just built against your three checks and quotes the line that shows each one passing or failing. It fixes the biggest miss and rebuilds the page from the same export.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tip:** Check the callout and the first line of the table against your spreadsheet yourself. Two numbers checked by hand tell you whether the rest holds up.",
+                    "**Tip:** Keep the instructions block it gives you. Next month, paste it into a new chat with the new export and get a fresh page."
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Automate your budget vs. actuals reporting](/content/item/urn:contentEntry:6ab9ae40e7196c57e98f073a) · Finance",
+            "[Create financial reports with accurate data and formatting](/content/item/urn:contentEntry:6ab9ae39145f62682627ec04) · Finance",
+            "[Create board updates from your operating data](/content/item/urn:contentEntry:6ab9ae464312b8f229471292) · Finance",
+            "[Excel Spreadsheets](/content/item/urn:contentEntry:6ab9ae522638a4b47c5afeb2) and [Web Design Guidelines](/content/item/urn:contentEntry:6ab9ae61a504335da054eb3e) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

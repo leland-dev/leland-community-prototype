@@ -1,0 +1,713 @@
+{
+  "id": "urn:contentEntry:6ab9ae4fc4ae3f8db07a1932",
+  "title": "Build an AI Document Auditor",
+  "resourceType": "TUTORIAL",
+  "description": "Automate document review against a known rule set. Drop in a PDF, get back a structured verdict, no manual comparison required.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4fc4ae3f8db07a1932",
+  "viewableFile": "document auditor.mp4",
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "meta": {
+    "mins_total": 80
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "outcomes",
+      "children": [
+        {
+          "text": "Led by **Karla M.**",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Built a Make.com scenario that watches a Google Drive folder, downloads each incoming invoice PDF, and pulls the full vendor contracts list from Google Sheets.",
+            "Configured a Claude module to read an invoice PDF and the contracts database together in a single call, returning a structured APPROVED/FLAGGED verdict as JSON.",
+            "Wrote a system prompt with strict, unambiguous auditing rules, so Claude only flags real rate overages rather than incidental variation.",
+            "Logged every audit result, timestamp, vendor, status, and discrepancy notes, straight to a Google Sheet with no manual data entry.",
+            "Tested the workflow end-to-end with two mock invoices, one that should be approved and one that should be flagged, and watched Claude's verdict land in the Audit Results tab."
+          ],
+          "title": "What you'll build",
+          "variant": "check"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "intro",
+      "title": "Session intro",
+      "subtitle": "What you need before we start and what this session covers.",
+      "children": [
+        {
+          "text": "**Before you start**",
+          "type": "prose"
+        },
+        {
+          "text": "A few minutes of prep before the session keeps the build moving.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A **Make.com** workspace (free tier works)",
+            "An **Anthropic Developer Console** account with a valid API key — [console.anthropic.com](https://console.anthropic.com)",
+            "A **Google Workspace** account with access to Google Drive and Google Sheets"
+          ],
+          "variant": "check"
+        },
+        {
+          "text": "**About this session**",
+          "type": "prose"
+        },
+        {
+          "text": "This session uses **Claude via the Anthropic API**, not the Claude desktop app. You're connecting Make.com directly to Claude's API, so the build works the same regardless of which AI tool you use day-to-day.",
+          "type": "prose"
+        },
+        {
+          "text": "**What you'll build today**",
+          "type": "prose"
+        },
+        {
+          "text": "By the end of this session, you'll have a working Make.com scenario that does all of this automatically:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Watches a Google Drive folder for new invoice PDFs and pulls your full vendor contracts list from Google Sheets.",
+            "Sends both to Claude in a single call, which matches the invoice to a vendor, audits every line-item rate against the contract, and returns a structured APPROVED/FLAGGED verdict as JSON.",
+            "Logs the result, timestamp, vendor, status, and discrepancy notes, straight to your Audit Results sheet with no manual review."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "concepts",
+      "title": "Key concept",
+      "children": [
+        {
+          "text": "**How Claude reads and evaluates documents with structured output**",
+          "type": "prose"
+        },
+        {
+          "text": "Claude doesn't scan a PDF for keywords. It reads the whole document and reasons over it. In this workflow, that means it can look at an invoice, figure out who the vendor is, find their hourly rate buried in a line-item table, and check whether any of it exceeds the contracted maximum, all in a single pass.\n\nStructured output is what makes this work inside automation. Rather than returning a paragraph about what it found, Claude gives back a JSON object with the specific fields you defined beforehand: invoice ID, vendor name, status, discrepancy notes. The next module reads those fields and logs them straight to your sheet, with no manual review required.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-1",
+      "title": "1. Environment & registry initialization",
+      "subtitle": "Set up the Google Sheet and Drive folder the rest of the workflow reads from and writes to.",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Create a source of truth.** In Google Sheets, create a new workbook titled `Vendor Contracts & Audit Log`.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Create two tabs** with these column headers:",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Tab 1: Contracts** — columns: _Vendor Name, Contracted Rate Per Hour, Max Monthly Budget_",
+                    "**Tab 2: Audit Results** — columns: _Timestamp, Invoice ID, Vendor Name, Status, Discrepancy Notes, Total Billed_"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Configure trigger storage.** Create a folder in Google Drive named `01_Incoming Invoices`. This is where you'll drop PDFs for processing.",
+                  "type": "prose"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-2",
+      "title": "2. Live Make.com workflow build",
+      "subtitle": "Wire up the trigger, file download, and contracts lookup that feed the Claude module.",
+      "children": [
+        {
+          "text": "**Metadata and its importance in dynamic workflows**",
+          "type": "prose"
+        },
+        {
+          "text": "Metadata is data about data. When a file lands in your Google Drive folder, it comes with a name, a file ID, a creation timestamp, and a MIME type. None of that is the file's content, but in an automated workflow, it's what everything else depends on.\n\nIn Make.com, modules talk to each other by passing metadata downstream. The Watch Files module doesn't send the invoice, it sends the file's ID and name. The Download module takes that ID to fetch the actual content. The Sheets module uses the name to look up a vendor. Each step reacts to what the step before it passed along.\n\nThis is what makes a workflow dynamic. A static workflow hardcodes a specific file. A dynamic one responds to whatever shows up and uses metadata to figure out what to do next. When a workflow behaves unexpectedly, metadata is usually the first place to check.",
+          "type": "prose"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Create your workflow.** In [Make.com](https://make.com), go to the Scenarios tab and select \"Create Scenario\".",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Add the trigger.** Click the purple plus to add your first module. Search for **Google Drive → \"Watch Files in a Folder\"**. Connect your Google Drive account, select the `01_Incoming Invoices` folder, and set the Limit to **1** (one file per cycle).",
+                  "type": "prose"
+                },
+                {
+                  "type": "toggle",
+                  "title": "How this module works",
+                  "children": [
+                    {
+                      "text": "This is the trigger that starts everything. It watches your `01_Incoming Invoices` folder and fires the scenario the moment a new file lands. Setting the limit to 1 means it processes one invoice per cycle, keeping each run clean and isolated. Nothing downstream runs until this module sees a file.",
+                      "type": "prose"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Download the file.** Add another Google Drive module: **\"Download a File\"**. In the File ID field, click the box and select **\"File ID\"** from the list of objects passed by the Watch Files module.",
+                  "type": "prose"
+                },
+                {
+                  "type": "toggle",
+                  "title": "How this module works",
+                  "children": [
+                    {
+                      "text": "The Watch Files module just tells Make.com a file exists. This module is what actually gets it. It takes the File ID from step 2 and pulls the raw PDF data from Google Drive, which is what Claude receives and reads later. Skip this step and Claude has nothing to look at.",
+                      "type": "prose"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Pull your contracts database.** Add a Google Sheets **\"Search Rows\"** module. Select the `Vendor Contracts & Audit Log` spreadsheet and the **Contracts** tab. Leave \"Table Contains Headers\" as Yes and Column Range as A-CZ.",
+                  "type": "prose"
+                },
+                {
+                  "type": "toggle",
+                  "title": "How this module works",
+                  "children": [
+                    {
+                      "text": "This module pulls your entire Contracts tab and hands it to the next step, every vendor, every rate, every budget. No filter means Claude does the matching rather than Make.com, so it doesn't matter what the invoice file is named. As long as the vendor is in your sheet, Claude will find them.",
+                      "type": "prose"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Aggregate for Claude ingestion.** Add a Make.com native **\"Text Aggregator\"** module. Set the Source Module to the Sheets module. In the text field, map the metadata labels from the Sheets module: _Vendor Name, Contracted Rate Per Hour, and Max Monthly Budget_, each on its own labeled line.",
+                  "type": "prose"
+                },
+                {
+                  "type": "toggle",
+                  "title": "How this module works",
+                  "children": [
+                    {
+                      "text": "Google Sheets returns data as separate rows and fields. Claude can't read that directly. The Text Aggregator takes all those rows and merges them into one formatted text string, turning your spreadsheet into something Claude can actually read and reason over.",
+                      "type": "prose"
+                    }
+                  ]
+                },
+                {
+                  "text": "![Make.com Text Aggregator with each Sheets field mapped onto its own labeled line: Vendor Name, Contracted Rate Per Hour, and Max Monthly Budget](https://public-shareable-files.s3.us-west-2.amazonaws.com/ai-builder/special-sessions/ai-document-auditor/text-aggregator.png)",
+                  "type": "prose"
+                },
+                {
+                  "text": "Type each label, then drop in its matching Sheets field so every value lands on its own line.",
+                  "type": "prose",
+                  "variant": "footnote"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Adding modules in between existing modules",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "To insert a module between two others: right-click in the blank white canvas area, create a new module (select the type you want), then **drag it** into position between the two existing modules. You can't insert mid-chain directly from the module list, create it first, then reposition.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Missing metadata from previous modules",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "If you're trying to select a module's output as input to another and the fields aren't showing up: first check that all modules have active, working connections to their respective accounts (click \"Add\" in any module to reconnect). If connections are fine but metadata still isn't appearing, run the scenario once with any sample data. After each module has executed at least once, Make.com populates the available metadata fields so you can map them.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "label": "Level 2",
+          "title": "Upgraded efficiency for scale",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "The current workflow passes your entire vendor database to Claude on every run. For large vendor lists, a two-call approach is faster: one call extracts the vendor name, then a second call runs a targeted audit against that vendor's contract only.",
+              "type": "prose"
+            },
+            {
+              "type": "steps",
+              "steps": [
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "**Add a first Claude call.** Right-click in the blank canvas area, add a new **Anthropic \"Create a Prompt\"** module, and drag it between the Google Drive \"Download a File\" module and the Google Sheets \"Search Rows\" module.",
+                      "type": "prose"
+                    }
+                  ]
+                },
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "Use Sonnet or Haiku 4.5 with 4000 tokens max. Add a user message with Multiple content blocks.",
+                      "type": "prose"
+                    }
+                  ]
+                },
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "Add a PDF content block pointing to the downloaded file, and a text content block with:",
+                      "type": "prose"
+                    },
+                    {
+                      "type": "prompt",
+                      "prompt": "Extract the vendor name from this invoice. Return only the vendor\nname as a plain string, nothing else."
+                    }
+                  ]
+                },
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "In the Google Sheets module, add a filter where **Vendor Name (column A)** equals the _Text Response_ from the first Claude module's metadata.",
+                      "type": "prose"
+                    }
+                  ]
+                },
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "Delete the Text Aggregator module. In the main Claude module (Phase 3), replace the Content 1 text with:",
+                      "type": "prose"
+                    },
+                    {
+                      "type": "prompt",
+                      "prompt": "Here is the contract data for this vendor:\n- Vendor: [Select Vendor Name from Google Sheets]\n- Contracted Allowed Rate: [Select Contracted Rate Per Hour from Google Sheets]\nPlease audit the attached invoice against this rule. Return your analysis in this exact JSON structure:\n{\n  \"invoice_id\": \"...\",\n  \"vendor_name\": \"...\",\n  \"total_billed\": 0.00,\n  \"status\": \"APPROVED or FLAGGED\",\n  \"discrepancy_notes\": \"...\"\n}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "label": "Level 3",
+          "title": "Email ingestion instead of folder upload",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "Replace the Google Drive trigger with Gmail so invoices that arrive as email attachments get processed automatically, no manual upload needed.",
+              "type": "prose"
+            },
+            {
+              "type": "steps",
+              "steps": [
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "Remove the two Google Drive modules. Add a **Gmail \"Watch Emails\"** module as your new trigger. Sign into the email account that receives invoices. Set Filter Type to _Gmail Filter_ and paste this into the Query field:",
+                      "type": "prose"
+                    },
+                    {
+                      "type": "prompt",
+                      "prompt": "has:attachment filename:pdf"
+                    }
+                  ]
+                },
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "Add a **Gmail \"List Email Attachments and Media\"** module. Set the Message ID to the metadata from the Watch Emails module. (If it doesn't appear, select _executionID_, run the scenario once to generate sample data, then reopen the module and select the correct field.)",
+                      "type": "prose"
+                    }
+                  ]
+                },
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "Keep the rest of the build the same, except in the Claude module, change Content block 2 to use _Gmail - List Email Attachments and Media_ as the file source instead of Google Drive.",
+                      "type": "prose"
+                    }
+                  ]
+                },
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "Test it: email yourself a test invoice PDF and watch it get logged automatically.",
+                      "type": "prose"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-3",
+      "title": "3. Prompt engineering & deterministic formatting",
+      "subtitle": "Give Claude the invoice, the contracts data, and a strict rule set, and get a clean JSON verdict back.",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Add the Claude module.** Add an Anthropic **\"Create a Prompt\"** module. Connect your Anthropic account and select **Claude Sonnet 4.5**. Set Max Tokens to **4000**.\n\nIn the Messages tab, add a new message with:",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Role:** User",
+                    "**Input Type:** Multiple content blocks"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Add two content blocks. **Content block 1 — Type: Text.** Paste this as the Content Text:",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "label": "User prompt (Content block 1)",
+                  "prompt": "Here is the full vendor contracts database:[text object from text aggregator]\nPlease identify which vendor matches this invoice, look up their contracted rate,\nand audit accordingly. Return your analysis in this exact JSON structure:\n{\n  \"invoice_id\": \"...\",\n  \"vendor_name\": \"...\",\n  \"total_billed\": 0.00,\n  \"status\": \"APPROVED or FLAGGED\",\n  \"discrepancy_notes\": \"...\"\n}"
+                }
+              ],
+              "unnumbered": true
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Content block 2 — Type: PDF Document.** Select _Google Drive - Download a File_ as the file source.\n\nThen scroll to **Advanced Settings → System Prompt** and paste:",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "label": "System prompt",
+                  "prompt": "You are a meticulous forensic accountant and financial auditor. Your task is to\ncompare an incoming invoice against a contracted vendor rate.\nStrict Rules:\n1. Do not assume, guess, or extrapolate. If data is missing, flag it.\n2. APPROVED if ALL line-item rates are less than or equal to the contracted rate.\n3. FLAGGED only if ANY line-item rate is strictly greater than the contracted rate.\n4. Do not flag for tiered pricing, rate variation, or underbilling. Only flag overages.\n5. Output your final answer strictly in JSON format using the keys provided.\n   Do not include conversational filler, markdown formatting, or text outside the JSON object."
+                }
+              ],
+              "unnumbered": true
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Finally, in the **Output Format** section, select _JSON Schema_ as the type. Click **\"Generate Schema\"** and paste this example object:",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "label": "JSON Schema example",
+                  "prompt": "{\n  \"invoice_id\": \"...\",\n  \"vendor_name\": \"...\",\n  \"total_billed\": 0.00,\n  \"status\": \"APPROVED or FLAGGED\",\n  \"discrepancy_notes\": \"...\"\n}"
+                },
+                {
+                  "type": "toggle",
+                  "title": "How this module works",
+                  "children": [
+                    {
+                      "text": "This is where the actual work happens. Claude gets two inputs at once: the invoice as a PDF and your full contracts list as text. It reads the invoice, figures out the vendor, pulls their contracted rate, and checks every line item against it. If anything is over the limit, it flags it and explains why.\n\nSetting Output Format to JSON Schema means the response always comes back clean and structured, ready to parse, no matter how the invoice is worded.",
+                      "type": "prose"
+                    }
+                  ]
+                }
+              ],
+              "unnumbered": true
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Parse the response.** After the Claude module, add a Make.com native **\"Parse JSON\"** module. Select _Raw Response_ as the JSON string input.",
+                  "type": "prose"
+                },
+                {
+                  "type": "toggle",
+                  "title": "How this module works",
+                  "children": [
+                    {
+                      "text": "Claude's response is technically a text string, even though it looks like JSON. Make.com can't map individual fields from it until this module runs. The JSON Parser reads the string and breaks it into separate variables, so `invoice_id`, `vendor_name`, `status`, and the rest each become their own output you can plug directly into Google Sheets.",
+                      "type": "prose"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Claude mis-flagging invoices",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "If Claude is incorrectly approving or flagging invoices, go into the system prompt in the Claude module's Advanced Settings and tighten the rules. Be more explicit about the specific condition that triggers FLAGGED. The cause is usually ambiguous rule wording, figure out what Claude is misreading and rewrite that rule to be unambiguous. Iterate the prompt until the behavior matches the rule exactly.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "tags": [
+            {
+              "text": "Model: Claude Sonnet 4.5"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-4",
+      "title": "4. Output logging & workflow verification",
+      "subtitle": "Write every verdict to your Audit Results tab, then test the full pipeline end to end.",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Log the audit results.** Add a Google Sheets **\"Add a Row\"** module. Select `Vendor Contracts & Audit Log` as the spreadsheet and **Audit Results** as the sheet. Set \"Table contains headers\" to Yes.\n\nIn the Values in Columns section, map each field:",
+                  "type": "prose"
+                },
+                {
+                  "code": "Timestamp         → {{now}}   (type this manually)\nInvoice ID        → JSON Response: invoice_id\nVendor Name       → JSON Response: vendor_name\nStatus            → JSON Response: status\nDiscrepancy Notes → JSON Response: discrepancy_notes\nTotal Billed      → JSON Response: total_billed",
+                  "type": "code"
+                },
+                {
+                  "type": "toggle",
+                  "title": "How this module works",
+                  "children": [
+                    {
+                      "text": "Every invoice that clears the workflow lands here as a new row in your Audit Results tab. This module takes the parsed variables from the JSON Parser and writes them straight into the sheet. The `{{now}}` timestamp logs exactly when the scenario ran, so you end up with a full chronological record of every audit, no manual entry required.",
+                      "type": "prose"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "**Test the workflow.** Download these two mock invoices, one that should be flagged ([INV-204.pdf](https://public-shareable-files.s3.us-west-2.amazonaws.com/ai-builder/special-sessions/ai-document-auditor/INV-204.pdf), rate over contract) and one that should be approved ([INV-201.pdf](https://public-shareable-files.s3.us-west-2.amazonaws.com/ai-builder/special-sessions/ai-document-auditor/INV-201.pdf)), or use invoices of your own.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "First, populate your **Contracts** tab with test data. If you're using the mock invoices above (vendors \"Vertex Analytics\" and \"Crestwood Advisory\"), use:",
+                  "type": "prose"
+                },
+                {
+                  "code": "Vendor Name           Contracted Rate/Hour   Max Monthly Budget\nVertex Analytics      120                    8000\nCrestwood Advisory    110                    7000",
+                  "type": "code"
+                }
+              ],
+              "unnumbered": true
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Upload your PDFs to the `01_Incoming Invoices` folder in Google Drive, then hit play in Make.com. Check the **Audit Results** tab, you should see a new row with Claude's verdict.",
+                  "type": "prose"
+                }
+              ],
+              "unnumbered": true
+            }
+          ]
+        },
+        {
+          "text": "Try describing what you want the system prompt to do out loud. Use Wispr Flow, your AI tool's built-in voice, or Mac dictation (press Fn twice) to draft and iterate the prompt without typing.",
+          "type": "callout",
+          "title": "Voice mode"
+        },
+        {
+          "type": "toggle",
+          "label": "Level 1",
+          "title": "Email alert on flagged invoices",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "Add a conditional email notification so you only hear about invoices that need attention.",
+              "type": "prose"
+            },
+            {
+              "type": "steps",
+              "steps": [
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "After the Google Sheets \"Add a Row\" module, add a **Gmail \"Send an Email\"** module.",
+                      "type": "prose"
+                    }
+                  ]
+                },
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "Set the Recipient to the address where you want alerts.",
+                      "type": "prose"
+                    }
+                  ]
+                },
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "Customize the subject and body. A simple version:",
+                      "type": "prose"
+                    },
+                    {
+                      "type": "list",
+                      "items": [
+                        "**Subject:** [vendor name] - Flagged",
+                        "**Body:** [discrepancy notes]"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "To limit emails to flagged invoices only: click the gear icon between the Sheets module and the Gmail module. Add a filter condition where **[status] equals \"FLAGGED\"**. [See the filter dialog screenshot](https://public-shareable-files.s3.us-west-2.amazonaws.com/ai-builder/special-sessions/ai-document-auditor/email-filter.png).",
+                      "type": "prose"
+                    }
+                  ]
+                },
+                {
+                  "type": "step",
+                  "children": [
+                    {
+                      "text": "Test it: upload a flagged invoice and confirm the email arrives.",
+                      "type": "prose"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "adapt",
+      "title": "Adapt this to your context",
+      "children": [
+        {
+          "text": "**Remix it**",
+          "type": "prose"
+        },
+        {
+          "text": "The build uses invoices and vendor rates, but the architecture isn't specific to finance. It's: a document goes in, a rule set gets checked, a verdict comes out. Here's how to remap it for other contexts:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Rename the Contracts tab to match your use case.** Instead of Vendor Name and Contracted Rate Per Hour, your sheet might have Employee Name and Approved Expense Limit, Client Name and Retainer Cap, or Applicant and Required Qualifications.",
+            "**Point the folder or trigger at wherever your documents arrive.** An expense submission folder, a contracts inbox, a shared drive your team drops files into, the trigger just needs a folder to watch.",
+            "**Rewrite the system prompt for your document type.** The auditor persona and the APPROVED/FLAGGED logic are just instructions. Swap them for whatever evaluation you need: a hiring screen checks resumes against job criteria, an expense auditor checks receipts against a reimbursement policy, a contract reviewer checks clauses against a legal standard.",
+            "**Keep the JSON output structure.** The fields can be renamed, but the pattern stays the same: an ID, a name, a status, and a notes field. That's all you need to log a structured finding from any document."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "share",
+      "title": "Share what you built",
+      "children": [
+        {
+          "text": "A huge chunk of knowledge work is just comparison. Someone reads a document, checks it against a standard, and writes down what they found. It's slow, it's inconsistent, and it's the kind of thing that falls through the cracks when people are busy. What you built today is a pattern for automating that entire loop.\n\nThe invoice use case is just one version of it. The same architecture handles expense reports checked against policy, contracts reviewed against standard terms, job applications screened against requirements. Anywhere a document needs to be evaluated against a known rule set, this workflow applies.\n\n**Share what you built and tell us what you'd actually point it at in your own work.**",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

@@ -1,0 +1,223 @@
+{
+  "id": "urn:contentEntry:6ab9ae3dcc4fa070a0e5e4bc",
+  "title": "Build a Q&A bot for your internal docs",
+  "resourceType": "TUTORIAL",
+  "description": "A system that answers your team's questions from your own SOPs and process docs, citing which doc it pulled from, instead of guessing.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae3dcc4fa070a0e5e4bc",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "api": {
+        "title": "API (Application Programming Interface)",
+        "content": "A way for two programs to talk to each other. When a tool says 'connect via API,' it means software can send requests and get data back automatically — no manual copy-paste needed."
+      },
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "notion": {
+        "title": "Notion",
+        "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "read-only": {
+        "title": "Read-only",
+        "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      },
+      "personal-knowledge-base": {
+        "title": "Personal Knowledge Base",
+        "content": "A store of your own accumulated knowledge — notes, decisions, references — organized so an AI can search and use it. The difference from a pile of documents: structure and maintenance. Level 2 builds one as a wiki."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Operations"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "Intercom's Fin, a support [agent](#tooltip-agent) built on [Claude](#tooltip-claude), resolves 51% of questions correctly out of the box, rising to 86% once tuned to its own [knowledge base](#tooltip-personal-knowledge-base), per [Anthropic's Intercom customer story](https://claude.com/customers/intercom). An internal bot facing employees instead of customers runs on that same pattern.",
+            "type": "prose"
+          },
+          {
+            "text": "55% of knowledge workers say it's genuinely hard to track down information at work despite knowing plenty of people who could help, per [Atlassian's State of Teams 2024](https://www.atlassian.com/blog/state-of-teams-2024) research. This system points an agent at your team's actual SOPs and process docs once, then answers questions from them directly, naming which doc it pulled from and saying \"not covered\" instead of guessing.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a one-off paste-in [prompt](#tooltip-prompt), a saved [skill](#tooltip-skill), or a scheduled agent wired into your team chat tool. Every version stays [read-only](#tooltip-read-only) against your source docs.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your source docs, what counts as out of scope, and who owns keeping the docs current.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that answers my team's questions from our own SOPs and process docs instead of them pinging me or searching a messy wiki. Ask me questions, one at a time, about which docs to include first, where they live, how current they actually are, what kinds of questions people ask most, and what it should do when the answer isn't in the docs. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview forces you to name which docs are current before you build against stale ones, and the scope document becomes the brief for every build session after it."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Where the source-of-truth docs live, and whether they're current enough to trust.",
+              "What the bot does when a question falls outside those docs.",
+              "Who owns keeping the source docs updated so the bot doesn't go stale."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your documentation home ([Notion](#tooltip-notion), Confluence, Google Drive, and SharePoint all publish [API](#tooltip-api) docs), your team chat tool for delivery, and your identity system if some docs are restricted. The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Build and test the system on a real set of source docs. The prompt below is one example; your scope document has the full version.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Answer team questions about [process/policy area] using only our own docs as the source, with citations.\n\nContext: Source docs at [folder or wiki location] covering [list actual topics]. Last reviewed [date]. Note anything known to be outdated.\n\nRules:\n- Answer only from the provided documents.\n- Every answer names its source doc.\n- If the docs don't cover the question, say so instead of inferring from general knowledge.\n- Never answer questions about individual people's performance or HR cases; escalate those instead.\n- Output as a direct answer, source doc name, and a confidence flag (covered / partially covered / not covered).",
+            "prompt_note": "How this prompt works: naming a confidence flag on every answer forces the system to admit when it's guessing instead of blending in a plausible-sounding one."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. Right source doc named, confidence flag honest, HR and performance questions escalated instead of answered?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what went wrong (\"that doc's outdated, drop it from the source set\") and fold each correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Add a weekly digest of the questions it couldn't answer, so documentation gaps surface on their own.",
+              "Feed in a new SOP each time one gets written, so the source set grows as you go.",
+              "Track which docs get cited most as your real usage signal.",
+              "Extend it to meeting notes and decisions once the core bot earns trust."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft rubric and run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each answer, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, question asked, source doc cited, confidence flag given, and whether it was correct. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make a pattern of wrong or overconfident answers visible after a week of entries."
+          },
+          {
+            "text": "**Log** every run against the rubric. Note the date, which checks passed or failed, and what changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the rubric passes a few weeks straight, package the prompt and your corrected rules into a reusable AI skill, so every run starts from your defaults. A repeated failure earns its own skill. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. A confident wrong answer reads exactly like a right one, so \"not covered\" has to get used, and someone still has to keep the source docs from going stale.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Anthropic, Intercom customer story](https://claude.com/customers/intercom) — The 51% and 86% resolution-rate figures.",
+              "[Atlassian, State of Teams 2024](https://www.atlassian.com/blog/state-of-teams-2024) — The 55% information-retrieval figure."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Automate a repetitive process from a recorded walkthrough](/content/item/urn:contentEntry:6ab9ae4037b8bb0628150b48) · Operations",
+              "[Build a bot to answer common HR questions](/content/item/urn:contentEntry:6ab9ae4336554a317a0287a6) · HR & Recruiting",
+              "[Build an audit evidence collector](/content/item/urn:contentEntry:6ab9ae4429ab70d81848c1fd) · Legal & Compliance",
+              "[Skills library](/content/collection/urn:course:6ab9ae741c9288bd883b77bf). Browse ready-made skills you can adapt for this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,208 @@
+{
+  "id": "urn:contentEntry:6ab9ae3b723c26e6c88c39e5",
+  "title": "Build a competitor ad teardown system",
+  "resourceType": "TUTORIAL",
+  "description": "A system that pulls competitor ads every week and turns them into a positioning brief naming where they overlap and where the gap is.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae3b723c26e6c88c39e5",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "pull": {
+        "title": "Pull",
+        "content": "Downloading the latest changes from GitHub to your computer so your local copy is up to date. Claude pulls before starting work to make sure it's building on the newest version, not an old one."
+      },
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Marketing"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "Nearly two-thirds of brands are expected to use agentic AI for one-to-one marketing by 2028, according to [Gartner's research, cited by Digital Commerce 360](https://www.digitalcommerce360.com/2026/01/16/gartner-research-agentic-ai-marketing). Competitive messaging is about to move faster and get more personal, and a teardown done once a quarter won't keep pace with it.",
+            "type": "prose"
+          },
+          {
+            "text": "This system runs on a weekly schedule. It pulls a set of live competitor ads, groups them by message theme and creative angle, and turns the [pull](#tooltip-pull) into a one-page positioning brief that names where competitors are converging and where there's a gap nobody is claiming.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a weekly paste-in [prompt](#tooltip-prompt), a saved [skill](#tooltip-skill), or a scheduled [agent](#tooltip-agent) that posts the brief to your team's channel. Every version only reads public ad libraries.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your priority competitors, where their ads are visible to you, and what a useful brief looks like.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that pulls our competitors' live ads on a weekly schedule and turns them into a positioning brief. Ask me questions, one at a time, about which competitors matter most right now, where I can actually access their ads (an ad library, screenshots, a tool I already use), what a useful positioning brief looks like to me, and who should see it each week. When you have what you need, write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: naming your access point up front keeps the build from stalling later on an ad library you assumed you could see but can't."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Which competitors matter most right now, and where their ads are visible to you.",
+              "What a useful positioning brief looks like versus a list of screenshots.",
+              "The review cadence: weekly for fast-moving categories, monthly for slower ones."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather access to whatever it calls for. Common [connectors](#tooltip-tool-connectors) are ad transparency libraries (Meta Ad Library, Google Ads Transparency Center, LinkedIn Ad Library) and wherever the running brief lives. The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Start building the system your scope document describes, and test it on a real week's pull. The prompt below is an example of the core task. Your scope document will give you a version shaped to your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Turn this week's pull of competitor ads into a positioning brief.\n\nContext: Here are [8-12] competitor ads collected this week: [paste text/screenshots or a summary of each]. Our own current positioning is [1-2 sentences].\n\nRules:\n- Group ads by message theme and creative angle, don't just list them.\n- Call out any theme where 3+ competitors overlap versus a theme nobody is using.\n- Do not speculate about competitor strategy or budget, stick to what the ad itself claims.\n- Output format: a one-page brief with clustered themes, a gaps section (what nobody is saying), and one recommended angle for us to test.",
+            "prompt_note": "How this prompt works: grouping by theme instead of listing ads is what turns a pile of screenshots into a brief you can act on."
+          },
+          {
+            "text": "**Review.** Check against your scope. Themes clustered by substance, the gaps section names a real open angle, no speculation about competitor budget or strategy?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what went wrong and fold each correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Track how long each theme stays live to see which messages are working for competitors.",
+              "Add your own ad performance data side by side once you have it.",
+              "Extend the pull to organic social posts too."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft rubric and run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each positioning brief, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, competitors pulled, themes identified, gaps flagged, and what changed since last week. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks catch a brief that lists ads instead of clustering them, and the log surfaces which gaps hold up week over week."
+          },
+          {
+            "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. After a month it shows which gaps were real openings and which closed the moment you acted on them. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the system passes the rubric a few weeks straight, package the prompt and your corrected rules into a reusable AI skill. A check that fails again and again is a candidate for a skill of its own. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write the skill for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. Clustering on surface wording instead of underlying strategy produces themes that look distinct but aren't, so check the brief against your own read of the category every few weeks.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Gartner, cited in Digital Commerce 360, Gartner: 60% of Brands Will Use Agentic AI for One-to-One Marketing](https://www.digitalcommerce360.com/2026/01/16/gartner-research-agentic-ai-marketing) — The agentic personalization stat."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Create a weekly competitor research report](/content/item/urn:contentEntry:6ab9ae4225cab744782f9dbf) · Product & R&D",
+              "[Create competitor comparison sheets for your sales team](/content/item/urn:contentEntry:6ab9ae3c7739139b9eeef6cb) · Sales",
+              "[Research Brief](/content/item/urn:contentEntry:6ab9ae5a7cac5cd407ea82ef), [Winning Copy Extraction](/content/item/urn:contentEntry:6ab9ae6171d9f134a448ff6d), and [Marketing Psychology](/content/item/urn:contentEntry:6ab9ae56c6466536c2e817eb) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

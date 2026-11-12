@@ -1,0 +1,230 @@
+{
+  "id": "urn:contentEntry:6ab9ae46df1626f9de88ba3c",
+  "title": "Create a living AI strategy for your team",
+  "resourceType": "TUTORIAL",
+  "description": "A system that turns scattered AI wins and pain points into one strategy document you keep current.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae46df1626f9de88ba3c",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "slack": {
+      "title": "Slack",
+      "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "trigger": {
+      "title": "Trigger",
+      "content": "The event that kicks off an automation, like 'new email received' or 'row added to a sheet.' Every Zapier or n8n workflow starts with a trigger and then runs the actions that follow."
+    },
+    "grounding": {
+      "title": "Grounding",
+      "content": "Feeding an AI real, current source material before it answers, so the response is based on facts instead of just training data. Copilot grounds in your organization's files; Gemini grounds in Google Search results. The main defense against hallucination."
+    },
+    "automation": {
+      "title": "Automation",
+      "content": "Having Claude run tasks automatically on a schedule or trigger — without you manually starting them each time. For example, checking your inbox every morning and summarizing it to Slack."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    },
+    "personal-knowledge-base": {
+      "title": "Personal Knowledge Base",
+      "content": "A store of your own accumulated knowledge — notes, decisions, references — organized so an AI can search and use it. The difference from a pile of documents: structure and maintenance. Level 2 builds one as a wiki."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Leadership"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Most AI adoption inside a team lives as scattered fragments. A good prompt someone found, a pilot that quietly died, a complaint that never reached anyone who could act on it. 97% of executives say they personally benefit from AI, but only 29% see meaningful organizational ROI, per [WRITER's Enterprise AI adoption in 2026 report](https://writer.com/blog/enterprise-ai-adoption-2026/). This system pulls those wins, pain points, and pilots into one living document that names what's working, what's next, and what's retired.",
+          "type": "prose"
+        },
+        {
+          "text": "By 2027, Gartner projects half of business decisions will be AI-augmented or automated, per its [Top Data & Analytics Predictions research](https://www.gartner.com/en/newsroom/press-releases/2025-06-17-gartner-announces-top-data-and-analytics-predictions). A strategy written once and filed away goes stale fast. This runs on a set review cadence instead of a slide deck from the last offsite.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a recurring paste-in [prompt](#tooltip-prompt) during a standing review, a saved [skill](#tooltip-skill) you invoke when a new win or pain point surfaces, or a scheduled [agent](#tooltip-agent) that drafts the update for review. You decide what changes.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming where wins and pain points reach you, your review cadence, and what should [trigger](#tooltip-trigger) an update outside that cadence.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that keeps a living AI strategy document current, capturing what's working, what's failing, and what we're prioritizing next as a team. Ask me questions, one at a time, about how AI wins and pain points currently reach me, how often I want the strategy formally reviewed, who should be able to propose additions, and what should trigger an update outside the regular cadence. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview forces you to name where wins and complaints surface today, and the scope document becomes the brief every update session works from."
+        },
+        {
+          "text": "The interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where scattered wins and pain points surface today, [Slack](#tooltip-slack), a suggestion box, or informal conversation.",
+            "How formal the review cadence needs to be for your team's size.",
+            "Whether this stays a leadership document or opens up for the whole team to propose into."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first in a fresh session or a different [model](#tooltip-model) by asking it to poke holes. Then gather what it needs through [tool connectors](#tooltip-tool-connectors). Common connectors are your [knowledge base](#tooltip-personal-knowledge-base) ([Notion](#tooltip-notion), Confluence, Google Docs) to host the document and your comms tools (Slack, email) where wins and complaints surface. The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Build the system your scope document describes, and test it on your current strategy doc and this period's new items. The prompt below is an example. Your scope document gives you a version for your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Update our AI strategy document with this period's new wins, pain points, and priority shifts.\n\nContext: Current strategy doc: [paste or link]. New items to fold in: [list of recent wins, pilots, or complaints from the team]. Our priorities are ranked by: value, feasibility, and adoption difficulty.\n\nRules:\n- Don't just append new items, integrate them. Note if something supersedes or contradicts a prior priority.\n- Score each new item on the same rubric as existing ones so the ranking stays consistent.\n- Flag anything proposed without a clear owner.\n- Keep the document to one page per section: Current state, Active priorities, Parked ideas, Recently retired.",
+          "prompt_note": "How this prompt works: scoring new items on the same rubric as existing ones keeps the priority list one ranked document instead of two competing ones."
+        },
+        {
+          "text": "**Review.** Check the draft against your scope. Contradictions flagged, owners assigned, all four sections present?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it what's wrong and fold the correction into the rules instead of hand-editing the output each time.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Add a harvesting step that actively solicits wins instead of waiting for them to surface.",
+            "Build a simple scoring rubric so prioritization is explainable.",
+            "Retire items on a schedule so the document doesn't just grow.",
+            "Pair it with an adoption scorecard so priorities stay [grounded](#tooltip-grounding) in the real gaps."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft the rubric and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each strategy update, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, items added, items superseded or retired, owner gaps flagged, and what I changed in the rubric. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call on whether an update integrated new items, and the log columns make a stalling strategy visible after a quarter of entries."
+        },
+        {
+          "text": "**Log** every update against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the rubric holds a quarter straight, package the prompt, rubric, and format into a skill. [Claude](#tooltip-claude)'s skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. A strategy nobody reopens after the first draft is dead on arrival. Build the update cadence into the system, so it doesn't depend on memory.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[WRITER, Enterprise AI adoption in 2026](https://writer.com/blog/enterprise-ai-adoption-2026/) — The individual-benefit versus organizational-ROI gap.",
+            "[Gartner, Top Data & Analytics Predictions](https://www.gartner.com/en/newsroom/press-releases/2025-06-17-gartner-announces-top-data-and-analytics-predictions) — The 2027 decision-[automation](#tooltip-automation) projection."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build an AI adoption scorecard for your team](/content/item/urn:contentEntry:6ab9ae469642555de85d4aa0) · Leadership",
+            "[Design your AI chief of staff](/content/item/urn:contentEntry:6ab9ae461b3e0a3396c3a1f7) · Leadership",
+            "[Business Case Builder](/content/item/urn:contentEntry:6ab9ae510b29ae38fd9eb352) and [SOP Creator](/content/item/urn:contentEntry:6ab9ae5e6dea06cc86f4baa1) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

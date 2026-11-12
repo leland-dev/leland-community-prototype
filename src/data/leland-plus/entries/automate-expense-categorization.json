@@ -1,0 +1,214 @@
+{
+  "id": "urn:contentEntry:6ab9ae417f1c80ad957192d1",
+  "title": "Automate expense categorization",
+  "resourceType": "TUTORIAL",
+  "description": "A system that checks every transaction against your chart of accounts and flags anything it isn't confident about.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae417f1c80ad957192d1",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "api": {
+        "title": "API (Application Programming Interface)",
+        "content": "A way for two programs to talk to each other. When a tool says 'connect via API,' it means software can send requests and get data back automatically — no manual copy-paste needed."
+      },
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "batch-api": {
+        "title": "Batch API",
+        "content": "A way to send a big pile of requests to Claude at once and get the results back later (usually within 24 hours) at a discount. Good for one-time bulk jobs like classifying 10,000 customer support tickets."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Finance"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "A [batch](#tooltip-batch-api) of receipts or a bank export lands, and this system assigns every transaction a GL code or spend category, with the reasoning attached so a human can spot-check the uncertain ones. AI-based capture now reaches 95%+ field-level accuracy on document data extraction, versus 1-4% error rates in manual entry, per [Ardent Partners' AP metrics research](https://ardentpartners.com/ap-metrics-that-matter-in-2025/).",
+            "type": "prose"
+          },
+          {
+            "text": "Categorization only holds up when the model shows its reasoning per line item, so a mistake surfaces before it hits the books. The system is only as good as the chart of accounts and prior categorization rules it's given.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a weekly paste-in [prompt](#tooltip-prompt) against a statement export, a saved skill, or a scheduled [agent](#tooltip-agent) that pulls each new batch through a [tool connector](#tooltip-tool-connectors). Every version holds its output for review before anything posts to your books.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming where your transactions come from, your chart of accounts, which categories are genuinely ambiguous, and who reviews the output before it's final.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that categorizes my expenses against my chart of accounts every time I export transactions. Ask me questions, one at a time, about where my transaction data comes from, what my GL codes or categories are, which categorizations are ambiguous or contested, who reviews the output before it's final, and how I want exceptions flagged. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview surfaces the edge cases your chart of accounts doesn't already cover, and the scope document becomes the brief for every build session after it."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Where your transaction data lives, and whether it needs cleanup before the AI sees it.",
+              "Whether your chart of accounts already has enough example-based rules, or whether you need to write those first.",
+              "Who does the final review pass and how often, before this turns into trusting the AI blindly."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common connectors are your accounting software (QuickBooks, Xero, and NetSuite publish official [API](#tooltip-api) docs), your card or expense platform, and a spreadsheet for the review layer. The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Build and test the system on a real batch of transactions. The prompt below is one example; your scope document has the full version.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Categorize this batch of transactions against my chart of accounts and flag anything you're not confident about.\n\nContext: Transaction export attached (CSV with date, vendor, amount, memo). My chart of accounts and category rules are [paste or attach: your GL code list with examples of past categorizations]. Recurring vendors that always map to one category: [list them, e.g. \"AWS -> Software\", \"Delta -> Travel\"].\n\nRules: Assign one GL code per transaction. If a transaction could reasonably fit more than one code, flag it instead of guessing and explain the ambiguity. Never invent a GL code that isn't in my chart of accounts. Flag any transaction over [$ threshold] regardless of confidence, for manual review.\n\nOutput format: A table with columns Date, Vendor, Amount, Assigned GL Code, Confidence (high/medium/low), Reasoning. A second table listing only the flagged/low-confidence rows.",
+            "prompt_note": "How this prompt works: naming the recurring vendors up front cuts the ambiguous pile down to the transactions that need a human look."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. One GL code per row, ambiguous ones flagged with reasoning, nothing invented outside your chart of accounts?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Correct the underlying rule so the same vendor doesn't get miscoded next batch.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Add OCR so photographed receipts feed in directly.",
+              "Build a monthly summary of spend by category on top of the categorized data.",
+              "Add a rule that routes anything above a dollar threshold to a manager for approval before posting.",
+              "Track categorization accuracy over time and retrain the rules on your corrections."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** against a written [rubric](#tooltip-rubric). Have your AI chat draft the rubric and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each categorized batch, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, transactions categorized, transactions flagged as ambiguous, corrections I made, and which GL code got fixed most. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make a chronically miscoded vendor visible after a few batches."
+          },
+          {
+            "text": "**Log** every run against the rubric. Note the date, which checks passed or failed, and what changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the rubric passes a few batches straight, package the prompt and your corrected rules into a reusable AI skill, so every run starts from your defaults. A repeated failure earns its own skill. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. A model will confidently assign a plausible-sounding code even when a transaction is genuinely ambiguous, so every categorization needs a visible confidence signal alongside the answer. Never let categorized output post to the ledger without a human review step first.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Ardent Partners, Accounts Payable Metrics That Matter in 2025](https://ardentpartners.com/ap-metrics-that-matter-in-2025/) — AI capture accuracy versus manual entry error rates."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Automate your invoice bookkeeping](/content/item/urn:contentEntry:6ab9ae41e85e62d98b89da14) · Finance",
+              "[Create financial reports with accurate data and formatting](/content/item/urn:contentEntry:6ab9ae39145f62682627ec04) · Finance",
+              "[Automate invoice and PO data entry](/content/item/urn:contentEntry:6ab9ae3f9d989c5117dc791d) · Operations",
+              "[Data Cleaner](/content/item/urn:contentEntry:6ab9ae51a1bfd0785cb3341a), [Excel Spreadsheets](/content/item/urn:contentEntry:6ab9ae522638a4b47c5afeb2), and [Financial Operations Expert](/content/item/urn:contentEntry:6ab9ae5218f60ab384a8df58) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

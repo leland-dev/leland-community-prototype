@@ -1,0 +1,590 @@
+{
+  "id": "urn:contentEntry:6ab9ae4e0c1ad7a0ef590470",
+  "title": "Build a Lead Qualification Agent",
+  "resourceType": "TUTORIAL",
+  "description": "Source verified B2B leads straight from your ICP, score them automatically, and draft personalized outreach, no starting lead list required.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4e0c1ad7a0ef590470",
+  "viewableFile": "Robin Build Session 1.mp4",
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "meta": {
+      "mins_total": 90
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "outcomes",
+        "children": [
+          {
+            "text": "Led by **Robin van Veen, Arcgent**",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Scaffolded and built a working lead-qualification agent that sources B2B prospects with verified emails straight from an ICP, with no starting lead list.",
+              "Turned their own ICP into a weighted scoring rubric and used it to automatically score every sourced lead into A/B/C tiers with an auditable reason.",
+              "Enriched the qualified (A/B) leads with real personalization hooks scraped from LinkedIn and company websites via Apify.",
+              "Generated short, personalized first-touch outreach emails for the top leads and watched a live demo of pushing A-tier leads into a paused Instantly campaign.",
+              "Seen (via demo) how to turn the whole pipeline into a scheduled weekly system with a digest email, and updated the README so they can rerun it on their own business going forward."
+            ],
+            "title": "What you'll build",
+            "variant": "check"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "intro",
+        "title": "Session intro",
+        "subtitle": "What you need before we start and what this session covers.",
+        "children": [
+          {
+            "text": "**What to have ready before we start**",
+            "type": "prose"
+          },
+          {
+            "text": "A few minutes of prep before the session keeps the build moving.",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Install Claude Code and sign in ([claude.com/claude-code](http://claude.com/claude-code))",
+              "Get your Anthropic API key from [console.anthropic.com](http://console.anthropic.com)",
+              "Create an Ark AI account and get your API token from [ai-ark.com](http://ai-ark.com). A small free credit allowance is enough to run the session",
+              "Optional, for Build 3: create a free Apify account and get your API token from [apify.com](http://apify.com)",
+              "Optional, for the closing demo only (presenter keys; attendees do not need these): Instantly API key, Gmail"
+            ],
+            "variant": "check"
+          },
+          {
+            "text": "**About this session**",
+            "type": "prose"
+          },
+          {
+            "text": "The live build (Builds 1-3) produces the full result (found leads, scored, personalized drafts) in about 45 minutes, leaving room for two presenter-led demos and Q&A.\n\nThe one paid dependency you need to fully rebuild this yourself is Ark AI. A small free credit allowance covers a 20-lead run.",
+            "type": "prose"
+          },
+          {
+            "text": "**What you'll build today**",
+            "type": "prose"
+          },
+          {
+            "text": "By the end of this session, you'll have a working pipeline that does all of this automatically:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "A **lead-qualification agent** that sources B2B prospects with verified emails from an ICP, with no starting lead list needed, then scores each one into A/B/C tiers with an auditable reason.",
+              "**Enrichment and outreach**: real personalization hooks pulled from LinkedIn and company sites for your A/B tier leads, turned into short, personalized first-touch emails."
+            ]
+          },
+          {
+            "text": "The core live build produces the full result, found leads, scored, and personalized drafts, in about 45 minutes. That leaves room for two presenter-led demos and Q&A.",
+            "type": "prose",
+            "variant": "footnote"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-1",
+        "title": "1. Source leads from your ICP",
+        "subtitle": "No starting lead list. Claude Code and Ark AI source matching companies and decision-makers with verified emails straight from your ICP.",
+        "children": [
+          {
+            "text": "**From ICP to lead list**",
+            "type": "prose"
+          },
+          {
+            "text": "Most outbound workflows start with a lead list someone already built: a CSV from a data vendor, a list a colleague exported, last quarter's leftovers. This agent starts one step earlier, from nothing but a description of who you want to sell to.\n\nAn ICP (Ideal Customer Profile) usually lives as a paragraph in someone's head or a slide in a deck: \"mid-size B2B SaaS companies, VP of Sales or above, recently raised a Series B.\" That description is searchable. Ark AI's Company Search and People Search APIs accept firmographic and persona filters, the same fields your ICP already names, and return real companies and people that match.\n\nThe shift this build teaches: an ICP is not just a targeting document for humans to read, it's a structured query an agent can run directly against a data API. Write the ICP once, and the agent turns it into the list, with no manual prospecting in between.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Create a new folder called `Lead-Gen` and create a `.env` file inside it. Open the file with a text editor and add your API keys:",
+                    "type": "prose"
+                  },
+                  {
+                    "code": "ANTHROPIC_API_KEY=your_key_here\nARK_API_TOKEN=your_token_here\nAPIFY_API_TOKEN=your_token_here",
+                    "type": "code"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Launch Claude Code from the Lead-Gen folder and paste this prompt to scaffold the structure of your project:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Create a new project called lead-qualification-agent. We are building an agent that starts from just an ideal customer profile, finds matching B2B prospects with verified emails, scores each one against that profile, and drafts personalized outreach for the good-fit ones. There is no existing lead list, the agent has to source the leads itself. Set up the folder structure: an icp.md config, a find_leads.py for sourcing, an output/ folder, and a README. Also create a .gitignore that includes .env so API keys are never committed. Do not write any logic yet, just scaffold it and explain the plan."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Write the ICP as a rubric. Still in the Claude Code session, you'll fill in `icp.md` together. Paste this prompt:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Help me turn my ICP into a scoring rubric in icp.md.\n\nFirst ask me to describe my ICP in my own words. Then interview me to fill any gaps — firmographics (industry, size, geography), buying signals (what shows a company is ready to buy now), target persona (titles, seniority, segments), and value prop. Check my notes/workspace for relevant context first, but tell me if you find nothing rather than guessing. If anything I say conflicts with an existing icp.md, stop and ask before overwriting.\n\nThen write a weighted rubric into icp.md: 3-5 criteria summing to 100%, each with concrete Strong/Medium/Weak signal definitions, plus score bands (e.g. 80+/60-79/<60) and a note on how to swap in a different ICP later.\n\nNote: if this ICP will drive automated sourcing later, add a caution that free-text \"keyword\" filters on data APIs (e.g. Ark) can silently return unfiltered results — verify any filter against a live response before trusting it, and prefer exact-match filters against the provider's real taxonomy values."
+                  },
+                  {
+                    "text": "_Voice mode: Try saying this out loud. Use Wispr Flow, your AI tool's built-in voice, or Mac dictation (press Fn twice) instead of typing._",
+                    "type": "callout"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Build the lead generator. Paste this prompt:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Write find_leads.py. We have no lead list, so build one from the ICP using the Ark AI API in two stages. First call Company Search to find companies matching the ICP firmographics (industry/keywords, employee size, location from icp.md). Then for each company call People Search filtered to that company to find the decisionmaker matching the persona (titles/seniority in icp.md). Reveal each verified email with the export/single endpoint. Header X-TOKEN, read ARK_API_TOKEN from the environment, base https://api.ai-ark.com/api/developer-portal, use curl via subprocess not Python urllib because their TLS rejects it. Write the results to leads.csv with columns: name, title, company, domain, linkedin_url, email. Start with a small batch (for example 20 leads) and print how many credits that used",
+                    "prompt_note": "The script calls curl via subprocess instead of Python's urllib because Ark's TLS configuration rejects urllib's default handshake; subprocess hands the request to the system's own curl binary, which negotiates it fine. Every filter in the two API calls maps directly to a field already in icp.md: firmographics drive Company Search, persona titles and seniority drive the People Search on each matching company, so changing the rubric automatically changes what the script searches for next run."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Run it:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Run find_leads.py and show me the leads.csv it created."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "title": "TLS error or API connection failure",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "Confirm `ARK_API_TOKEN` is exported in the current terminal session. Confirm the script uses curl via subprocess, not urllib.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "label": "Level 2",
+            "title": "Increase batch size or add a second ICP segment",
+            "variant": "go-further",
+            "children": [
+              {
+                "text": "Once your first batch of 20 leads looks right, scale up or branch out. Either ask Claude Code to raise the batch size in find_leads.py and re-run it against the same ICP, or define a second ICP segment (a different industry or company size band) in a new file and have the agent source against both segments in one run, tagging each lead with which segment it came from.",
+                "type": "prose"
+              },
+              {
+                "type": "prompt",
+                "prompt": "Update find_leads.py to accept a --segment flag pointing to a different ICP file (default icp.md), and a --batch-size flag (default 20). Add a `segment` column to leads.csv recording which ICP file produced each lead. Run it once against icp.md and once against a second segment file I'll provide, then show me the combined leads.csv."
+              }
+            ]
+          },
+          {
+            "tags": [
+              {
+                "text": "Model: Sonnet"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-2",
+        "title": "2. Score leads with Claude",
+        "subtitle": "Apply your ICP rubric to every lead and get a tier plus an auditable reason, not just a number.",
+        "children": [
+          {
+            "text": "Same rubric, every lead, with an auditable reason. Even leads the agent found still get filtered. Sourcing is not the same as fit.",
+            "type": "prose"
+          },
+          {
+            "text": "**LLM as judge**",
+            "type": "prose"
+          },
+          {
+            "text": "Once you have a list of leads, the next question is which ones are worth a human's time. LLM-as-judge is the pattern of handing that decision to a model instead of a person: give it the same rubric a human would use, plus the data for one lead, and ask it to score and explain.\n\nThe pattern works because scoring against a rubric is exactly the kind of structured judgment language models are good at: read a fixed set of criteria, read the lead's facts, decide where each criterion lands, and produce a number and a reason. Running it through Claude Code in headless mode means the same login and the same model are used for every lead, so the standard doesn't drift between lead 1 and lead 200.\n\nThe \"auditable reason\" part matters as much as the score. A bare 0-100 number tells you a lead passed; a one-sentence reason tells you why, so a human reviewing the A-tier list later can sanity-check the model's judgment instead of trusting it blindly.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Paste this prompt into Claude Code:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Write score_leads.py. For each row in leads.csv, score the lead 0-100 against the criteria in icp.md. Do the scoring through Claude Code (the claude CLI in headless -p mode), not the Anthropic API, so it uses my Claude Code login and needs no API key. Use a structured output with: score, tier (A 80+, B 60-79, C below 60), and a one-sentence reason. Write the results to output/qualified_leads.csv sorted by score descending. Print a short summary of how many A, B, and C leads there are.",
+                    "prompt_note": "Routing the scoring through the Claude Code CLI in headless mode, instead of calling the Anthropic API directly, means no second API key to manage, it reuses the same login already set up for this session. The structured output (score, tier, reason) is what makes the result auditable: tier alone tells you a verdict, but the paired reason is what a human checks before trusting an A-tier lead enough to enroll it in outreach."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Run it:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Run score_leads.py on the leads we just found and show me the top of qualified_leads.csv."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "title": "ANTHROPIC_API_KEY not found",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "Run `echo $ANTHROPIC_API_KEY` to verify the key is exported. Re-export if missing and re-run.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "label": "Level 2",
+            "title": "Compare scores across two models",
+            "variant": "go-further",
+            "children": [
+              {
+                "text": "Run the same rubric through a second model and compare where it agrees or disagrees with the first pass. Disagreements are usually the most interesting leads to review by hand.",
+                "type": "prose"
+              },
+              {
+                "type": "prompt",
+                "prompt": "Update score_leads.py to accept a --model flag (default the current model) and write its output to output/qualified_leads_<model>.csv. Run it once with the default model and once with a second model of your choice, then write compare_scores.py to merge both outputs on email and report every lead where the two models disagree on tier, sorted by the size of the score gap."
+              }
+            ]
+          },
+          {
+            "tags": [
+              {
+                "text": "Model: Opus"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-3",
+        "title": "3. Enrich leads and draft personalized outreach",
+        "subtitle": "Pull real personalization hooks from LinkedIn and company sites, then write first-touch emails that reference them.",
+        "children": [
+          {
+            "text": "We only enrich A and B tier leads so we don't waste Apify runs on C-tier. Then we use real hooks (a recent post, a role detail, something the company shipped) to write first-touch emails that can't be generic.",
+            "type": "prose"
+          },
+          {
+            "text": "**Personalization at scale**",
+            "type": "prose"
+          },
+          {
+            "text": "Generic outreach reads as generic because it has nothing specific to the recipient: no real detail, just a template with a name swapped in. Personalization at scale means giving the model a real, current fact about each lead before asking it to write, so the output can't default to boilerplate.\n\nApify runs a scraper against a target page, in this case each lead's LinkedIn profile and their company's website, and returns structured data Claude can read: a recent post, a role detail, something the company shipped. Those become \"hooks\", concrete anchors the email-writing prompt can reference by name instead of inventing a generic compliment.\n\nThe scale part comes from gating: only the leads that already passed scoring get enriched, so the scraping budget goes toward leads worth the outreach, not the full unfiltered list.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Add enrichment for A and B tier leads only. Paste this prompt:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Add enrich.py. For the A and B tier leads only, use Apify to scrape each lead's LinkedIn profile and their company website. Use my APIFY_API_TOKEN from the environment. Extract 2-3 concrete personalization hooks per lead (a recent post, a role detail, something the company recently shipped or announced) and save them next to each lead in output/qualified_leads.csv. Be efficient: only enrich qualified leads so we do not waste Apify runs on C-tier."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Run it and show the hooks pulled for 2-3 leads live.",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "run enrich.py"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Draft personalized outreach for each qualified lead. Paste this prompt:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Write draft_outreach.py. For each A and B tier lead, use the Claude API to write a short personalized first-touch email. It must reference one of the real personalization hooks from enrichment, connect it to the value we offer (described in icp.md), and end with a soft call to action. Keep it under 90 words, conversational, first person, and do not use em-dashes. Save one file per lead in output/drafts/. Then print the drafts for the top 3 leads so we can read them.",
+                    "prompt_note": "Requiring the email to reference one of the real enrichment hooks is what keeps the output specific instead of generic, the model can't write \"I noticed your company is doing great things\" when it has to name the actual post or announcement. Gating enrichment (and now drafting) to A and B tier leads only means the time and API spend goes toward leads that already passed the rubric, not the full unfiltered list."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Read two drafts aloud. Contrast a personalized one with what a generic template would have said. This is the payoff moment.",
+                    "type": "prose"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "title": "Apify returning empty results",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "Confirm `APIFY_API_TOKEN` is exported. Confirm A/B tier leads exist in qualified_leads.csv before running enrich.py.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "label": "Level 2",
+            "title": "Add a follow-up email draft",
+            "variant": "go-further",
+            "children": [
+              {
+                "text": "A first-touch email is one message in a sequence. Have the agent draft a second-touch follow-up that references the first email without repeating it, for leads that don't reply within a set window.",
+                "type": "prose"
+              },
+              {
+                "type": "prompt",
+                "prompt": "Add draft_followup.py. For each A and B tier lead with a drafted first-touch email in output/drafts/, write a short second-touch follow-up email. It should acknowledge that the first email may not have landed, add one new piece of value or information rather than just \"checking in\", and stay under 60 words. Save it next to the original draft as <lead>_followup.txt."
+              }
+            ]
+          },
+          {
+            "tags": [
+              {
+                "text": "Model: Sonnet"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-4",
+        "title": "4. Watch: push qualified leads to Instantly",
+        "subtitle": "Live demo on the presenter's keys. A-tier leads go into a paused Instantly campaign, never sent without a human review.",
+        "children": [
+          {
+            "text": "This is a live demo the presenter runs on their own Instantly account, you are not blocked if you skip the setup. If you want to replicate it on your own leads later, create an Instantly API key and add it to your .env file first.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Open the Claude Code session with the folder that has the `.env` file inside it and paste this prompt:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Add push_to_instantly.py. Take only the A-tier leads with their drafted email, create a campaign in Instantly via the API, and add those leads with their personalized first line. Do not launch it automatically, leave it paused so a human reviews before anything sends."
+                  },
+                  {
+                    "text": "_Talking point: human in the loop and deliverability. You review first, then Instantly handles warmup and drip so you protect your domain._",
+                    "type": "callout"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tags": [
+              {
+                "text": "Model: Sonnet"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-5",
+        "title": "5. Watch: automate the weekly pipeline",
+        "subtitle": "Live demo connecting Gmail. A scheduled run that finds, scores, enriches, and emails you a digest of new leads on its own.",
+        "children": [
+          {
+            "text": "This demo connects the presenter's Gmail account to Claude. To do this yourself later, open the Claude Desktop App and go to Customize > Connectors > Search > Gmail, install it, and connect your account.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "First, the digest. Paste this prompt:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Write send_digest.py. After a run, build a short HTML email summarizing the new A and B tier leads from output/qualified_leads.csv: name, company, score, the one-line reason, and a link to their drafted email. Send it to me by email using my Gmail, subject line \"Your best prospects this week - [count] new leads\". Keep it scannable."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Then the orchestrator and schedule. Paste this prompt:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Write run_weekly.sh that runs the full pipeline in order: find_leads.py, score_leads.py, enrich.py, draft_outreach.py, then send_digest.py. Make find_leads.py skip prospects already seen in previous runs so the digest only shows genuinely new leads. Then show me how to schedule it to run every Monday at 8am, both as a plain cron job and as a Claude Code scheduled agent, and explain the trade-offs of each."
+                  },
+                  {
+                    "text": "_Talking point: this is the jump from a script you run to a system that runs itself. The leads come to you._",
+                    "type": "callout"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Run `send_digest.py` live so attendees see the email arrive.",
+                    "type": "prose"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tags": [
+              {
+                "text": "Model: Sonnet"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-6",
+        "title": "6. Customize this for your own business",
+        "subtitle": "Update the README so this pipeline runs on someone else's ICP, not just the one built today.",
+        "children": [
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Paste this prompt:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Update the README so someone can run this on their own business: how to edit icp.md, which environment variables they need (ANTHROPIC_API_KEY, ARK_API_TOKEN, APIFY_API_TOKEN), and the order to run the scripts. Keep it short."
+                  },
+                  {
+                    "text": "_Closing: change one file, `icp.md`, to describe your own ideal customer, then run `find_leads.py` and the agent builds your pipeline from scratch._",
+                    "type": "callout"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tags": [
+              {
+                "text": "Model: Sonnet"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "wrap",
+        "title": "Summary & next steps",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "A project scaffold, `icp.md`, `find_leads.py`, an `output/` folder, and a README, created before a single line of sourcing logic existed.",
+              "`icp.md` rewritten as a weighted 0-100 scoring rubric, with strong, medium, and weak signals spelled out for every criterion.",
+              "`find_leads.py`, which sources matching companies and their decision-makers from Ark AI and reveals verified emails, starting from zero lead list.",
+              "`score_leads.py`, which grades every lead against that rubric through Claude Code itself, returning a tier and an auditable one-line reason.",
+              "`enrich.py`, which pulls real personalization hooks from LinkedIn and company sites via Apify, for A and B tier leads only.",
+              "`draft_outreach.py`, which writes a sub-90-word first-touch email per lead, grounded in a real hook, never a fabricated one."
+            ],
+            "title": "What you built today"
+          },
+          {
+            "text": "**Four ideas that hold the pipeline together**\n\n1. **Sourcing before fit.** Find the companies and people first, decide who's worth contacting second.\n2. **One rubric, every lead.** The same scoring criteria, applied consistently, with a reason you can audit.\n3. **Enrichment gated by tier.** Apify runs only on leads that already passed scoring, never on C-tier.\n4. **A human signs off before send.** Campaigns stay paused until someone reviews the list.\n\nThat's the loop. Swap in your own `icp.md` and it runs again for a different business.",
+            "type": "prose"
+          },
+          {
+            "text": "**Production checklist**\n\n1. Schedule the full chain with `run_weekly.sh`, deduped against prior runs so the digest only shows genuinely new leads.\n2. Wire up `send_digest.py` so a scannable summary of new A/B leads lands in your inbox automatically.\n3. Keep `ARK_API_TOKEN` and `APIFY_API_TOKEN` out of git, environment variables only.\n4. Review every campaign in Instantly before unpausing it. Nothing sends without a human looking first.",
+            "type": "prose"
+          },
+          {
+            "text": "**Where to go next**\n\n1. Edit `icp.md` to describe your own ideal customer, it's the only file the rest of the pipeline depends on.\n2. Add Instantly and Gmail credentials when you're ready to send for real, today's demo ran on the presenter's keys.\n3. Schedule `run_weekly.sh` as a cron job or a Claude Code scheduled agent so new leads land in your inbox on their own.",
+            "type": "prose"
+          }
+        ]
+      }
+    ]
+  }
+}

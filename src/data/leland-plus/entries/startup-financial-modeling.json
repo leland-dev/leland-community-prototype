@@ -1,0 +1,118 @@
+{
+  "id": "urn:contentEntry:6ab9ae5fa543a1ee682e5bc9",
+  "title": "Startup Financial Modeling",
+  "resourceType": "SKILL",
+  "description": "Build a 3-5 year financial model for an early-stage startup, covering cohort-based revenue, cost structure, cash flow, headcount, scenario analysis, and investor-ready metrics.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5fa543a1ee682e5bc9",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Data"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Build comprehensive 3-5 year financial models with revenue projections, cost structures, cash flow analysis, and scenario planning for early-stage startups.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview-2",
+      "title": "Overview",
+      "children": [
+        {
+          "text": "Financial modeling provides the quantitative foundation for startup strategy, fundraising, and operational planning. Build realistic projections using cohort-based revenue modeling, detailed cost structures, and scenario analysis.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "core-components",
+      "title": "Core Components",
+      "children": [
+        {
+          "text": "### Revenue Model\n\nBuild revenue from customer acquisition and retention by cohort.\n\n```\nMRR = Sum of (Cohort Size x Retention Rate x ARPU)\nARR = MRR x 12\n```\n\nKey inputs:\n- Monthly new customer acquisitions\n- Customer retention rates by month\n- Average revenue per user (ARPU)\n- Pricing and packaging assumptions\n- Expansion revenue (upsells, cross-sells)\n\n### Cost Structure\n\nOrganize operating expenses into four categories:\n\n1. **Cost of Goods Sold (COGS):** hosting, payment processing, support (variable portion), third-party services per customer\n2. **Sales and Marketing (S&M):** CAC, advertising, sales team compensation, marketing tools\n3. **Research and Development (R&D):** engineering, product, design, development infrastructure\n4. **General and Administrative (G&A):** executive team, finance, legal, HR, office, compliance\n\n### Cash Flow Analysis\n\n```\nRunway = Current Cash Balance / Monthly Burn Rate\nMonthly Burn = Monthly Expenses - Monthly Revenue\n```\n\nTrack: beginning cash, revenue collected, operating expenses paid, CapEx, ending cash, monthly burn, and months of runway.\n\n### Headcount Planning\n\nTrack headcount by department and role. Include fully-loaded compensation (salary x 1.3-1.4 for benefits and taxes).\n\nTypical ratios for early-stage SaaS:\n- Engineering: 40-50%\n- Sales and Marketing: 25-35%\n- G&A: 10-15%\n- Customer Success: 5-10%",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "three-scenario-framework",
+      "title": "Three-Scenario Framework",
+      "children": [
+        {
+          "text": "**Conservative (P10):** slower acquisition, lower conversion, higher churn. Use for cash management.\n\n**Base (P50):** most likely outcomes, realistic assumptions. Use for board reporting.\n\n**Optimistic (P90):** faster growth, better unit economics, lower churn. Use for upside planning.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-by-step-process",
+      "title": "Step-by-Step Process",
+      "children": [
+        {
+          "text": "### Step 1: Define Business Model\n\nClarify revenue model and pricing:\n- **SaaS:** subscription tiers, annual vs. monthly, free trial, expansion strategy\n- **Marketplace:** GMV projections, take rate, buyer/seller economics\n- **Transactional:** volume, revenue per transaction, frequency and seasonality\n\n### Step 2: Build Revenue Projections\n\nUse cohort-based methodology. For each monthly cohort, apply a retention curve and multiply by ARPU each month.\n\nTypical SaaS retention curve:\n- Month 1: 100%, Month 3: 90%, Month 6: 85%, Month 12: 75%, Month 24: 70%\n\n### Step 3: Model Cost Structure\n\nSeparate fixed costs (salaries, software, rent) from variable costs (hosting, payment processing, support). Define scaling assumptions as a percentage of revenue where appropriate.\n\n### Step 4: Create Hiring Plan\n\nModel headcount growth by role and department. Account for:\n- Time to fill roles (3-6 months)\n- Ramp time for productivity (3-6 months)\n- Annual attrition (10-15%)\n\n### Step 5: Project Cash Flow\n\nBuild monthly cash flow statements. Note that revenue collected may lag recognized revenue based on payment terms.\n\n### Step 6: Calculate Key Metrics\n\n**Revenue:** MRR, ARR, growth rate (MoM, YoY)\n\n**Unit Economics:**\n- CAC (Customer Acquisition Cost)\n- LTV (Lifetime Value)\n- CAC Payback Period\n- LTV/CAC Ratio\n\n**Efficiency:**\n- Burn multiple (Net Burn / Net New ARR)\n- Magic number (Net New ARR / S&M Spend)\n- Rule of 40 (Growth % + Profit Margin %)\n\n**Cash:** monthly burn, runway in months\n\n### Step 7: Scenario Analysis\n\nVary these assumptions across scenarios:\n- Customer acquisition rate (+-30%)\n- Churn rate (+-20%)\n- Average contract value (+-15%)\n- CAC (+-25%)",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "fundraising-integration",
+      "title": "Fundraising Integration",
+      "children": [
+        {
+          "text": "Model dilution from funding rounds:\n\n```\nPost-Money = Pre-Money + Investment\nDilution % = Investment / Post-Money\n```\n\nAllocate use of funds across product, sales/marketing, G&A, and working capital. Ensure runway to the next milestone plus a 6-month buffer.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "common-pitfalls",
+      "title": "Common Pitfalls",
+      "children": [
+        {
+          "text": "| Pitfall | What to do instead |\n|---------|-------------------|\n| Overly optimistic revenue | Use conservative acquisition assumptions and realistic churn |\n| Underestimating costs | Add 20% buffer; include fully-loaded compensation |\n| Ignoring cash timing | Revenue does not equal cash; model payment terms |\n| Static headcount | Account for fill time, ramp time, and attrition |\n| Single scenario | Always model the conservative case |",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "validation-checklist",
+      "title": "Validation Checklist",
+      "children": [
+        {
+          "text": "- [ ] Revenue growth rate is achievable (3x Year 2, 2x Year 3)\n- [ ] LTV/CAC is above 3, payback under 18 months\n- [ ] Burn multiple is under 2.0 in Years 2-3\n- [ ] Revenue per employee is growing over time\n- [ ] Gross margin is appropriate for the business model\n- [ ] S&M spending aligns with CAC and growth targets",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

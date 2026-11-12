@@ -1,0 +1,549 @@
+{
+  "id": "urn:contentEntry:6ab9ae4b51c8de688786573f",
+  "title": "Build an AI personal trainer",
+  "resourceType": "TUTORIAL",
+  "description": "Use Claude Cowork to generate a clickable mobile app prototype that adapts your training to your daily vitals.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4b51c8de688786573f",
+  "viewableFile": "GMT20260429-230033_Recording_1920x1080.mp4",
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "meta": {
+    "mins_total": 60
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "outcomes",
+      "children": [
+        {
+          "text": "Led by **Jon M.**",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Generate a clickable, mobile-responsive AI personal trainer prototype from a single prompt",
+            "Test your prototype across phone, tablet, and desktop screen sizes",
+            "Customize the plan around your own goals, injuries, and equipment",
+            "Connect real health data from Function Health, Apple Health, or your Oura Ring"
+          ],
+          "title": "What you'll build",
+          "variant": "check"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "intro",
+      "title": "Session intro",
+      "subtitle": "What this build is, what you need, and what you'll walk away with.",
+      "children": [
+        {
+          "text": "**Build your own AI personal trainer**",
+          "type": "prose"
+        },
+        {
+          "text": "A good personal trainer costs $100 an hour and sees you twice a week. Yours will live in your pocket, cost nothing, and know exactly what to tell you the morning after you slept four hours.\n\nThis is a guest build session with Jon Metz, Principal AI Product Manager at Nike. By the end of the hour you'll have a working prototype that takes your health information and fitness goals and generates a plan that's actually yours - and adapts in real time as your vitals change.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Your AI trainer reads your daily vitals - sleep, energy, nutrition, pain - and automatically adjusts training intensity and volume.",
+            "Example: 4 hours of sleep → reduce volume by 25% and extend rest. No manual replanning."
+          ],
+          "title": "The key idea"
+        },
+        {
+          "text": "**What you need for this session**",
+          "type": "prose"
+        },
+        {
+          "text": "Everything runs inside the Claude desktop app. No coding required.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "The Claude desktop app installed, with Cowork available",
+            "About 60 minutes",
+            "Optional, for the last build: a Function Health account, an iPhone with Apple Health, or an Oura Ring to connect real data"
+          ],
+          "variant": "check"
+        },
+        {
+          "text": "**What you'll build today**",
+          "type": "prose"
+        },
+        {
+          "text": "Five short builds, start to finish:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Set up Cowork** with a project folder so your files persist.",
+            "**Generate the prototype** - a clickable three-screen app from one prompt.",
+            "**Test it** across phone, tablet, and desktop sizes.",
+            "**Customize it** around your own goals, injuries, and equipment.",
+            "**Connect real health data** so the plan reacts to your actual vitals."
+          ]
+        },
+        {
+          "text": "Work through them in order. Each one builds on the prototype from the last.",
+          "type": "prose",
+          "variant": "footnote"
+        },
+        {
+          "text": "**Session resources**",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Claude Cowork** — The desktop workspace where you'll build and preview your app.",
+            "**Function Health** — Bloodwork and lab data you can connect for personalized programming.",
+            "**Oura Ring setup guide** — How to connect an Oura Ring to Claude: https://zackproser.com/blog/connect-oura-ring-to-claude-desktop-with-mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "concepts",
+      "title": "Opening concepts",
+      "subtitle": "Three things that make the rest of the session click.",
+      "children": [
+        {
+          "text": "**What Claude Cowork is**",
+          "type": "prose"
+        },
+        {
+          "text": "Cowork is a mode in the Claude desktop app where Claude works inside a project folder on your computer. You can see the file structure at all times, files persist between sessions, and everything you build is saved in one place you can reopen, version, and share.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Project folder** — A folder on your desktop that Claude reads and writes to. Your prototype lives here.",
+            "**Persistent files** — Close Claude and come back later - your work is still there."
+          ]
+        },
+        {
+          "text": "**Why Haiku 4.5 for prototyping**",
+          "type": "prose"
+        },
+        {
+          "text": "Haiku 4.5 is the fastest and most cost-effective Claude model. It generates a full interactive HTML prototype in seconds, which makes it ideal for rapid iteration - you can regenerate the whole app, try a new design, or add a feature without waiting. Reach for a larger model later if you need deeper reasoning; for clickable prototypes, Haiku is the right tool.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Fast** — Generates an interactive prototype in roughly 15-30 seconds.",
+            "**Cost-effective** — Cheap enough to regenerate and iterate as many times as you want."
+          ]
+        },
+        {
+          "text": "**What a clickable prototype is**",
+          "type": "prose"
+        },
+        {
+          "text": "A clickable prototype is a single interactive HTML page - buttons, sliders, form inputs, and screen transitions that actually work - running directly in your browser with no installation. It's not the final app, but it behaves like one, so you can click through it, test it on real devices, and show it to anyone.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Runs anywhere** — One HTML file, opens in any browser, works on your phone.",
+            "**Fully interactive** — Working buttons, sliders, and transitions - not a static mockup."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-1",
+      "title": "1. Set up Cowork and your project folder",
+      "subtitle": "Give Claude a place to save your prototype so it persists between sessions.",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Open the Claude desktop app and click the **Cowork** icon in the top-left navigation (the check-and-bullet-list icon). You're now in Cowork mode.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Create a folder on your desktop named `Claude Leland`. This is where all your TrainAI files will live.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "In Cowork, open the **\"Work in a Project\"** dropdown under the chat window and select the `Claude Leland` folder you just created.",
+                  "type": "prose"
+                },
+                {
+                  "text": "Now everything you build is saved in one place. You can see the folder structure at all times, files persist between sessions, and it's easy to version and share.",
+                  "type": "callout"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Without a project, your work lives only in the chat. With one, your prototype is a real file on disk you can reopen, hand off, or drop into another tool later.",
+          "type": "callout",
+          "title": "Why a project folder"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-2",
+      "title": "2. Generate your clickable prototype",
+      "subtitle": "One prompt produces a working three-screen app you can click through.",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "In Cowork settings, set your model to **Haiku 4.5**. Haiku generates the full interactive prototype in seconds.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Paste the prompt below into the chat and hit Enter.",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "prompt": "Generate a clickable prototype of a mobile app for TrainAI, an AI personal trainer. Create a single interactive HTML page with three functional screens: (1) Home Screen showing vital signs dashboard with sleep, steps, workouts, and recovery stats; (2) Vitals Update Screen with clickable sliders and dropdowns so users can input their sleep, energy, nutrition, and pain levels; (3) Training Plan Screen that shows how their vitals triggered real-time adjustments to their workout (e.g., \"4 hours sleep → reduce volume by 25% and extend rest\").\nThe app must be fully clickable with working buttons, functional form inputs, smooth screen transitions, and mobile-responsive design. Use modern, minimalist styling with light grays and blues. This is a prototype to demonstrate how AI fitness coaching adapts to real user data instantly.\nResponsive Design: Scale fluidly across phones, tablets, laptops, and smart displays — no hardcoded pixel dimensions. Phones fill the full screen with a bottom nav; tablets go full-bleed; ≥1024px uses a left sidebar. Account for device safe areas so UI chrome never overlaps system UI, and keep all three screens separate.",
+                  "prompt_note": "The prompt does three things that make the output usable on the first try. It names the exact screens and the data on each one, so Claude doesn't guess at scope. It gives a concrete adaptive example (\"4 hours sleep → reduce volume by 25%\"), which forces the logic to be real instead of decorative. And it specifies the constraints that make a prototype demo-able: fully clickable, working inputs, smooth transitions, mobile-responsive, and a clean visual style."
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Click the preview to interact with your prototype. Click through all three screens - the vitals dashboard, the vitals update screen, and the training plan that adjusts to what you entered.",
+                  "type": "prose"
+                },
+                {
+                  "text": "If something feels off, just ask Claude to change it. Haiku regenerates in seconds, so iterate freely: \"make the recovery score bigger,\" \"add a weekly streak,\" \"use a darker theme.\"",
+                  "type": "callout"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Click every button, move every slider, and confirm the training plan actually changes when you change your vitals. That feedback loop is the whole point of the app.",
+          "type": "callout",
+          "title": "Test everything"
+        },
+        {
+          "tags": [
+            {
+              "text": "Model: Haiku"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-3",
+      "title": "3. Test it on every screen size",
+      "subtitle": "Confirm the mobile-responsive design holds up on real devices.",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Ask Claude for a shareable link so you can open the prototype outside of Cowork.",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "prompt": "Send me a browser URL of this clickable prototype so I can view it outside of Claude and test it on different devices.",
+                  "prompt_note": "This asks Claude to surface the prototype as a link you can open anywhere - usually a file you can download or a shareable address. You want this so you can test on an actual phone and send it to teammates, not just preview it inside Cowork."
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Right-click the HTML file and select **Open With** → **Chrome** (or **Edge**). In your browser, press `F12` to open the Developer Tools. If a dialog appears in Edge, select **Open DevTools** and check **Remember always**. Click on the newly opened Developer Tools side sheet (right side of your browser window) and open the device toolbar: Press `Ctrl+Shift+M` (Windows) or `Cmd+Shift+M` (Mac).",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Switch between device sizes from the dropdown - iPhone, Samsung Galaxy, iPad, desktop - and test every interaction on each: buttons, sliders, form inputs, and screen transitions.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Phone: the primary experience. Everything should be thumb-reachable.",
+                    "Tablet and desktop: nothing should overflow or break the layout."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Layout breaks on a small screen",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Tell Claude exactly what broke: \"on iPhone the buttons overflow the screen - make the layout stack vertically and fit the viewport.\" Then regenerate.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "tags": [
+            {
+              "text": "Model: Haiku"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-4",
+      "title": "4. Customize it for you",
+      "subtitle": "Make the plan yours - your goals, your injuries, your equipment.",
+      "children": [
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Fill in the prompt below with your own profile, then paste it into the same chat. Claude regenerates a clickable prototype tailored to you in seconds.",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "prompt": "Customize this prototype for me. Here is my profile:\n\n- Goals: [your training goal, e.g. build strength for climbing]\n- Injuries: [any injuries and how long, e.g. lower back pain for 2 years]\n- Sleep: [your typical range, e.g. usually 6-7 hours, often only 5]\n- Equipment: [what you have, e.g. dumbbells, pull-up bar, resistance bands]\n- Pain level: [your range out of 10, e.g. fluctuates 2-5 depending on sleep]\n\nWhen I get less than 6 hours of sleep, the app should automatically reduce intensity by 15% and add mobility work.",
+                  "prompt_note": "Specific inputs produce a specific plan. Age, goal, injury history, available equipment, and a sleep-to-pain relationship give Claude enough to make real programming decisions. The last line defines an adaptive rule in plain language - that's what turns a static plan into a coach that responds to your day."
+                },
+                {
+                  "text": "_Voice mode: Try saying this one out loud. Use Wispr Flow, your AI tool's built-in voice, or Mac dictation (press Fn twice) instead of typing - it's faster for describing your own profile._",
+                  "type": "callout"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Click through the regenerated app and check that the plan reflects your inputs - your equipment shows up, your injury is respected, and your sleep rule actually changes the plan when you lower your sleep on the vitals screen.",
+                  "type": "prose"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Add more adaptive logic the same way: \"if my pain is above 4, swap heavy lifts for mobility,\" or \"if energy is low, cut the session to 20 minutes.\"",
+          "type": "callout",
+          "title": "Iterate on the rules"
+        },
+        {
+          "type": "toggle",
+          "label": "Level 2",
+          "title": "Build a prototype for someone you'd actually coach",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "If you coach clients or train with friends, generate a version for one of them with their real profile. Then ask Claude to add a simple onboarding screen where a new person enters their health profile and immediately sees their custom plan.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "tags": [
+            {
+              "text": "Model: Haiku"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-5",
+      "title": "5. Connect your real health data",
+      "subtitle": "Wire in Function Health, Apple Health, or your Oura Ring so the plan reacts to your actual vitals.",
+      "children": [
+        {
+          "text": "**What connectors do here**",
+          "type": "prose"
+        },
+        {
+          "text": "Connectors let Claude read data from another app you use - your labs, your wearable, your calendar. Once connected, your AI trainer can pull your real numbers instead of the placeholder vitals in the prototype, and build a plan around them.",
+          "type": "prose"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Open your connector settings. In Cowork, click your **name / profile** (bottom-left), then **Settings → Connectors**.",
+                  "type": "prose"
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Connect **Function Health**. Search for Function Health in your available connectors, click it, then select **Connect**.",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Authorize Function Health to access your health data.",
+                    "Grant the necessary permissions.",
+                    "Confirm any API connections."
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Back in your personal trainer app chat, ask Claude to use your real data.",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "prompt": "Add a section to the app that reads my bloodwork and lab results from Function Health and customizes my workout and nutrition plan to help me improve my scores.",
+                  "prompt_note": "This points the prototype at real data instead of the sample vitals. Naming the source (Function Health) and the goal (improve my scores) tells Claude what to read and what the plan should optimize for."
+                },
+                {
+                  "type": "toggle",
+                  "title": "Connect Apple Health instead (iPhone only)",
+                  "children": [
+                    {
+                      "text": "Apple Health connects through the Claude iOS app, not the desktop app. First confirm you meet the requirements: you're in the U.S., you have Claude Pro or Max, and you're on an iOS device.\n\n1. Download the Claude app on iOS.\n2. In the app, go to your profile (bottom-left) and select **Permissions**.\n3. Tap **Health** and select **Ask each time** for read access to your health data (steps, heart rate, and so on). A disclaimer notes your data won't be used to train Anthropic's models and you can disconnect anytime.\n4. To test it, open a new chat and type: `summarize my health data from the past 30 days` (mention your Apple Watch if you have one).\n5. A permission request appears - select **Allow Once** for now.\n6. Choose what Claude can read (sleep, steps, resting heart rate, and more) - all of it or just a few.\n7. Once the summary works, ask Claude to incorporate that data into your personal trainer app (iOS only).",
+                      "type": "prose"
+                    }
+                  ]
+                },
+                {
+                  "type": "toggle",
+                  "title": "Connect your Oura Ring",
+                  "children": [
+                    {
+                      "text": "Oura connects to Claude through a tool connector. Follow this step-by-step guide: https://zackproser.com/blog/connect-oura-ring-to-claude-desktop-with-mcp - then ask Claude to read your Oura sleep and readiness data and adjust your plan around it.",
+                      "type": "prose"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "The connector won't authorize",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Re-run the connect flow in Settings → Connectors and make sure you're signed into the correct account for that service. Confirm any permission prompts the service shows.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Apple Health isn't available on desktop",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Apple Health only connects through the Claude iOS app, and only in the U.S. with a Pro or Max plan. Use the iOS toggle above, or connect Function Health or Oura on desktop instead.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "label": "Level 2",
+          "title": "Put your workouts on your calendar with daily reminders",
+          "variant": "go-further",
+          "children": [
+            {
+              "text": "Connect Google Calendar (Settings → Connectors → Google Calendar → Connect, then grant read and write access) and have Claude schedule your plan and remind you each day.\n\nTest the connection first: ask Claude to `add a test event to my Google Calendar for tomorrow at 2 PM called 'Test Workout'` and confirm it appears. Then add a single workout: `add my Monday workout to my Google Calendar at 5:00 PM:` followed by your workout details. Once that works, automate the week.",
+              "type": "prose"
+            },
+            {
+              "type": "prompt",
+              "prompt": "Create calendar events for my entire week's training plan at 5:00 PM each day, with the customized workouts my app generated in the description."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "wrap",
+      "title": "Summary & next steps",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "A clickable, mobile-responsive AI personal trainer prototype from a single prompt",
+            "A version tested across phone, tablet, and desktop",
+            "A plan customized to your own goals, injuries, and equipment",
+            "A real data connection through Function Health, Apple Health, or Oura"
+          ],
+          "title": "What you built today"
+        }
+      ]
+    }
+  ]
+}
+}

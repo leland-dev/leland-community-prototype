@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae5966d510fef06e6a60",
+  "title": "QBR Generator",
+  "resourceType": "SKILL",
+  "description": "Build a structured quarterly business review covering revenue performance, pipeline coverage, forecast confidence, and deal analysis for leadership",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5966d510fef06e6a60",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Data"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Build a structured quarterly business review from deal and pipeline data.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-define-the-quarter",
+      "title": "Step 1, Define the Quarter",
+      "children": [
+        {
+          "text": "Ask the user which quarter to review. If not specified, use the most recently completed quarter.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-gather-the-data",
+      "title": "Step 2, Gather the Data",
+      "children": [
+        {
+          "text": "Ask the user to provide:\n- Deals closed-won in the quarter (revenue, product or service breakdown)\n- Deals closed-lost (reasons, patterns)\n- Pipeline entering vs. exiting the quarter\n- Average deal size, time-to-close, conversion rates by stage\n- Revenue vs. target",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-build-the-review",
+      "title": "Step 3, Build the Review",
+      "children": [
+        {
+          "text": "### Revenue Performance\nActual vs. target. What drove the gap, positive or negative?\n\n### Pipeline Coverage\nHow much pipeline entered the quarter? What converted? What's the coverage ratio?\n\n### Forecast Confidence\nBased on current open pipeline, what's the realistic outlook for next quarter?\n\n### Deal Analysis\nTop wins: what made them close? Top losses: what pattern explains them?\n\n### Process Health\nAre standard workflows functioning? Any systematic issues in the sales process?",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Quarterly Business Review, [Quarter]\nPrepared: [date]\n\n## Revenue Summary\n| Metric | Target | Actual | Delta |\n|--------|--------|--------|-------|\n| Revenue | $[target] | $[actual] | [+/-] |\n| Deals Closed-Won |, | [n] |, |\n| Avg Deal Size |, | $[amount] |, |\n\n## What Drove Results\n[3-4 bullets on key drivers]\n\n## Pipeline Health\n[Coverage ratio, conversion rates, stage breakdown]\n\n## Forecast: Next Quarter\n[Realistic outlook with assumptions]\n\n## Top Wins\n1. [Deal + why it closed]\n\n## Top Losses\n1. [Deal + root cause]\n\n## Process Issues\n- [Any systematic problems]\n\n## Recommendations\n1. [Action for next quarter]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

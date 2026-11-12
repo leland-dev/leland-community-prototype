@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae58eed4be81c3fc7192",
+  "title": "Opportunity Tracker",
+  "resourceType": "SKILL",
+  "description": "Log professional opportunities, job applications, and networking contacts to a Google Sheet, surface follow-ups due within 7 days, and generate a pipeline view on demand.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae58eed4be81c3fc7192",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Product"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Structure and log professional opportunities into a Google Sheet for centralized career and networking tracking. Parses natural language input, organizes by status, and surfaces follow-ups due within 7 days.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "when-to-use-this-skill",
+      "title": "When to Use This Skill",
+      "children": [
+        {
+          "text": "Trigger when the user says: \"track this opportunity,\" \"log this contact,\" \"I just applied to,\" \"had a call with [person],\" \"got an intro to [person],\" \"networking follow-up,\" \"add to my tracker,\" or any time they want to record or review career and networking activity.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "how-it-works",
+      "title": "How It Works",
+      "children": [
+        {
+          "text": "### Step 1, Load Sheet ID from Config\n\nCheck for a `config.md` file in `~/.claude/skills/opportunity-tracker/config.md`.\n\n- If it exists and has a `sheet_id`: use that sheet for all read and write operations.\n- If it does not exist or has no sheet_id: a new sheet will be created in Step 3.\n\n### Step 2, Parse the Input\n\nExtract these fields from the user's natural language input:\n\n- **Person:** name of the contact (if applicable)\n- **Company:** organization name\n- **Role or Context:** job title, project, or reason for connection (e.g. \"Senior PM,\" \"Informational interview,\" \"Networking contact\")\n- **Date Logged:** when this was created (default: today)\n- **Source:** how they connected (\"LinkedIn,\" \"Referral from [name],\" \"Company website,\" etc.)\n- **Status:** one of: Applied / Reached Out / In Conversation / Waiting / Follow Up Due / Closed Won / Closed Lost\n- **Next Action:** specific next step (\"Send follow-up email,\" \"Schedule call,\" \"Review offer\")\n- **Deadline:** when the next action is due (YYYY-MM-DD format)\n- **Notes:** any additional context\n\n### Step 3, Create or Update the Google Sheet\n\nSheet column layout: Date Logged | Person | Company | Role or Context | Source | Status | Next Action | Deadline | Notes\n\n**First run (no Sheet ID):**\n- Create a new Google Sheet named: `Career Opportunities Tracker`\n- Write the header row and the first entry\n- Save the returned Sheet ID and today's date to `config.md`\n- Tell the user: \"Created a new tracker sheet. Sheet ID saved to config and will be used automatically on future runs.\"\n\n**Subsequent runs:**\n- Download the current sheet content\n- Append the new row after the last existing row\n- Re-upload the updated content\n- Update `last_updated` in config.md to today's date\n\nAlways show the user what will be logged before writing to the sheet.\n\n### Step 4, Surface Urgent Follow-Ups\n\nAfter logging, read all rows and check the Deadline column. Flag any row where:\n- Status is \"Follow Up Due,\" OR\n- Deadline is within 7 days from today\n\nDisplay as:\n```\nFOLLOW-UPS DUE WITHIN 7 DAYS\n\n[Person] at [Company], [Status]\n  Next Action: [action]\n  Deadline: [date] ([N] days away)\n  Notes: [brief context]\n```\n\nIf none are due, confirm: \"No follow-ups due within 7 days.\"\n\n### Step 5, Generate Pipeline View (on Request)\n\nWhen the user asks \"show my pipeline,\" \"opportunity status,\" or \"where do I stand,\" read all rows and group by Status:\n\n```\nOPPORTUNITY PIPELINE\n\nApplied ([N])\n  [Person] at [Company], Applied [date] via [source]\n\nReached Out ([N])\n  [Person] at [Company], Follow-up due [date]\n\nIn Conversation ([N])\n  [Person] at [Company], Next: [action] by [date]\n\nWaiting ([N])\n  [Person] at [Company], [reason]\n\nFollow Up Due ([N])\n  [Person] at [Company], URGENT, [action]\n\nClosed Won ([N])\n  [Person] at [Company], [closed date]\n\nClosed Lost ([N])\n  [Person] at [Company], [reason]\n\nTotal Active: [count] | Total Closed: [count]\nFull tracker: https://docs.google.com/spreadsheets/d/[SHEET_ID]\n```",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "status-definitions",
+      "title": "Status Definitions",
+      "children": [
+        {
+          "text": "| Status | Meaning | Default Deadline |\n|---|---|---|\n| Applied | Application submitted | 14 days |\n| Reached Out | Initial contact made | 7 days |\n| In Conversation | Active dialogue, next steps pending | 7 days |\n| Waiting | Waiting on them | 14 days |\n| Follow Up Due | Action required within 7 days | Immediate |\n| Closed Won | Offer accepted, role started, or relationship established | None |\n| Closed Lost | Rejected, withdrew, or relationship inactive | None |",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "key-rules",
+      "title": "Key Rules",
+      "children": [
+        {
+          "text": "1. Always parse a full entry: company, status, and next action before writing to the sheet.\n2. Set deadlines for all active opportunities. Use the Status Definitions defaults if the user does not specify.\n3. Surface urgent follow-ups after every new entry, not just on request.\n4. Keep notes specific. Context matters: where you met, what was discussed, why they matter.\n5. Close entries explicitly. Do not leave \"Waiting\" entries open indefinitely.\n6. Never modify the sheet without showing the user what will be logged first.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

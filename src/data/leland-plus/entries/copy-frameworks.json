@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae51b2b07de7af3c181b",
+  "title": "Copy Frameworks",
+  "resourceType": "SKILL",
+  "description": "Write outreach emails that get responses using campaign-tested copy frameworks, including SPARK, PAS, AIDA, and a follow-up Nudge",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae51b2b07de7af3c181b",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Writing"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Write emails that get responses using proven copy frameworks. Given a goal and audience, pick the right framework, apply it, and produce two ready-to-send variants.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "frameworks-available",
+      "title": "Frameworks Available",
+      "children": [
+        {
+          "text": "### SPARK (recommended for cold or warm outreach)\n- **S**ituation: establish context quickly\n- **P**roblem: name the pain or gap\n- **A**ngle: your unique take or hook\n- **R**elevance: why this matters to them specifically\n- **K**ick: clear, low-friction CTA\n\n### PAS (Problem-Agitate-Solution)\nBest for: re-engagement when the pain is well understood.\nName the problem, amplify why it matters, offer the solution.\n\n### AIDA (Attention-Interest-Desire-Action)\nBest for: introducing something new.\nHook attention, build interest, create desire, drive action.\n\n### The Nudge\nBest for: following up on silence.\nAcknowledge the non-reply, restate value in one sentence, make an even easier ask.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-pick-the-right-framework",
+      "title": "Step 1: Pick the Right Framework",
+      "children": [
+        {
+          "text": "Based on the user's goal:\n- First contact or warm lead? Use SPARK.\n- Following up on silence? Use the Nudge.\n- Re-engaging someone who said \"later\"? Use PAS.\n- Introducing a new offer? Use AIDA.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-write-the-email",
+      "title": "Step 2: Write the Email",
+      "children": [
+        {
+          "text": "Apply the chosen framework. Rules:\n- Subject line: specific, not clever. Under 8 words.\n- Opening line: no \"I hope this finds you well.\" Start with them, not you.\n- Body: 3-5 sentences max.\n- CTA: one ask, low friction. \"Does this still make sense?\" beats \"Schedule a call.\"\n- No attachments on first touch.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output",
+      "title": "Output",
+      "children": [
+        {
+          "text": "Produce 2 variants using different frameworks so there is a choice. Label each.\n\n```\n## Variant 1, [Framework Name]\nSubject: [subject]\n\n[email body]\n\n---\n\n## Variant 2, [Framework Name]\nSubject: [subject]\n\n[email body]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

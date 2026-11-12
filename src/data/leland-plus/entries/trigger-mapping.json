@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae601126143ee94c9b86",
+  "title": "Trigger Mapping",
+  "resourceType": "SKILL",
+  "description": "Identify which business or life events apply to a prospect or audience and map each to a recommended outreach action, angle, and timing.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae601126143ee94c9b86",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Product"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Identify which trigger types apply to a prospect or audience and map each to a recommended outreach action, angle, and timing.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "the-12-trigger-types",
+      "title": "The 12 Trigger Types",
+      "children": [
+        {
+          "text": "### High-Urgency Triggers (act within 24 to 48 hours)\n1. **Inquiry or application submitted:** peak interest moment, respond fast\n2. **Reactivation date reached:** they said \"contact me then\" and that date has arrived\n3. **Deadline or window imminent (within 7 days):** last-chance urgency\n4. **Inbound reply received:** they initiated contact, respond promptly\n\n### Medium-Urgency Triggers (act within 3 to 5 days)\n5. **Offer opened 3 or more times, no reply:** reading but not responding, something is holding them back\n6. **Deadline approaching (7 to 30 days out):** natural urgency window\n7. **Prior outreach sequence completed with no response:** needs a new angle\n8. **Price change or new offer:** trigger re-engagement with updated terms\n\n### Low-Urgency Triggers (act within 1 to 2 weeks)\n9. **Reactivation date approaching (within 30 days):** prepare the outreach now\n10. **Related opportunity available:** alternative option relevant to their goal\n11. **Success story or social proof:** case study or result relevant to their situation\n12. **New product or program launched:** relevant to their stated interest",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-map-the-triggers",
+      "title": "Step 1, Map the Triggers",
+      "children": [
+        {
+          "text": "From the input provided, identify which triggers apply to the prospect or audience. For each active trigger:\n- Name the trigger\n- Assess urgency\n- Recommend an outreach action and timing",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Trigger Map: [Prospect or Audience]\n\n## Active Triggers\n\n### [Trigger Name], [Urgency Level]\n**Signal:** [what happened]\n**Action:** [what to send or do]\n**Timing:** [when to act]\n**Message angle:** [what to lead with]\n\n---\n\n## No Active Triggers\n[When to check back and what to watch for]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

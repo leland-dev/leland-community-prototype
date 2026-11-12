@@ -1,0 +1,215 @@
+{
+  "id": "urn:contentEntry:6ab9ae39728238bde8667dee",
+  "title": "Design an AI personal assistant for your life",
+  "resourceType": "TUTORIAL",
+  "description": "One assistant that reads your calendar, tasks, and inbox and hands you a short, prioritized daily brief instead of five apps to check every morning.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae39728238bde8667dee",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "triage": {
+      "title": "Triage",
+      "content": "Sorting items by urgency or importance to decide what gets attention first. Your email-manager skill triages your inbox — it separates messages that need a real reply from noise you can ignore."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Life & Personal"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Most people run their life through five disconnected tools, and the person becomes the connector between them. The cost is measured. [A survey of 2,000 UK adults](https://www.brightpearl.com/press-and-media/press-releases/news-average-adult-spends-five-years-and-five-months-of-their-lives-doing-hated-admin) found people spend 8 hours and 48 minutes a week on personal admin, and legal scholar Elizabeth Emens named this invisible work \"life admin.\"",
+          "type": "prose"
+        },
+        {
+          "text": "[Anthropic's personal use-case library](https://academy.claude.com/use-cases?department=personal) shows the fragments already in the wild, like inbox cleanup and weekly calendar prep. This assistant does those jobs continuously, from one place, as a short daily brief.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a morning paste-in [prompt](#tooltip-prompt), a saved project with your situation baked in, or a scheduled [agent](#tooltip-agent) connected to calendar and email through [tool connectors](#tooltip-tool-connectors).",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your first two data sources, what the brief includes, when it arrives, and what stays out of version one.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to design an AI personal assistant that pulls my calendar, tasks, and email into one short daily brief that tells me what actually matters today. Ask me questions, one at a time, about how I want this to work. Cover where my tasks really live, which two sources to start with, what the brief should include and leave out, when I want it, and how I'll know it's working. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview makes you name where your tasks actually live before building starts, the decision that sinks most personal-assistant builds when skipped."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where your tasks really live. Usually a list, some email flags, a sticky note, and memory.",
+            "Paste-in versus live access. Wait on standing email access until you trust the manual version.",
+            "One assistant versus two narrower steps, one that [triages](#tooltip-triage) and one that plans."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking what will annoy you by day three. Then gather any access it calls for. Common connectors are your calendar (Google Calendar, Outlook), email (Gmail, Outlook), and your task app (Todoist, [Notion](#tooltip-notion)). The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Start building the system your scope document describes, and test it on today's real calendar and task list. The prompt below is an example of the core task. Your scope document will give you a version shaped to your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Give me one prioritized brief for today from my actual calendar, tasks, and inbox.\n\nContext:\n- Today's calendar: [paste today's events, times, and any notes]\n- My running task list: [paste from wherever it lives]\n- Unread email subjects: [paste subject lines only, no need to forward full emails]\n- Anything time-sensitive I already know about: [deadlines, appointments, people waiting on me]\n\nRules:\n- Output a single brief with three sections: Top 3 priorities today, Time-sensitive items (anything with a real deadline or start time), and What I'm intentionally ignoring today and why.\n- Do not just reformat my list back to me. Decide what matters given the calendar and deadlines.\n- If something conflicts, two things at the same time, a task that needs more time than I have, flag it instead of silently picking one.",
+          "prompt_note": "How this prompt works: \"What I'm intentionally ignoring\" does the real work, forcing the assistant to justify what it left out instead of silently dropping it."
+        },
+        {
+          "text": "**Review.** Check it that evening. Right priorities, no missed deadlines, no wasted space?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it what it over-weighted or missed, then run it again tomorrow.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Add a weekly review that names what keeps sliding and what to drop.",
+            "Connect calendar and inbox through tool connectors and schedule the brief.",
+            "Fold in expenses, flagging anything that looks like a forgotten recurring charge.",
+            "Have it draft replies to the two emails that need one."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric), not end-of-day gut feel. Have your AI chat turn the scope bar into pass/fail checks and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each daily brief, with 4 or 5 pass/fail checks. Then set up a simple run log I can keep in a note, with columns for date, what the brief got right, what it misread or missed, and what instruction I changed. Give me both in a format I can paste into my notes app.",
+          "prompt_note": "How this prompt works: the rubric keeps \"did it help\" from drifting into \"did it sound helpful,\" and the misread column surfaces patterns one bad morning never shows."
+        },
+        {
+          "text": "**Log** every morning run against the rubric, even on good days. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. Each recurring misread becomes a one-line instruction fix. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the system passes the rubric a week straight, package the prompt and your corrected rules into a reusable AI skill, so every run starts from your defaults instead of a blank chat. When the log shows the same check failing again and again, that gap is a candidate for a skill of its own. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write the skill for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. Stale inputs still produce a confident brief, so when it sounds right but isn't, check what you fed it before blaming the assistant.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Brightpearl, personal admin survey](https://www.brightpearl.com/press-and-media/press-releases/news-average-adult-spends-five-years-and-five-months-of-their-lives-doing-hated-admin) — The 8 hours 48 minutes a week figure, from 2,000 UK adults.",
+            "Elizabeth Emens, Life Admin: How I Learned to Do Less, Do Better, and Live More (2019) — Coined \"life admin\" as a category of invisible work.",
+            "[Claude Academy, Personal use cases](https://academy.claude.com/use-cases?department=personal) — The documented fragments this assistant consolidates."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Deal follow-up reminder agent](/content/item/urn:contentEntry:6ab9ae39368c9c2f3c8d6b81) · Sales",
+            "[Accurate financial reports](/content/item/urn:contentEntry:6ab9ae39145f62682627ec04) · Finance",
+            "[Email Manager](/content/item/urn:contentEntry:6ab9ae5254bac698edfe450a), [Meeting Prep](/content/item/urn:contentEntry:6ab9ae575970ee9cdf0c866b), and [Notion Task Manager](/content/item/urn:contentEntry:6ab9ae584ab0c4b844679dcb) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

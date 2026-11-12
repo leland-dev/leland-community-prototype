@@ -1,0 +1,620 @@
+{
+  "id": "urn:contentEntry:6ab9ae50bc685d3818107c4f",
+  "title": "Build Your Job Search OS with Claude",
+  "resourceType": "TUTORIAL",
+  "description": "Set up a Claude Project as your job-search brain and an Excel tracker as your record, then sweep your inbox, track a role, and auto-fill an application, in about an hour.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae50bc685d3818107c4f",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "meta": {
+      "mins_total": 60
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "outcomes",
+        "children": [
+          {
+            "text": "Led by **Ben L.**",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Set up a Claude Project called \"Job Search OS\" with custom instructions and two knowledge files: a Universal Profile built from their resume and LinkedIn, and an Answer Library of draft application and interview answers.",
+              "Built jsos.xlsx, a single tracker spreadsheet with a Dashboard, Companies, Applications, People, and Answer Library tabs that Claude reads and writes to directly.",
+              "Connected Gmail and Claude for Chrome, then ran a live inbox sweep that turned buried recruiter and ATS threads into structured rows in their tracker.",
+              "Tracked a real job posting end-to-end: pulled the listing into a row, then used Claude for Chrome to auto-fill the application from their Profile and Answer Library, stopping short of submit for their review."
+            ],
+            "title": "What you'll build",
+            "variant": "check"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "intro",
+        "title": "Session intro",
+        "subtitle": "What you need before we start and what this session covers.",
+        "children": [
+          {
+            "text": "**What to have ready before we start**",
+            "type": "prose"
+          },
+          {
+            "text": "About 15 minutes of prep makes this session feel smooth. The core build works for everyone; the connector-powered steps (the inbox sweep and auto-fill) need two things connected in advance, so do those before you arrive.",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Cowork and a paid Claude account (recommended for Projects and connectors)",
+              "**Gmail connected**, required for the inbox sweep: Customize → Connectors → add Gmail. No connector? We'll give you a sample inbox export to use instead.",
+              "**Claude for Chrome installed**, required for auto-fill: the browser extension that lets Claude see and fill a web form. No extension? You'll follow along on Ben's screen.",
+              "Excel or Google Sheets, the whole tracker is one spreadsheet (examples use Excel, Sheets is identical)",
+              "Your résumé (PDF) and your LinkedIn URL, the raw material Claude uses to seed your profile",
+              "A real job posting URL you'd actually apply to (we provide a sample if you'd rather not use a live one)"
+            ],
+            "variant": "check"
+          },
+          {
+            "text": "Privacy note: the inbox sweep is read-only, Claude never replies or sends. The auto-fill agent never clicks Submit, it stops and shows you the form. If you're doing a sensitive search, use a personal Gmail and skip anything you don't want on screen.",
+            "type": "callout"
+          },
+          {
+            "text": "**What you'll build today**",
+            "type": "prose"
+          },
+          {
+            "text": "Two things that work together every day of your search:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "A **Claude Project named \"Job Search OS\"** with custom instructions, a Universal Profile, and an Answer Library in Project Knowledge.",
+              "**jsos.xlsx**, one spreadsheet with a Dashboard, Companies, Applications, People, and Answer Library that Claude updates for you."
+            ]
+          },
+          {
+            "text": "The build takes about 60 minutes live. After that, tracking a new role is about 30 seconds, filling an application is about 5 minutes instead of 30, and your morning brief writes itself. The spreadsheet is the record. The Project is the brain.",
+            "type": "prose",
+            "variant": "footnote"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "opening-concepts",
+        "title": "Opening concepts",
+        "subtitle": "Three ideas worth knowing before you build.",
+        "children": [
+          {
+            "text": "**Claude Projects: a persistent brain**",
+            "type": "prose"
+          },
+          {
+            "text": "A Project holds standing instructions plus knowledge files Claude reads before every message. You set up who you are once; every future chat starts already knowing your background, your targets, and your voice.",
+            "type": "prose"
+          },
+          {
+            "text": "**Connectors (MCP): Claude reaching into your tools**",
+            "type": "prose"
+          },
+          {
+            "text": "Connectors let Claude read your Gmail and see the web page in your browser. Paired with its access to your spreadsheet, that's what turns a chatbot into a system that acts on your real search.",
+            "type": "prose"
+          },
+          {
+            "text": "**Brain vs. record, and structured output**",
+            "type": "prose"
+          },
+          {
+            "text": "The brain (Project) holds judgment and voice. The record (jsos.xlsx) holds structured rows. The trick that connects them is asking Claude to return data in a fixed shape, named columns, consistent categories, so it drops straight into your spreadsheet instead of becoming prose you have to clean up.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-1",
+        "title": "1. Set up your Job Search OS Project and connect your tools",
+        "subtitle": "One Project, two connectors, and every later build depends on it.",
+        "children": [
+          {
+            "text": "**Custom Instructions, standing rules for every chat**",
+            "type": "prose"
+          },
+          {
+            "text": "You set these once; everything in the next five builds depends on them.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Create the Project.** Open Cowork, click Projects in the left sidebar, then New Project. Name it Job Search OS and click Create. Keep jsos.xlsx in the project's working folder so Claude can read and write it.",
+                    "type": "prose"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Set your custom instructions.** Click Set project instructions and paste the prompt below, then save.",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "You are my job-search copilot. You help me run my search like a project:\ntracking companies, roles, contacts, and conversations; drafting\napplications in my voice; and keeping my pipeline current.\n\nBehavior rules:\n- Treat universal-profile.md as ground truth for facts (identity, work\n  history, work authorization, comp). Treat answer-library.md as the\n  source for reusable application and interview answers.\n- When you write to my tracker (jsos.xlsx), use the EXACT sheet and column\n  names I've defined. Never invent columns. If something doesn't fit, ask.\n- When filling an application: fill STATIC fields verbatim from my\n  Universal Profile; pull STANDARD questions from my Answer Library at the\n  length that fits the field; STOP and flag anything NOVEL or company-\n  specific. Never invent facts, metrics, or experience I don't have.\n- Never click Submit on an application. Always show me the filled form first.\n- When you sweep my email, you are READ-ONLY. Never reply or send. Flag\n  anything time-sensitive at the top.\n- Be direct and specific. When I ask \"where does my search stand,\" give me\n  counts and names, not vibes."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Confirm your connectors.** Open Customize → Connectors and confirm Gmail and Claude for Chrome are connected. This is the step that must be done before Build 4.",
+                    "type": "prose"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "It encodes the two guardrails that make the whole system trustworthy: facts come from your Profile, answers come from your Library, and the agent never sends or submits anything on its own.",
+            "type": "callout",
+            "title": "How this prompt works"
+          },
+          {
+            "type": "toggle",
+            "title": "No \"Connectors\" menu?",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "You're on a plan without them, you can still do Builds 1–3 and the URL step in Build 5; use the sample data for the Gmail sweep.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "tags": [
+              {
+                "text": "Model: Claude"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-2",
+        "title": "2. Seed the brain: Universal Profile and Answer Library",
+        "subtitle": "Turn your résumé and LinkedIn into structured facts and pre-written answers.",
+        "children": [
+          {
+            "text": "**Project Knowledge, files Claude reads before every message**",
+            "type": "prose"
+          },
+          {
+            "text": "The Universal Profile is your facts. The Answer Library is your pre-written answers. Together they're why auto-fill in Build 5 can draft an application without you re-typing your life story.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Start a new chat in the Job Search OS Project.** Attach your résumé (PDF) and paste your LinkedIn URL, then send the prompt below.",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Create a file called universal-profile.md in my working directory with the\nsections below, then fill it from my attached resume and LinkedIn.\n\n## 01 IDENTITY\n- One-liner (the elevator pitch you'd give at a dinner)\n- Location + work authorization\n- 3 sentences: what I do, what I'm known for, what I'm after\n## 02 EXPERIENCE\n- Every role: title, dates, and 4-6 impact bullets with numbers\n## 03 TARGETS\n- 3-5 role titles I'd accept; company stage/industry; comp band\n  (floor / target / ceiling); deal-breakers (location, travel, equity)\n## 04 LOGISTICS\n- Earliest start date, notice period, EEO voluntary self-ID, visa/sponsorship\n## 05 STORIES (leave as a placeholder — we fill it next)\n\nPull only from what I've given you. Where you need something I haven't\nprovided, leave a [NEEDED: ...] placeholder. Do not invent anything."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Review the flags, then seed your Answer Library.** Fill in the obvious [NEEDED:] flags, then send the prompt below.",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Read my universal-profile.md, resume, and LinkedIn. Seed my Answer Library\nwith drafts for the 25 most common application and interview questions\nacross: Why this role, Why this company, Tell me about yourself, Strengths,\nWeakness, Failure, Conflict, Leadership, Career goals, Salary expectations.\n\nFor each question, write a SHORT (~50w), MEDIUM (~150w), and LONG (~300w)\nversion in my voice — pull phrasing from my Universal Profile. Mark every\nentry Status = Draft. Flag any \"why this company\"-type question as\nneeds-company-customization. Save it all as answer-library.md."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "You don't write 25 answers from scratch, Claude drafts and you promote. \"Draft\" is good enough to apply with; your real voice shows up by the third application, and that's when you upgrade the high-frequency entries.",
+            "type": "callout",
+            "title": "How this prompt works"
+          },
+          {
+            "type": "toggle",
+            "title": "Thin résumé?",
+            "children": [
+              {
+                "text": "Paste a 200-word bio or a past cover letter as extra source material. More of your real writing means less generic drafts.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "tags": [
+              {
+                "text": "Model: Claude"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-3",
+        "title": "3. Stand up your jsos.xlsx tracker",
+        "subtitle": "One spreadsheet, five tabs, and a Dashboard that reads across all of them.",
+        "children": [
+          {
+            "text": "**Structured storage, one row per thing**",
+            "type": "prose"
+          },
+          {
+            "text": "Companies, roles, people, and answers each get their own tab. A Dashboard tab reads across them so \"where does my search stand\" is one glance, no digging.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Download the starter workbook.** Download the jsos.xlsx starter from the session email and open it. It already has a Dashboard plus companies, applications, people, and answers tabs, with the columns pre-set and the Dashboard formulas pre-built.",
+                    "type": "prose"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Clear the example rows.** Delete the two italic example rows on each tab when you're ready to add your own, the Dashboard updates automatically.",
+                    "type": "prose"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Load your Answer Library in.** Send the prompt below to move your drafts into the tracker.",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Open jsos.xlsx in my working directory. Load my answer-library.md drafts into\nthe 'answers' sheet — one row per question, filling the columns: question,\ncategory, short, medium, long, status (=Draft), tags, needs_company_custom.\nDon't touch the other sheets yet."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "title": "Claude edited the file but you don't see changes?",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "Close and reopen jsos.xlsx, Excel won't show external edits to an open file.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "text": "The exact column names matter, your custom instructions told Claude to only ever write to columns you've defined, and the Dashboard formulas depend on them. This is the schema every later automation reads and writes.",
+            "type": "callout",
+            "title": "How this prompt works"
+          },
+          {
+            "type": "toggle",
+            "title": "Generate the workbook from scratch (or on Google Sheets)",
+            "children": [
+              {
+                "text": "Prefer to build from scratch, or use Google Sheets instead of Excel? Send this prompt instead of downloading the starter.",
+                "type": "prose"
+              },
+              {
+                "type": "steps",
+                "steps": [
+                  {
+                    "type": "step",
+                    "children": [
+                      {
+                        "text": "Generate the workbook.",
+                        "type": "prose"
+                      },
+                      {
+                        "type": "prompt",
+                        "prompt": "Create jsos.xlsx in my working directory with these sheets and headers:\n- companies:    name, industry, stage, why_it_fits, status, heat,\n                warm_intro, comp_target, last_touch, notes, url\n- applications: role, company, status, comp_range, location, posted_date,\n                applied_date, jd_summary, why_fit, why_stretch, fit, source,\n                warm_contact, next_step, due_date, url\n- people:       name, company, role, relationship, strength, last_contact,\n                next_contact, owes, linkedin, email, notes\n- answers:      question, category, short, medium, long, status, tags,\n                last_used, needs_company_custom\nThen load my answer-library.md drafts into the answers sheet, Status = Draft."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tags": [
+              {
+                "text": "Model: Claude"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-4",
+        "title": "4. Catch up your search: Gmail sweep to Excel",
+        "subtitle": "Turn 20 to 50 buried threads into structured rows in one pass.",
+        "children": [
+          {
+            "text": "**Connectors in action, Claude reads your real data**",
+            "type": "prose"
+          },
+          {
+            "text": "Most searches have 20–50 latent threads already sitting in Gmail. This sweep turns them into structured rows in one pass, the single biggest time-save of the day.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Run the catch-up sweep.** In the Project, run the prompt below against your workbook.",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Sweep my Gmail from the last 90 days for job-related threads: recruiters,\nATS senders (greenhouse.io, lever.co, ashby.com, workday.com,\nsmartrecruiters.com, icims.com), interview scheduling, and alumni intros.\n\nFor each thread, append rows to jsos.xlsx:\n1. Add or update the company in the 'companies' sheet (status = \"Researching\"\n   since I had a thread).\n2. If a specific role is mentioned, add it to 'applications' with a best-guess\n   status (Spotted, Applied, Phone Screen, etc.) inferred from the thread.\n3. Add the human(s) to 'people' with an inferred relationship\n   (recruiter, hiring manager, referral, alumni).\nDedupe before writing — update existing rows, don't duplicate. Do NOT reply\nto anything; you are read-only.\n\nThen give me a one-page summary: how many companies / roles / people were\nadded, my pipeline broken down by status, and the 5 oldest \"waiting on them\"\nthreads I should re-poke this week."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Reopen jsos.xlsx.** Watch the Dashboard light up, the pipeline you forgot you had, on one screen.",
+                    "type": "prose"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "toggle",
+            "title": "Too many results, or wrong statuses?",
+            "variant": "troubleshooting",
+            "children": [
+              {
+                "text": "Too many results? Narrow the sweep to 30 days. Wrong statuses? Tell Claude the correction in-thread and it re-writes those rows.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "text": "Notice what you didn't do, no copying company names by hand, no reconstructing where each application stands. Claude reads the threads, infers status, and writes structured rows. You review; you don't transcribe.",
+            "type": "callout",
+            "title": "How this prompt works"
+          },
+          {
+            "type": "toggle",
+            "title": "Gmail not connected / sensitive inbox",
+            "children": [
+              {
+                "text": "Use the sample inbox export from the session email (Claude reads it as an attachment and populates the same rows), or hand-add two real applications so you've felt the shape.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "tags": [
+              {
+                "text": "Model: Claude"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-5",
+        "title": "5. Track a job, then auto-fill the application",
+        "subtitle": "Read the posting, write the row, then let Claude for Chrome fill the form and stop before submit.",
+        "children": [
+          {
+            "text": "**The agent that acts: read, classify, fill, stop**",
+            "type": "prose"
+          },
+          {
+            "text": "Claude for Chrome can see the form on your screen, fill what it knows from your Profile and Library, and stop before submit so you stay in control.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Track a new job.** In the Project, paste a real job posting URL and send the prompt below.",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Open this job posting: [URL].\n1. Pull role, company, comp band, location, and posted date; write a\n   3-sentence JD summary.\n2. Add a row to the 'applications' sheet of jsos.xlsx with status = \"Spotted.\"\n   If the company isn't in 'companies' yet, add it (status = \"Researching\" +\n   a 1-sentence why-it-fits).\n3. Then return:\n   - 3 reasons I'd be a fit (from my Universal Profile)\n   - 3 reasons it'd be a stretch\n   - 1 person in my 'people' sheet I should reach out to first\n   - a 2-line draft message to that person"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Auto-fill the application.** Open the application page in Chrome, trigger Claude for Chrome, and send the prompt below.",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "You're looking at an open job application. For each form field:\n- STATIC (name, email, phone, LinkedIn, work authorization, EEO, education)\n  → fill verbatim from my universal-profile.md.\n- STANDARD (\"Why this role?\", \"Why this company?\", \"Tell us about yourself\")\n  → pull the matching Answer Library entry at the length that fits the field.\n  If it's flagged needs-company-customization, adapt it using the company's\n  recent news.\n- NOVEL (no match in my Library) → STOP. Show me the field and any context\n  you found. I'll write it, then ask if I want to save it to my Answer Library.\nNever guess. Never invent metrics. Do NOT click Submit — show me the filled\nform for review."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "A Workday form that used to take 30 minutes takes about five. The agent fills roughly 80%, flags the company-specific essay, and hands it back. Human review is mandatory by design, you always see exactly what's being sent before anything goes out.",
+            "type": "callout",
+            "title": "How this prompt works"
+          },
+          {
+            "type": "toggle",
+            "title": "Chrome not installed",
+            "children": [
+              {
+                "text": "Follow along on Ben's screen for the auto-fill half, and use the sample posting URL for the tracking half so you still create a real row.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "tags": [
+              {
+                "text": "Model: Claude + Claude for Chrome"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-6",
+        "title": "6. Make it ongoing: schedule your brief and sweep",
+        "subtitle": "Two scheduled tasks that keep the system current without you touching it.",
+        "children": [
+          {
+            "text": "**Scheduled tasks, prompts that run on a clock**",
+            "type": "prose"
+          },
+          {
+            "text": "Cowork can run a prompt on a schedule. A morning brief orients your day; a Sunday sweep keeps the pipeline honest.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Schedule your morning brief.** In Cowork, schedule a task for weekdays at 7am using the prompt below.",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "prompt": "Generate my Job Search OS morning brief from jsos.xlsx and email it to me:\n- TOP 3 PRIORITIES today (applications with a status move due; people with\n  next-contact today)\n- PIPELINE FLAGS (apps \"Applied\" >14 days with no movement; hot companies\n  not touched in >7 days)\n- OUTREACH DUE (people past their cadence — cap at 3)\n- ONE CONFIDENCE PULL (a strong story from my Library)\nShort email, bullets, no fluff. Subject: \"Job Search OS — Morning Brief [date].\"\nSend to me at [your email]. Don't ask for confirmation."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**Schedule your weekly sweep.** Schedule a second task for Sunday at 6pm using the Weekly inbox sweep prompt from your prompt library, the same read-only Gmail sweep with a 7-day window, that keeps jsos.xlsx current before the week starts.",
+                    "type": "prose"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "You start each weekday already oriented and each week with a pipeline that reflects reality, without opening five tabs to remember where you were.",
+            "type": "callout",
+            "title": "How this prompt works"
+          },
+          {
+            "type": "toggle",
+            "title": "No scheduling on your plan",
+            "children": [
+              {
+                "text": "Run both prompts manually. Keep them at the top of your prompt library so they're one paste away.",
+                "type": "prose"
+              }
+            ]
+          },
+          {
+            "tags": [
+              {
+                "text": "Model: Claude"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "share",
+        "title": "Share what you built",
+        "children": [
+          {
+            "text": "Share a screenshot of your Dashboard tab, or the headline number from your live Gmail sweep, how many companies, roles, or people it surfaced that you'd forgotten about.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "wrap",
+        "title": "Summary & next steps",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "A Claude Project \"Job Search OS\" with custom instructions, universal-profile.md, and answer-library.md in Knowledge.",
+              "jsos.xlsx, a Dashboard plus Companies, Applications, People, and Answer Library, populated from your real inbox.",
+              "Gmail and Claude for Chrome connected, so the system updates from your search.",
+              "Run-forever prompts: catch-up sweep, track-a-job, application auto-fill, and a scheduled morning brief."
+            ],
+            "title": "What you built today"
+          },
+          {
+            "text": "**Where to go next**\n\n1. Promote 5 Answer Library entries from Draft to Reviewed as you reuse them.\n2. Run the interview-day company brief and behavioral-prediction prompts before your next round.\n3. Generate your personal marketplace map, which 5 surfaces actually fit your target, instead of refreshing LinkedIn 40 times a day.\n4. Fill one real application with the agent tomorrow morning. Time yourself before and after.",
+            "type": "prose"
+          },
+          {
+            "text": "_The system serves the search, not the other way around. Build it, use it, edit it. The version you're running six months from now will look nothing like tonight's, and that's exactly right._",
+            "type": "prose"
+          }
+        ]
+      }
+    ]
+  }
+}

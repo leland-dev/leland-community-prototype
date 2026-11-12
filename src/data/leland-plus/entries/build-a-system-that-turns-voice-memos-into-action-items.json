@@ -1,0 +1,216 @@
+{
+  "id": "urn:contentEntry:6ab9ae4ab2c8722dc6452ce4",
+  "title": "Build a system that turns voice memos into action items",
+  "resourceType": "TUTORIAL",
+  "description": "A system that turns a voice memo transcript into decisions, action items, and drafted follow-ups for review.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4ab2c8722dc6452ce4",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "slack": {
+      "title": "Slack",
+      "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "context": {
+      "title": "Context",
+      "content": "Everything Claude can 'see' in a given session — your messages, files you've shared, instructions, and conversation history. The more relevant context you give Claude, the better its output."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Life & Personal"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "A decision made out loud on a call, in a meeting, or on a walk rarely becomes a tracked task on its own. This system closes that gap. It takes a recorded voice memo, separates the decisions from the open questions, extracts action items with an owner and deadline, and drafts the follow-up messages for each so you can send them yourself.",
+          "type": "prose"
+        },
+        {
+          "text": "Claude can already search a person's own voice-memo transcripts and cite the specific recording where a decision got made, per [Anthropic's Claude Academy personal use cases](https://academy.claude.com/use-cases?department=personal). Turning that same transcript into a tracked list is the step that comes after finding it.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a paste-in [prompt](#tooltip-prompt) every time you record, a saved [skill](#tooltip-skill), or a scheduled [agent](#tooltip-agent) that runs on new transcripts automatically.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming what you usually record, where the transcripts come from, who needs to see follow-ups, and how urgency gets flagged.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that turns my voice memos into tracked action items. Ask me questions, one at a time, about what I usually record, where my transcripts come from, who needs to see follow-ups, and how urgent items should be flagged. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview forces you to name where transcripts come from before you build around a guess, and the scope document becomes the brief for every run after it."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where memos get recorded and transcribed.",
+            "Where extracted items should land so they don't pile into one list.",
+            "Whether follow-up drafts always wait for review or only above a stakes threshold."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common connectors are a notes or task app ([Notion](#tooltip-notion), Apple Notes, Todoist), a calendar (Google Calendar), and messaging to send follow-ups (Gmail, [Slack](#tooltip-slack), iMessage). The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Start building the system your scope document describes, and test it on a real transcript. The prompt below is an example of the core task. Your scope document will give you a version shaped to your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Turn a raw voice-memo transcript into decisions, action items, and drafted follow-ups.\n\nContext: [Paste your transcript.] I record after [calls / meetings / planning walks]. Action items usually involve [names or roles].\n\nRules:\n- Separate decisions, action items, and open questions.\n- Give each action item an owner and deadline, or mark it \"not specified.\"\n- Draft one follow-up message per action item; never send it.\n- Ignore filler and hedging; extract only firm statements.\n- Output as three sections: Decisions, Action Items as a table, Follow-up Drafts.",
+          "prompt_note": "How this prompt works: naming decisions, action items, and open questions as separate categories keeps a passing comment from getting logged as a commitment."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Owners and deadlines present, follow-ups drafted and not sent, filler left out?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what got missed or overstated, and fold the correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "File items straight into the right project by connecting your notes app through a [tool connector](#tooltip-tool-connectors).",
+            "Build a weekly digest of everything extracted across memos.",
+            "Flag open questions that keep recurring across recordings."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat turn the scope bar into pass/fail checks and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each action item list, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, memos processed, items extracted, items missed or misread, and what rule I changed. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make recurring misses visible after a week of entries."
+        },
+        {
+          "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the system passes the rubric a week straight, package the prompt and your corrected rules into a reusable AI skill, so every run starts from your defaults instead of a blank chat. When the log shows the same check failing again and again, that gap is a candidate for a skill of its own. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write the skill for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. A rambling transcript produces vague items unless you tell the tool to ignore hedging, so give it that [context](#tooltip-context) every run. A passing comment can also read as firmer than it was, which is why every follow-up draft waits on you to send.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Anthropic, Claude Academy personal use cases](https://academy.claude.com/use-cases?department=personal) — Supports the voice-memo transcript search claim."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Automate action items from your meeting notes](/content/item/urn:contentEntry:6ab9ae3f6e098a0cda79a8fd) · Operations",
+            "[Create an agent that helps you think through decisions](/content/item/urn:contentEntry:6ab9ae4a225e5315e4c0c3c6) · Life & Personal",
+            "[Meeting Analyzer](/content/item/urn:contentEntry:6ab9ae572155c4d377d9627e) and [Notion Task Manager](/content/item/urn:contentEntry:6ab9ae584ab0c4b844679dcb) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

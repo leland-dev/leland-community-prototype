@@ -1,0 +1,213 @@
+{
+  "id": "urn:contentEntry:6ab9ae4aef5f07dc6e09707a",
+  "title": "Design a caregiving coordinator",
+  "resourceType": "TUTORIAL",
+  "description": "A system that turns your caregiving notes into a shared status log, task list, and family update, with urgent items flagged first.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4aef5f07dc6e09707a",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "slack": {
+      "title": "Slack",
+      "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Life & Personal"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "63 million Americans provide unpaid family care for a relative, averaging 27 hours a week, per [AARP and the National Alliance for Caregiving's Caregiving in the US 2025 report](https://www.aarp.org/pri/topics/ltss/family-caregiving/caregiving-in-the-us-2025/). Most families run that second job with no shared system, so siblings each see a different slice of what's happening.",
+          "type": "prose"
+        },
+        {
+          "text": "This system turns today's caregiving notes into an updated status log, task assignments split across whoever's involved, and a drafted family update, triggered by a new appointment, a medication change, or a missed-dose alert. It's the highest-stakes build in this catalog. A missed dose has real consequences, so urgent items get flagged first, in plain language, before anything else.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a paste-in [prompt](#tooltip-prompt) after every update, a saved [skill](#tooltip-skill) kept in your notes app, or a scheduled [agent](#tooltip-agent) that watches wherever notes already land and posts the family update to your group chat.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming what needs tracking, who's involved and their responsibilities, how urgent issues get flagged, and where information lives today.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that helps me coordinate care for a family member. Ask me questions, one at a time, about what needs tracking, who's involved and their responsibilities, how urgent issues get flagged, and where information lives today. When you have what you need, write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview surfaces who's responsible for what before a gap causes a missed task, and the scope document becomes the brief every family member can build from."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where the shared log lives so every sibling can read and edit it.",
+            "How urgent alerts reach people who don't check the log daily.",
+            "Who has final say on what the system surfaces, since it organizes what you tell it and never diagnoses anything on its own."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first in a fresh session or a different [model](#tooltip-model). Common connectors are shared docs or a task board (Google Docs, [Notion](#tooltip-notion), Trello), a calendar (Google Calendar), and messaging for siblings and the care team (iMessage, WhatsApp, [Slack](#tooltip-slack)). The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Build your system and test it on today's caregiving notes. The prompt below is an example. Your scope document gives a version for your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Turn today's caregiving notes into an updated status log and task list split across the people involved.\n\nContext: [Paste today's notes.] People involved: [names and roles].\n\nRules:\n- Flag urgent items (missed dose, fall, new symptom) first, in plain language, with no medical interpretation.\n- Assign each task to whoever covers that area; mark \"unassigned\" if it's unclear.\n- Append to the log. Never overwrite prior entries.\n- Draft a short, factual family update.\n- Output as: Urgent Flags, Task Assignments table (Task | Owner | Due), Family Update Draft.",
+          "prompt_note": "How this prompt works: append-only logging keeps a full record as different siblings update it, and separating urgent flags from routine tasks means nobody has to read the whole log to catch what matters today."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Urgent items flagged first, every task assigned or marked unassigned, log appended rather than overwritten?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what went wrong and fold each correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Cross-check medications against pharmacy refill dates.",
+            "Build a weekly rollup for a sibling who lives farther away.",
+            "Feed the symptom log into a brief for the next doctor's visit.",
+            "Connect the shared log and calendar through a [tool connector](#tooltip-tool-connectors) so updates sync without manual copying."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat turn the scope document into pass/fail checks and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each status update, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, urgent flags raised, flags that turned out to matter, tasks assigned, and what rule I changed. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the guesswork over what counts as urgent, and the log columns show which tasks keep landing on the same person before that becomes a pattern nobody named."
+        },
+        {
+          "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from the log. Once the rubric passes a couple weeks straight, package the prompt and rules into a skill. A check that keeps failing is a candidate for its own skill. [Claude](#tooltip-claude)'s skill-creator skill writes it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. It only works if the input method is nearly frictionless, since a coordinator nobody updates goes stale within days. Treat every output as organizing notes. It never replaces medical judgment.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[AARP and National Alliance for Caregiving, Caregiving in the US 2025](https://www.aarp.org/pri/topics/ltss/family-caregiving/caregiving-in-the-us-2025/) — The unpaid caregiver volume and weekly hours figure."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Design an AI personal assistant for your life](/content/item/urn:contentEntry:6ab9ae39728238bde8667dee) · Life & Personal",
+            "[Build a life maintenance renewal tracker](/content/item/urn:contentEntry:6ab9ae4a35c1e8d4795d7c63) · Life & Personal",
+            "[Notion Task Manager](/content/item/urn:contentEntry:6ab9ae584ab0c4b844679dcb), [SOP Creator](/content/item/urn:contentEntry:6ab9ae5e6dea06cc86f4baa1), and [Email Manager](/content/item/urn:contentEntry:6ab9ae5254bac698edfe450a) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

@@ -1,0 +1,214 @@
+{
+  "id": "urn:contentEntry:6ab9ae3f6e098a0cda79a8fd",
+  "title": "Automate action items from your meeting notes",
+  "resourceType": "TUTORIAL",
+  "description": "A system that turns a meeting transcript into owned action items and posts them where your team tracks work.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae3f6e098a0cda79a8fd",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "slack": {
+        "title": "Slack",
+        "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "notion": {
+        "title": "Notion",
+        "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "granola": {
+        "title": "Granola",
+        "content": "An AI meeting notes app that listens to your calls and produces structured summaries, action items, and transcripts. Works in the background during Zoom, Google Meet, and in-person meetings. Useful as a source of raw material for AI workflows — feed transcripts into Claude for follow-ups or CRM updates."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Operations"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "US knowledge workers spend 187 hours a year in meetings they consider unnecessary, and nearly a quarter see a direct link between missed deadlines and meeting overload, per [Asana's Anatomy of Work Index](https://asana.com/resources/anatomy-of-work-index). This system takes the transcript or rough notes from a meeting, pulls out who owns what and by when, separates decisions from open questions, and posts the result to wherever your team tracks work.",
+            "type": "prose"
+          },
+          {
+            "text": "The same research treats chasing status and re-explaining decisions as its own category of wasted time, distinct from the work itself. Turning notes straight into owned, dated tasks cuts against exactly that category, one meeting at a time.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a paste-in [prompt](#tooltip-prompt) right after a meeting ends, a saved [skill](#tooltip-skill), or a scheduled [agent](#tooltip-agent) that reads a recurring meeting's transcript and posts on its own. Keep a human glance before it posts, at least until you trust the owner calls it's making.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming which meetings to start with, how notes get in, where action items land, and how owners get assigned when a meeting never says so out loud.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that turns my meeting notes or transcripts into real action items, assigned to the right person, posted where my team tracks work. Ask me questions, one at a time, about which meetings to start with, how I'll get notes in, where action items should end up, how owners get assigned when it's ambiguous, and how to handle decisions versus open questions. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview surfaces decisions you didn't know you needed to make, and the scope document becomes the brief for every build session after it."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Whether your input is a clean transcript or your own rough notes, and how consistent it stays meeting to meeting.",
+              "Which tracker is the real source of truth for your team.",
+              "How to handle meetings where nobody assigns a clear owner out loud."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document, then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your meeting or recording tool (Zoom, Google Meet, [Granola](#tooltip-granola)), your task tracker ([Notion](#tooltip-notion), Asana, Linear), and your team chat tool for posting a summary alongside tracked items ([Slack](#tooltip-slack), Teams). The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Build and test the system on the transcript or notes from one real meeting. The prompt below is one example; your scope document has the full version.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Turn the transcript or notes from [meeting name] into action items with owners and due dates, posted to [tracker].\n\nContext: Meeting recurs [frequency] with [attendees]. Notes come from [tool]. Tracker is [Notion/Asana/Linear] with fields [owner, due date, status, project].\n\nRules:\n- Separate action items from decisions from open questions.\n- Only assign an owner if named explicitly, flag anything ambiguous.\n- Never invent a due date that wasn't discussed.\n- Output as three lists: action items, decisions, and open questions, one line each, owner and date where known.",
+            "prompt_note": "How this prompt works: explicit rules for what counts as an action item versus a decision keep it from guessing at ownership when a meeting never assigned one out loud."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. Three lists kept separate, no invented owners or dates?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly what went wrong (\"that was a decision, not an action item\") and fold each correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Flag recurring open questions that show up meeting after meeting unresolved.",
+              "Chain it into a project status update so new action items roll into the next report.",
+              "Add a personal weekly digest of everything assigned to you.",
+              "Track completion rate on generated action items as the real measure of whether it's working."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric), not a feel check. Have your AI chat turn the scope bar into pass/fail checks and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each set of action items, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for meeting date, action items generated, items assigned correctly, items I had to reassign or correct, and open questions still unresolved. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make a pattern of wrong owner guesses visible after a few meetings."
+          },
+          {
+            "text": "**Log** every run. Note the date, which rubric checks passed or failed, and what changed. A single miss is noise, and a repeated miss is an unwritten instruction.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the rubric passes meetings straight, package the prompt and corrected rules into a skill. A repeated failure earns its own skill. [Claude](#tooltip-claude)'s skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. It can only work from what was said out loud, so silence in a meeting isn't agreement, and posting without a human glance first trains people to ignore it the moment it gets an owner wrong in public.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Asana, Anatomy of Work Index 2021](https://asana.com/resources/anatomy-of-work-index) — The meeting time and missed-deadline stats."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Automate meeting notes into your CRM](/content/item/urn:contentEntry:6ab9ae3c0eb91beef7dce02d) · Sales",
+              "[Build a 1:1 prep assistant](/content/item/urn:contentEntry:6ab9ae46ec5756f65592aa7e) · Leadership",
+              "[Build a system that turns voice memos into action items](/content/item/urn:contentEntry:6ab9ae4ab2c8722dc6452ce4) · Life & Personal",
+              "[Meeting Analyzer](/content/item/urn:contentEntry:6ab9ae572155c4d377d9627e) and [Notion Task Manager](/content/item/urn:contentEntry:6ab9ae584ab0c4b844679dcb) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae51650d788b29cb12d1",
+  "title": "Deal Action Engine",
+  "resourceType": "SKILL",
+  "description": "Diagnose stalled deals by reading the actual notes and email history, then draft a targeted re-engagement email that addresses the real blocker, not a generic check-in.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae51650d788b29cb12d1",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Product"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Diagnose stuck deals and draft re-engagement emails that address the real blocker.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-identify-the-deal-s",
+      "title": "Step 1, Identify the Deal(s)",
+      "children": [
+        {
+          "text": "If the user specifies a deal, pull that deal from the CRM or notes they provide.\nIf the request is \"all stalled\" or unspecified, focus on deals with no contact in the past 7 or more days.\n\nFor each deal, gather:\n- Current stage and status\n- Last email or message content\n- Notes and activity log\n- Any price history or offer details",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-diagnose-the-blocker",
+      "title": "Step 2, Diagnose the Blocker",
+      "children": [
+        {
+          "text": "Read the actual notes and email history. Do not assume. Common blockers:\n\n| Signal | Likely Blocker |\n|--------|---------------|\n| No reply after offer | Hasn't seen it, not interested, or price objection |\n| Replied then went quiet | Specific objection not addressed |\n| Said \"later\" | Timing issue, needs a reactivation nudge |\n| Multiple price changes, no close | Decision pending at floor price |\n| Active thread, no commitment | Undecided, needs urgency or social proof |",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-draft-re-engagement-email",
+      "title": "Step 3, Draft Re-Engagement Email",
+      "children": [
+        {
+          "text": "Write an email that:\n- References the specific thing blocking this deal, not a generic \"just checking in\"\n- Is short: 3 to 5 sentences maximum\n- Has one clear ask or call to action\n- Matches the tone of the prior thread",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Deal Action: [Deal or Contact Name]\n\n## Diagnosis\n[What is actually blocking this deal based on notes and email history]\n\n## Recommended Email Draft\n\nSubject: [subject line]\n\n[email body]\n\n---\n\n## Next Step If No Reply\n[What to do if this email gets no response]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

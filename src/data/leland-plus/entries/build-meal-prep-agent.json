@@ -1,0 +1,710 @@
+{
+  "id": "urn:contentEntry:6ab9ae4da82bc521ad8b0be2",
+  "title": "Build Meal Prep Agent",
+  "resourceType": "TUTORIAL",
+  "description": "Build an agent workflow that turns a week of meals into a ready-to-checkout grocery cart. Everything runs on your machine. No server, no deployment.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4da82bc521ad8b0be2",
+  "viewableFile": "GMT20260521-210025_Recording_1920x1118.mp4",
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "meta": {
+      "mins_total": 180
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "outcomes",
+        "children": [
+          {
+            "text": "Led by **Jordan**",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Fetch a recipe dataset from GitHub and store it as a local JSON file",
+              "Enrich each ingredient with a real Kroger product ID, description, and price",
+              "Pick meals for the week and have Claude consolidate the grocery list",
+              "Add the consolidated list to your actual Kroger cart via OAuth",
+              "Wire everything into /shop and /add-recipe Claude Code skills"
+            ],
+            "title": "What you'll build",
+            "variant": "check"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "intro",
+        "title": "What You're Building",
+        "children": [
+          {
+            "text": "**What You're Building**",
+            "type": "prose"
+          },
+          {
+            "text": "This is a hands-on workshop guide. You'll build an agent workflow that turns a week of meals into a ready-to-checkout grocery cart. Everything runs on your machine. No server, no deployment.",
+            "type": "prose"
+          },
+          {
+            "code": "Build recipes\n    |\nEnrich ingredient list (Kroger API)\n  \"chicken breast\" → { productId, price, description }\n    |\nChoose meals: \"this week I'll have...\"\n    |\nGenerate grocery list\n    |\nAdd to cart (Kroger API)\n    |\nCheckout",
+            "type": "code"
+          },
+          {
+            "text": "**Who This Is For**",
+            "type": "prose"
+          },
+          {
+            "text": "You've opened a terminal before. You may have heard of APIs but never built anything with one. Claude Code is new or newish to you. You want to see how these pieces actually fit together.",
+            "type": "prose"
+          },
+          {
+            "text": "**Tools We'll Use**",
+            "type": "prose"
+          },
+          {
+            "text": "Setting up your Kroger account is covered step-by-step below. Node.js and Claude Code are worth installing now if you haven't already.",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "**Node.js** — Runs the scripts. Check with `node -v`. Mac: `brew install node`. Windows: `winget install OpenJS.NodeJS`. Or download at nodejs.org.",
+              "**Claude Code** — Your AI build partner: writes and runs code alongside you. Download at claude.ai/download. CLI users: run `claude` from inside your project folder.",
+              "**Kroger developer account** — Product search and cart access: covered in Step 0.",
+              "**Kroger personal account** — The actual cart you'll add items to at the end."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-0",
+        "title": "0. Setup Tools",
+        "subtitle": "Create your working folder and register for the Kroger API. Start this first: Kroger's developer approval can take a few minutes to propagate.",
+        "children": [
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**0.1: Create your working folder.** Open your terminal and run:",
+                    "type": "prose"
+                  },
+                  {
+                    "code": "cd ~\nmkdir meal-planner\ncd meal-planner\ncat > .env << 'EOF'\nKROGER_CLIENT_ID=\nKROGER_CLIENT_SECRET=\nKROGER_LOCATION_ID=\nEOF",
+                    "type": "code"
+                  },
+                  {
+                    "code": "cd ~\nmkdir meal-planner\ncd meal-planner\n@\"\nKROGER_CLIENT_ID=\nKROGER_CLIENT_SECRET=\nKROGER_LOCATION_ID=\n\"@ | Set-Content .env",
+                    "type": "code",
+                    "label": "Windows"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**0.2: Create a Kroger developer account.** Go to [developer.kroger.com](http://developer.kroger.com), click **Sign Up**, fill in your name, email, and a password, then verify your email.",
+                    "type": "prose"
+                  },
+                  {
+                    "text": "Why Kroger? It's the only major US grocery chain with a free, self-serve public API. Walmart, Whole Foods, Albertsons, and Trader Joe's don't offer public developer access. For multi-retailer coverage in a production app, look at the Instacart Developer Platform.",
+                    "type": "callout"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**0.3  -  Create a new Kroger app.** Once logged in, click your profile → **Manage → Apps** → **Register**. Fill in the form:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "list",
+                    "items": [
+                      "Select **Personal App**",
+                      "**App Name**: anything  -  `<your-name>-meal-planner` works",
+                      "**App Description**: \"A personal grocery planning script\"",
+                      "**Environment**: Production",
+                      "**API Products**: check **Product, Cart, and Location**",
+                      "**Redirect URI**: `http://localhost:3000/callback`  -  this is where Kroger sends the user after they log in; your script will listen here",
+                      "Click **Register Application**"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**0.4  -  Save your credentials.** Your new app will show a **Client ID** and **Client Secret**. Paste both into your `.env` file. To open it: in Finder, navigate to `meal-planner`, press **Cmd+Shift+.** to show hidden files, right-click `.env`, and open with TextEdit. On Windows: enable \"Show hidden items\" in File Explorer, then open `.env` with Notepad.",
+                    "type": "prose"
+                  },
+                  {
+                    "text": "Treat the client secret like a password. Don't paste it into chat or any public place.",
+                    "type": "callout"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**0.5  -  Make sure you have a personal Kroger account.** The add-to-cart step requires a personal Kroger account  -  the same one you'd use in the store or on [kroger.com](http://kroger.com). Create one now if you don't have one.",
+                    "type": "prose"
+                  },
+                  {
+                    "text": "Why now? Occasionally Kroger takes a few minutes to activate new apps for the cart scope. Starting here gives it time to propagate.",
+                    "type": "callout"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-1",
+        "title": "1. Get Your Recipe Data",
+        "subtitle": "Open Claude Code in your project folder and fetch the recipe seed data from GitHub.",
+        "children": [
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**1.1  -  Open the Claude desktop app and log in.** At the bottom of the screen, click **Code**, then **Select folder**, and navigate to your `meal-planner` folder.",
+                    "type": "prose"
+                  },
+                  {
+                    "text": "Have the CLI? Run `cd ~/meal-planner && claude` from your terminal instead.",
+                    "type": "callout"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**1.2  -  Fetch the recipe data.** Paste this prompt into Claude Code:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Prompt",
+                    "prompt": "Fetch the JSON at https://raw.githubusercontent.com/yerbapadre/meal-planner/main/workshop/recipes.json and save it to recipes.json in this directory."
+                  },
+                  {
+                    "text": "Claude Code will download the file and save it locally. You now have 7 pre-built meals to work with.",
+                    "type": "callout"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**1.3  -  Understand the data structure.** Ask Claude Code:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Prompt",
+                    "prompt": "Read recipes.json and explain the data structure to me. What fields does each ingredient have? Which fields are currently empty?"
+                  },
+                  {
+                    "text": "Note the three empty Kroger fields on every ingredient: `krogerProductId`, `krogerProductDescription`, `krogerProductPrice`. Filling those in is the goal of this workshop.",
+                    "type": "callout"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-2",
+        "title": "2. Add New Recipes",
+        "subtitle": "The seed data is a starting point. Add your own meals in whichever way is easiest.",
+        "children": [
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**2.1  -  Manual entry.** Describe the meal, dictate it with your microphone, or upload a photo of a recipe card:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Prompt",
+                    "prompt": "Add a new recipe to recipes.json for chicken enchiladas. Generate realistic ingredients with quantities and units. Match the exact JSON structure of the existing recipes including the id format."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**2.2  -  From a URL.** Find any recipe online and paste the URL:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Prompt",
+                    "prompt": "Fetch [URL]. First look for a <script type=\"application/ld+json\"> tag  -  many recipe sites embed structured Recipe data there. If you find a JSON-LD Recipe object, parse it directly. Otherwise extract the recipe from the page text. Add the result to recipes.json matching the existing structure."
+                  },
+                  {
+                    "text": "Most major recipe sites (AllRecipes, NYT Cooking, Serious Eats) embed JSON-LD  -  Claude Code will pull it cleanly without scraping. For sites that don't, it falls back to reading the page.",
+                    "type": "callout"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-3",
+        "title": "3. Search Kroger Products",
+        "subtitle": "Now the first real API call. You'll authenticate with Kroger and search for products by ingredient name.",
+        "children": [
+          {
+            "text": "**Client credentials OAuth  -  how product search works**",
+            "type": "prose"
+          },
+          {
+            "text": "Your client ID and secret are sent to Kroger's token endpoint, and Kroger hands back a bearer token. That token goes in the `Authorization` header of every subsequent request. This is standard machine-to-machine authentication  -  no user involved, just your app proving its identity.\n\nThis is different from the add-to-cart step, which requires the user to log in. Product search is public catalog data  -  Kroger just wants to know who's asking.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**3.1  -  Find your local store.** Ask Claude Code to write a script:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Prompt",
+                    "prompt": "Write a script called find-store.js that:\n1. Reads KROGER_CLIENT_ID and KROGER_CLIENT_SECRET from .env\n2. Accepts a zip code as a command-line argument (process.argv[2])  -  exit with a usage message if none is provided\n3. Gets a client credentials OAuth token: POST to https://api.kroger.com/v1/connect/oauth2/token with Authorization header Basic base64(CLIENT_ID:CLIENT_SECRET), Content-Type application/x-www-form-urlencoded, body grant_type=client_credentials\n4. Calls GET https://api.kroger.com/v1/locations?filter.zipCode.near={zip}&filter.limit=5 with Authorization: Bearer {token} and Accept: application/json\n5. Prints each result's locationId, name, and address"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Now run it in your terminal with your zip code:",
+                    "type": "prose"
+                  },
+                  {
+                    "code": "node find-store.js [your-zip-code]",
+                    "type": "code"
+                  },
+                  {
+                    "text": "If the script isn't working, grab the pre-built version: [find-store.js](https://gist.github.com/yerbapadre/6e23a6d5e7cc2aea76e3ef883e72aca4)",
+                    "type": "callout"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Copy the `locationId` for the closest store. Open your `.env` file (same way you did in step 0.4) and paste it in: `KROGER_LOCATION_ID=your-location-id-here`. Save and close the file.",
+                    "type": "prose"
+                  },
+                  {
+                    "text": "Don't ask Claude Code to do this one  -  credentials should be handled by you, not pasted through a chat window.",
+                    "type": "callout"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**3.2  -  Search for a single ingredient.** Ask Claude Code to build a product search script:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Prompt",
+                    "prompt": "Write a script called search-product.js that:\n1. Reads KROGER_CLIENT_ID, KROGER_CLIENT_SECRET, and KROGER_LOCATION_ID from .env\n2. Accepts an ingredient name as a command-line argument  -  exit with a usage message if none provided\n3. Gets a client credentials OAuth token: POST to https://api.kroger.com/v1/connect/oauth2/token with Authorization: Basic base64(CLIENT_ID:CLIENT_SECRET), Content-Type application/x-www-form-urlencoded, body grant_type=client_credentials&scope=product.compact\n4. Calls GET https://api.kroger.com/v1/products?filter.term={ingredient}&filter.locationId={KROGER_LOCATION_ID}&filter.limit=6 with Authorization: Bearer {token} and Accept: application/json\n5. For each result prints: productId, description, price (from items[0].price.regular), and size (from items[0].size)"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Test it:",
+                    "type": "prose"
+                  },
+                  {
+                    "code": "node search-product.js \"chicken breast\"",
+                    "type": "code"
+                  },
+                  {
+                    "text": "If the script isn't working, grab the pre-built version: [search-product.js](https://gist.github.com/yerbapadre/fc7e700f58cbebfd8f8888c9a373756c)\n\nYou're now calling a live grocery API. The prices and product IDs you see are real.",
+                    "type": "callout"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "\"Chicken breast\" returns a specific brand at a specific price. That mismatch  -  general ingredient name vs. specific product item  -  is the core problem the enrichment step solves.",
+            "type": "callout",
+            "title": "The gap you're noticing"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-4",
+        "title": "4. Enrich Your Recipe Data",
+        "subtitle": "Link your abstract ingredient names to real Kroger products with real prices. After this, your data is actionable.",
+        "children": [
+          {
+            "text": "**What enrichment means**",
+            "type": "prose"
+          },
+          {
+            "text": "Right now every ingredient has name, quantity, unit, and estimatedCost  -  with three empty Kroger fields. After enrichment, each ingredient will have `krogerProductId`, `krogerProductDescription`, and `krogerProductPrice` filled in with real data.\n\nThat `krogerProductId` is what Kroger's cart API needs to add the item. Without it, you can't add to cart.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**4.1  -  What enrichment looks like.** Before and after:",
+                    "type": "prose"
+                  },
+                  {
+                    "code": "// Before:\n{ \"name\": \"chicken breast\", \"quantity\": 1.5, \"unit\": \"lb\", \"estimatedCost\": 6.00 }\n\n// After:\n{ \"name\": \"chicken breast\", \"quantity\": 1.5, \"unit\": \"lb\", \"estimatedCost\": 6.00,\n  \"krogerProductId\": \"0001111060822\",\n  \"krogerProductDescription\": \"Kroger Boneless Skinless Chicken Breasts\",\n  \"krogerProductPrice\": 8.49 }",
+                    "type": "code"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**4.2  -  Build the enrichment script.** Ask Claude Code:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Prompt",
+                    "prompt": "Write a script called enrich-recipes.js that reads recipes.json, loops through every ingredient in every meal, and for each one calls the same Kroger product search logic from search-product.js. Take the first result and write the krogerProductId, krogerProductDescription, and krogerProductPrice back into that ingredient in the file. Cache the token so you only fetch it once. Skip ingredients that already have a krogerProductId."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Run it:",
+                    "type": "prose"
+                  },
+                  {
+                    "code": "node enrich-recipes.js",
+                    "type": "code"
+                  },
+                  {
+                    "text": "If the script isn't working, grab the pre-built version: [enrich-recipes.js](https://gist.github.com/yerbapadre/f0d6d96ff9a9a0d88e6b891c69b4568c)\n\nThis will take a minute  -  it's making one API call per unique ingredient. When it finishes, open `recipes.json`. Your ingredients now have real Kroger product data attached to them.",
+                    "type": "callout"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**4.3  -  Check the results.** Ask Claude Code:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Prompt",
+                    "prompt": "Read recipes.json and tell me how many ingredients now have a krogerProductId vs. how many are still empty. For the ones that are missing, suggest better search terms that might find a match."
+                  },
+                  {
+                    "text": "Some specialty ingredients won't match  -  Kroger doesn't carry everything. You'll handle missing items gracefully in the next step.\n\nThe script skips already-enriched ingredients, so it's safe to re-run. Only needed again if you add new recipes.",
+                    "type": "callout"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "You've now created a lightning-fast lookup table. This is the pattern behind real production data pipelines: enrich once, use everywhere. Every downstream script gets fast, consistent results without making additional API calls.",
+            "type": "callout",
+            "title": "Why enrich?"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-5",
+        "title": "5. Build Your Shopping List",
+        "subtitle": "Pick a week of meals. Claude consolidates the ingredients. You get a clean, priced list.",
+        "children": [
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**5.1  -  Plan your week.** No script needed  -  ask Claude Code directly:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Prompt",
+                    "prompt": "Read recipes.json and show me a numbered list of all meals. I'll tell you which ones I want this week."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Pick your meals, then follow up:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Prompt",
+                    "prompt": "Consolidate the ingredients across those meals  -  combine duplicates, normalize units, and carry over the krogerProductId from each ingredient where it exists. Return a clean JSON array saved to shopping-list.json. Each item should have: name, quantity, unit, estimatedTotalCost, and krogerProductId. Then print the result as a formatted table with a total estimated cost."
+                  },
+                  {
+                    "text": "Claude will output something like:\n\nIngredient            Qty    Unit    Est. Cost    Kroger Product\nchicken breast        3.5    lb      $18.49       Kroger Boneless Skinless...\ngarlic                11     clove   $0.89        Fresh Whole Garlic\nolive oil             8      tbsp    $4.29        Kroger Pure Olive Oil\n\nTotal estimated cost: $67.40",
+                    "type": "callout"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-6",
+        "title": "6. Add to Cart",
+        "subtitle": "The final step. You'll authorize the script to act on your behalf and it will add your shopping list to your actual Kroger cart.",
+        "children": [
+          {
+            "text": "**Why this step is different  -  authorization code OAuth**",
+            "type": "prose"
+          },
+          {
+            "text": "Product search used **client credentials OAuth**  -  your app authenticating itself to Kroger. No user involved.\n\nAdding to cart requires **authorization code OAuth**  -  your app needs explicit permission to modify your specific cart. The flow: your script prints a URL → you open it and log in → Kroger redirects back to your script with a one-time code → your script exchanges that code for a user access token → the token lets you modify your cart.",
+            "type": "prose"
+          },
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**6.1  -  Build the cart script.** Ask Claude Code:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Prompt",
+                    "prompt": "Write a script called add-to-cart.js that reads shopping-list.json, filters to only items with a krogerProductId, then runs the Kroger authorization code OAuth flow:\n- Start a local HTTP server on port 3000 at /callback\n- Build and print an authorization URL using https://api.kroger.com/v1/connect/oauth2/authorize with scope cart.basic:write and redirect_uri http://localhost:3000/callback\n- Wait for the callback, extract the code, exchange it for a user token at https://api.kroger.com/v1/connect/oauth2/token using Basic auth with grant_type=authorization_code\n- Add all items to the Kroger cart using the user token\n- Print a success or skip message for each item. Load credentials from .env."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Run it:",
+                    "type": "prose"
+                  },
+                  {
+                    "code": "node add-to-cart.js",
+                    "type": "code"
+                  },
+                  {
+                    "text": "If the script isn't working, grab the pre-built version: [add-to-cart.js](https://gist.github.com/yerbapadre/52df58d226da13b0072262c17d16748a)",
+                    "type": "callout"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**6.2  -  Authorize.** The script will print a URL. Open it in your browser. Log in with your personal Kroger account and click **Allow**. Kroger redirects to `localhost:3000`, your script captures the code, exchanges it for a token, and starts adding items.",
+                    "type": "prose"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "**6.3  -  Check your cart.** Log in and open your cart. Depending on your region, Kroger may operate under a different banner  -  Smith's, Fred Meyer, King Soopers, Ralphs. Log into that site instead  -  same credentials, same cart.",
+                    "type": "prose"
+                  },
+                  {
+                    "text": "Items without a krogerProductId are skipped. This is intentional  -  you can't add something to a Kroger cart without a valid product ID. The script prints a list of skipped items at the end so you know what to add manually.",
+                    "type": "callout"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "The authorization code flow you just implemented is the same OAuth pattern used by every app that connects to a third-party service on a user's behalf  -  Spotify, Google Calendar, Slack, GitHub. The details differ but the shape is always the same: redirect the user, capture the code, exchange for a token, make the call.",
+            "type": "callout",
+            "title": "The OAuth pattern you just built"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build-7",
+        "title": "7. Bonus: /shop and /add-recipe Skills",
+        "subtitle": "You built four scripts. Now wire them together into a single command.",
+        "children": [
+          {
+            "type": "steps",
+            "steps": [
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Create the `.claude/commands` folder in your `meal-planner` directory:",
+                    "type": "prose"
+                  },
+                  {
+                    "code": "mkdir -p .claude/commands",
+                    "type": "code"
+                  },
+                  {
+                    "code": "New-Item -ItemType Directory -Force .claude/commands",
+                    "type": "code",
+                    "label": "Windows"
+                  },
+                  {
+                    "text": "Claude Code recently merged custom commands into skills. Files in `.claude/commands/` still work exactly as shown here  -  the newer format is `.claude/skills/shop/SKILL.md` (same content, lives in its own folder).",
+                    "type": "callout"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Ask Claude Code to create the `/shop` skill:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Prompt",
+                    "prompt": "Create a file at .claude/commands/shop.md with this exact content:\n\nRead recipes.json and print a numbered list of all available meals.\n\nAsk me which meals I want this week. Wait for my response.\n\nOnce I've chosen:\n1. Run enrich-recipes.js to fill in any missing Kroger product data (it will skip already-enriched ingredients automatically)\n2. Consolidate the ingredients across my chosen meals  -  combine duplicates, normalize units, carry over krogerProductId where it exists. Save the result to shopping-list.json. Each item should have: name, quantity, unit, estimatedTotalCost, and krogerProductId.\n3. Print the shopping list as a formatted table with a total estimated cost.\n4. Run `node add-to-cart.js` in the background. Then immediately poll for the `.auth-url` file (check every second, up to 15 seconds). As soon as the file exists, read it and show me this exact message:\n\n---\n**Open this link in your browser to authorize Kroger:**\n\n[the URL from .auth-url as a clickable link]\n\nLog in with your personal Kroger account and click **Allow**. The script will finish automatically once you do.\n---\n\nWait for me to confirm I've authorized, then check that the script completed successfully."
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Now type `/shop` in Claude Code to use it. Claude will show your meals, ask what you want this week, enrich any new recipes, build your list, and add everything to your cart  -  all in one command.",
+                    "type": "prose"
+                  }
+                ]
+              },
+              {
+                "type": "step",
+                "children": [
+                  {
+                    "text": "Create the `/add-recipe` skill:",
+                    "type": "prose"
+                  },
+                  {
+                    "type": "prompt",
+                    "label": "Prompt",
+                    "prompt": "Create a file at .claude/commands/add-recipe.md with this exact content:\n\nAsk me how I want to add a recipe. Give me three options:\n1. Describe it  -  I'll type or dictate the meal name and ingredients\n2. Paste a URL  -  you'll fetch and parse the recipe from the page\n3. Upload a photo  -  I'll attach an image of a recipe card\n\nWait for my response, then:\n\nIf I describe it: Ask for the meal name and any details I want to include. Generate realistic ingredients with quantities and units.\n\nIf I paste a URL: Fetch the page. First look for a <script type=\"application/ld+json\"> tag  -  many recipe sites embed structured Recipe data there. If you find a JSON-LD Recipe object, parse it directly. Otherwise extract the recipe from the page text.\n\nIf I upload a photo: Read the image and extract the recipe name and ingredients.\n\nIn all cases, append the new recipe to recipes.json using this exact structure  -  do not read the file first, just append:\n\n{\n  \"id\": \"meal-{slug}\",\n  \"name\": \"string\",\n  \"servings\": number,\n  \"prepTimeMinutes\": number,\n  \"caloriesPerServing\": number,\n  \"tags\": [\"string\"],\n  \"notes\": \"string\",\n  \"ingredients\": [\n    {\n      \"id\": \"ing-{meal-slug}-{n}\",\n      \"name\": \"string\",\n      \"quantity\": number,\n      \"unit\": \"string\",\n      \"estimatedCost\": number,\n      \"krogerProductId\": null,\n      \"krogerProductDescription\": null,\n      \"krogerProductPrice\": null\n    }\n  ]\n}\n\nThen:\n1. Confirm what was added  -  print the meal name and ingredient count.\n2. Run enrich-recipes.js to look up Kroger products for the new ingredients."
+                  },
+                  {
+                    "text": "Type `/add-recipe` any time you want to grow your recipe library. Claude handles the input method, parses the recipe, saves it, and immediately enriches the new ingredients  -  all in one command.",
+                    "type": "callout"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "This is what agent actually means: a sequence of steps, driven by AI, using tools you built. You wrote the scripts. The skill is the orchestration layer on top.",
+            "type": "callout",
+            "title": "What \"agent\" actually means"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "wrap",
+        "title": "Where to Go Next",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "Save your weekly plan to `plan.json` so Claude reads it automatically  -  no re-picking every Sunday",
+              "Recipe URL mode: paste a URL and Claude fetches, parses, and adds it to `recipes.json` in one command",
+              "Price comparison across stores: run the same search at two different `locationId`s and flag differences",
+              "Nutrition totals: ask Claude to sum calories and macros across your planned meals",
+              "Smart substitution: when a product search misses, ask Claude to suggest a substitute and try that instead",
+              "Turn it into a web app: wrap the same data structure and Kroger integration in a Next.js frontend"
+            ],
+            "title": "Meal Planner v2  -  what to tackle next"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Structured data as source of truth  -  `recipes.json` is the single source of truth. Every script reads and writes to it.",
+              "An AI layer for the reasoning-heavy parts  -  Claude handles fuzzy, reasoning-intensive work (consolidation). Scripts handle the deterministic parts.",
+              "External APIs to make output real and actionable  -  Kroger turns a list of ingredient names into real products with real prices.",
+              "OAuth  -  client credentials for machine-to-machine (product search), authorization code for user-delegated actions (cart).",
+              "Secrets management  -  `.env` is fine for local scripts, but in production use a secrets manager. Never commit credentials.",
+              "Determinism over scraping  -  when sites embed structured data (JSON-LD), use that instead of parsing HTML. Faster, more reliable, token efficient."
+            ],
+            "title": "Engineering patterns from this build"
+          },
+          {
+            "text": "The recipe is always the same. Every useful tool you build  -  with AI or without  -  follows the same recipe:\n\n1. **A job to be done**  -  what outcome do you actually want?\n2. **Reproducible steps**  -  if you had to explain it to someone else, what are the stages?\n3. **Where data comes from**  -  an API, a file, user input, a website?\n4. **Where data lives**  -  a file, a database, in memory?\n5. **Let AI bridge the gaps**  -  implementation, reasoning, ambiguity handling\n\nThe code was never the hard part. Clear thinking about the problem is the work. What you did today  -  defining a job, breaking it into steps, wiring real systems together  -  that's what software engineering actually is. AI just removed the syntax barrier.\n\nThe recipe doesn't change. What you build with it is up to you.",
+            "type": "prose",
+            "variant": "footnote"
+          }
+        ]
+      }
+    ]
+  }
+}

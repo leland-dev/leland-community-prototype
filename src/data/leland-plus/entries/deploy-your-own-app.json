@@ -1,0 +1,576 @@
+{
+  "id": "urn:contentEntry:6ab9ae4ce645f6d98046c476",
+  "title": "Deploy Your Own App",
+  "resourceType": "TUTORIAL",
+  "description": "Build a personal trainer iOS app from scratch using Xcode and Claude Code",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4ce645f6d98046c476",
+  "viewableFile": "jonbuild.mp4",
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "meta": {
+    "mins_total": 60
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "outcomes",
+      "children": [
+        {
+          "text": "Led by **Jordan**",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Install Xcode and Claude Desktop on your Mac",
+            "Create a new SwiftUI iOS project in Xcode",
+            "Connect your Xcode project to Claude Code",
+            "Build and test your personal trainer app in the iOS Simulator and on your iPhone",
+            "Use your AI tool as a UX thought partner to iterate on features"
+          ],
+          "title": "What you'll build",
+          "variant": "check"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "intro",
+      "title": "Session intro",
+      "children": [
+        {
+          "text": "**What you need for this session**",
+          "type": "prose"
+        },
+        {
+          "text": "Before we start, make sure you have these ready.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A Mac running macOS",
+            "Apple ID (free, needed for device signing)",
+            "~20GB of free disk space (Xcode is ~15GB)",
+            "iPhone (optional; the iOS Simulator works on its own)",
+            "Anthropic account at claude.ai"
+          ],
+          "variant": "check"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-1",
+      "title": "1. Installation & Setup",
+      "subtitle": "Install Xcode and Claude Desktop on your Mac",
+      "children": [
+        {
+          "text": "**What is Xcode?**",
+          "type": "prose"
+        },
+        {
+          "text": "Xcode is Apple's official development environment for iOS, macOS, and other Apple platform apps. It includes a code editor, an iOS Simulator, a debugger, and the build system that compiles your Swift code and installs it on your device.\n\nClaude Desktop is your AI coding partner. Once you point it at your Xcode project folder, it can read and write your Swift files directly, so you build features through conversation, not by typing code yourself.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Xcode**: Apple's iOS development environment (~15GB from the App Store)",
+            "**Claude Desktop**: Your AI thought partner, connected to your project folder"
+          ],
+          "title": "What you're installing"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Install Xcode",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Open App Store on your Mac",
+                    "Search for \"Xcode\"",
+                    "Click **Get → Install**",
+                    "Wait for installation to complete (this is large, ~15GB)",
+                    "Open Xcode once installed",
+                    "In the top nav, go to **Xcode → Settings → Locations**",
+                    "Verify Command Line Tools are installed (should show a version number)"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Install Claude Desktop",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Download Claude Desktop from claude.ai",
+                    "Click **Download for Mac**",
+                    "Open the downloaded file and drag Claude to Applications folder",
+                    "Launch Claude from Applications",
+                    "Sign in with your Anthropic account"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Can't install Xcode on macOS Sequoia (App Store blocks it)",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "The App Store's current Xcode requires **macOS 26 (Tahoe)**, so on **macOS Sequoia 15** it simply won't install. The fix is to download **Xcode 26.3**, the most recent version that still supports **macOS 15.6+**, directly from Apple.\n\n**1.** Make sure you're on **macOS 15.6 or later** (**Apple menu → System Settings → General → Software Update**). Xcode 26.3 won't run on older Sequoia.\n**2.** Go to **developer.apple.com/download/all** and sign in with your free Apple ID.\n**3.** Search for **Xcode 26.3** and download the **.xip** (large, ~10GB). Direct link: download.developer.apple.com/Developer_Tools/Xcode_26.3/Xcode_26.3_Universal.xip (you must be signed in for it to work).\n**4.** Double-click the downloaded **.xip** to expand it (this takes a few minutes), then drag **Xcode** into your **Applications** folder.\n**5.** Open Xcode once to finish first-launch setup, then continue with the rest of this session.\n\nHeads up: even after this, the brand-new iOS Simulator won't run on Sequoia. See the **\"Simulator won't launch on an older Mac\"** note in Build 4 for the iOS 18 workaround.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "text": "**On macOS Sequoia 15?** The App Store only offers the newest Xcode, which **requires macOS 26 (Tahoe)**, so it won't install on Sequoia. You can still do this session: download a Sequoia-compatible Xcode (**26.3**, which supports **macOS 15.6+**) directly from Apple instead. Steps are in the **\"Can't install Xcode on macOS Sequoia\"** note at the bottom of this section.",
+          "tone": "tan",
+          "type": "callout"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-2",
+      "title": "2. Create a New iOS Project in Xcode",
+      "subtitle": "Configure and save your Xcode project for development",
+      "children": [
+        {
+          "text": "**SwiftUI: Apple's modern UI framework**",
+          "type": "prose"
+        },
+        {
+          "text": "SwiftUI is Apple's declarative UI framework, introduced in 2019. You describe what the UI should look like and SwiftUI handles the rendering. UIKit is the older imperative approach.\n\nFor new projects, SwiftUI is the right choice: it's more concise, works better with AI-generated code, and is Apple's preferred path going forward. All the settings you'll select below are the defaults for a modern iOS app.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Language:** Swift",
+            "**User Interface:** SwiftUI",
+            "**Lifecycle:** SwiftUI App"
+          ],
+          "title": "Key settings to select"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Create a new project",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Open Xcode",
+                    "Click **File → New → Project**",
+                    "Select **iOS** at the top",
+                    "Choose **App** template",
+                    "Click **Next**"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Configure project settings",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "**Product Name:** Enter your app name (e.g., \"PersonalTrainerApp\")",
+                    "**Team:** Select your team (or \"None\" if no team)",
+                    "**Organization Identifier:** Enter your domain reversed (e.g., \"com.yourname.personaltrainer\")",
+                    "**Bundle Identifier:** Should auto-populate",
+                    "**Language:** Select Swift",
+                    "**User Interface:** Select SwiftUI",
+                    "**Lifecycle:** Select SwiftUI App",
+                    "Click **Next**"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Choose a save location",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Select a folder on your Mac where you want the project stored",
+                    "Make note of this path; you'll use it in Claude Code",
+                    "Make sure **Add to:** shows your project",
+                    "Click **Create**"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Verify the project structure. In Xcode's left sidebar, you should see: **YourAppName/**, YourAppNameApp.swift, ContentView.swift, Assets.xcassets/, Preview Content/, and Info.plist",
+                  "type": "prose"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-3",
+      "title": "3. Connect Xcode Project to Claude Code",
+      "subtitle": "Open your project folder in Claude Desktop and select the right model",
+      "children": [
+        {
+          "text": "**How Claude Code reads your project**",
+          "type": "prose"
+        },
+        {
+          "text": "Claude Code works by reading the files in your project folder directly. When you open a folder in Claude Desktop, your AI tool can see all your Swift files and project configuration, and it can write changes back to those files.\n\nThis is what makes the feedback loop work: your AI tool edits a file, Xcode picks up the change automatically, and you press **Command + R** to rebuild and test.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "You open your Xcode project folder in Claude Desktop",
+            "Your AI tool reads your project's file structure",
+            "You send a prompt and your AI tool writes or edits Swift files",
+            "Xcode detects the file change automatically",
+            "You press **Command + R** to rebuild and test"
+          ],
+          "title": "The development loop"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Get your project folder path",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "In Xcode, right-click on your project name in the left sidebar",
+                    "Select **Show in Finder**",
+                    "Copy the full folder path (**Command + Option + C** to copy path)",
+                    "Keep Finder open; you'll need this path"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Open the project in Claude Desktop",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Open Claude Desktop app",
+                    "Look for a folder icon or \"Attach files\" option",
+                    "Select **Open Folder** or \"Add Folder to Claude\"",
+                    "Navigate to your Xcode project folder and select it"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Select the right model",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "In Claude Desktop, look for Model Selection (usually top-right or in settings)",
+                    "Change from default to **Claude Opus 4.6**",
+                    "Confirm the selection"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Verify the connection",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "In a new message, type: \"What files do you see in my project?\"",
+                    "Your AI tool should list your project files",
+                    "If it does, you're connected and ready!"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-4",
+      "title": "4. Build & Test Your Personal Trainer App",
+      "subtitle": "Send your first build prompt, then test in Simulator and on your iPhone",
+      "children": [
+        {
+          "text": "**Your AI tool as a thought partner**",
+          "type": "prose"
+        },
+        {
+          "text": "Your AI tool is not just a code generator; it's your thought partner. Use it like you would a principal designer on your team.\n\nThe best results come from conversation, not just requests. After each build, test the feature on your device, note what feels good and what needs work, and message your AI tool: \"I just tested [feature]. Here's what I think: [your feedback]. As a principal UX designer, what would you improve?\"\n\nTreat your AI tool as your collaborative architect throughout the process.",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "\"Does this follow iOS design patterns?\"",
+            "\"How would you simplify this flow?\"",
+            "\"What's missing from a user experience perspective?\"",
+            "\"If you were a user, what frustrates you about this?\"",
+            "\"What should we polish next?\""
+          ],
+          "title": "Key questions to ask your AI tool"
+        },
+        {
+          "type": "steps",
+          "steps": [
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Copy the build prompt below and paste it into Claude Desktop to kick off your personal trainer app.",
+                  "type": "prose"
+                },
+                {
+                  "type": "prompt",
+                  "label": "Build prompt",
+                  "prompt": "You are a principal iOS app architect helping me build a personal trainer iOS app using SwiftUI and Xcode. We've just created a new iOS project. I want to build a comprehensive fitness application with these core features:\n\nUser Features:\n- Users can set fitness goals (weight loss, muscle gain, endurance, flexibility, sleep, general fitness)\n- Real-time health data integration from Apple Health (steps, sleep duration, calories burned, heart rate, weight, body fat)\n- Function Health biomarker tracking integration\n- AI-generated personalized training plans (weekly workouts tailored to goals)\n- Personalized nutrition plans with macro/calorie targets\n- Adaptive workout intensity based on daily check-ins (mood, energy, soreness, heart rate)\n- Daily morning check-in prompts (mood, energy, soreness, sleep quality)\n- Food logging with meal plans\n- Streak system for consistency tracking with streak freezes\n- Milestone celebrations at 25%, 50%, 75%, 100% goal completion\n- Rewards & gamification system (points for workouts, check-ins, goal progress)\n- Sign in with Apple authentication\n\nTechnical Requirements:\n- SwiftUI with Swift 6 concurrency\n- HealthKit integration for Apple Health data\n- Supabase backend for user data (PostgreSQL)\n- Local storage with UserDefaults for offline support\n- No authentication barriers — focus on app experience first\n\nYour Role: As a principal UX designer and architect, I want you to:\n- Help me build this incrementally, starting with the core onboarding and dashboard\n- After each feature build, ask me: \"What should we focus on next?\" or \"What would improve the UX here?\"\n- Suggest design improvements as if you were reviewing the app\n- Build features that look polished and production-ready\n- Focus on user experience and engagement\n\nOur Process:\n- You'll guide me through building features in Xcode\n- I'll test changes on my iOS device (we'll set that up)\n- After each build, we'll review what looks good and what needs improvement\n- We're NOT shipping to the App Store yet — just building for personal device testing\n\nLet's start by building an engaging onboarding flow and dashboard. Show me the app structure, then ask: what should we build first after these core screens?",
+                  "prompt_note": "This sets your AI tool up as a principal iOS architect and UX designer. It establishes the full app vision, your iterative process, and how you want your AI tool to guide you through each build. Starting with onboarding and dashboard gives you a foundation to build on session after session."
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Test your app in the iOS Simulator",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "In Xcode, click the device selector at the top (shows \"iPhone 15\" or similar)",
+                    "Select **Simulator → iPhone 15 Pro** (or your preferred device)",
+                    "Click the **Run** button (▶) to build and launch",
+                    "Interact with your app: tap, scroll, and pinch-zoom with your trackpad"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Test on your physical iPhone (optional)",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Plug your iPhone into your Mac with a USB cable",
+                    "Tap **Trust** on your iPhone when prompted",
+                    "In Xcode, click your project name in the left sidebar",
+                    "Go to **Targets → YourAppName → Signing & Capabilities**",
+                    "Under **Team**, click **Add Account** if needed, then select your Apple ID (Xcode creates a free development certificate)",
+                    "Select your iPhone from the device selector at the top of Xcode",
+                    "Click **Run** (▶) and your app will install and open on your device"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "step",
+              "children": [
+                {
+                  "text": "Iterate with your AI tool after each build",
+                  "type": "prose"
+                },
+                {
+                  "type": "list",
+                  "items": [
+                    "Test a feature on your device and note what feels good and what needs work",
+                    "Message your AI tool: \"I just tested [feature]. Here's what I think: [your feedback]. What would you improve?\"",
+                    "Your AI tool will suggest refinements and update the code",
+                    "Press **Command + R** in Xcode to rebuild and test",
+                    "Repeat until the feature is polished"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Make a change in Claude Code → your AI tool saves files to your Xcode project → files auto-update in Xcode → press **Command + R** to rebuild → test on Simulator or device → report back with feedback → repeat.",
+          "type": "callout",
+          "title": "Development loop"
+        },
+        {
+          "text": "**Xcode**\n**Command + R**: Build and run\n**Command + Shift + K**: Clean build\n**Command + B**: Just build (don't run)\n**Command + Option + Click**: Show code documentation\n**Command + //**: Comment/uncomment code\n\n**Simulator**\n**Command + Shift + H**: Go to home screen\n**Command + Shift + D**: Rotate device\n**Command + Shift + R**: Reset simulator\n**Command + Q**: Close simulator\n\n**Claude Code tips**\nAsk your AI tool to show you the code before applying changes. Request specific file locations: \"Update ContentView.swift to...\". Ask for explanations: \"Explain how this HealthKit integration works\".",
+          "type": "callout",
+          "title": "Xcode & Simulator shortcuts reference"
+        },
+        {
+          "type": "toggle",
+          "title": "App won't build",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Press **Command + Shift + K** to clean, then **Command + B** to rebuild. Check for red error messages in the Issue Navigator (left sidebar). Share the error message with your AI tool for help.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Simulator not showing changes",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Press **Command + Shift + K** to clean, then **Command + R** to rebuild fresh. If still stuck, close the Simulator and reopen it.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Device won't accept build",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "Unplug your device, plug it back in, and tap **Trust** on the device if prompted. In Xcode, reselect the device from the device selector and try building again.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Need to free up space",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "In Xcode, go **Window → Devices and Simulators**. Select the Simulator and click **Erase All Content and Settings**. Then rebuild your project.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "Simulator won't launch on an older Mac (no devices / runtime won't install)",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "If your Mac is on an older macOS (e.g. **macOS Sequoia 15**) but you have the newest Xcode, the brand-new iOS Simulator can refuse to install: the device menu shows **\"No devices\"** or only \"Any iOS Simulator Device,\" and you can't press Run. That's because the newest iOS Simulator needs the newest macOS to work; it has nothing to do with your app.\n\nThe fix is to run on an **iOS 18 Simulator** instead. Everything in this app works on iOS 18:\n\n**1.** Lower your app's minimum iOS version. In Xcode, click your project in the left sidebar → select your app **target → General** tab → set **Minimum Deployments → iOS** to **18.0**. (Or just ask your AI tool: \"Set the iOS deployment target to 18.0.\")\n**2.** Download an iOS 18 Simulator. Go **Xcode → Settings → Components**, find **iOS 18.x Simulator**, and click **Get** (it's a large download, ~7GB).\n**3.** In the device selector at the top of Xcode, pick an **iPhone (iOS 18.5)** simulator and press **Command + R**.\n\nOnce you upgrade to the newest macOS later, you can raise the deployment target back up.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "type": "toggle",
+          "title": "App installed on your iPhone but won't open (\"Could not verify\")",
+          "variant": "troubleshooting",
+          "children": [
+            {
+              "text": "With a **free** Apple ID, your iPhone has to verify the app with Apple the first time it runs, so it installs but won't open yet.\n\n**1.** Turn on Developer Mode: **Settings → Privacy & Security → Developer Mode**, toggle on, and restart when prompted.\n**2.** Trust your certificate: **Settings → General → VPN & Device Management → [your Apple ID] → Trust**, then tap **Verify App**.\n\nIf **Verify App** keeps bouncing back to \"Not Verified,\" your Wi-Fi is probably blocking Apple's check. Turn **Wi-Fi off** so you're on **cellular** and tap **Verify App** again, and it almost always clears on a clean connection. If it still won't cooperate, just use the **iOS Simulator** instead; it needs no signing or verification at all.\n\nNote: free-account apps expire after 7 days; rerun from Xcode to refresh the signature.",
+              "type": "prose"
+            }
+          ]
+        },
+        {
+          "tags": [
+            {
+              "text": "Model: Opus"
+            }
+          ],
+          "type": "tags"
+        },
+        {
+          "text": "**On an older Mac?** If you're on **macOS Sequoia (15) or earlier**, the brand-new iOS Simulator won't install: the device menu shows **\"No devices\"** and you can't press Run. It's not your app: the newest Simulator needs the newest macOS. The fix is to run on an **iOS 18 Simulator** instead (lower your deployment target to **iOS 18.0** and download the iOS 18 runtime). Full steps are in the **\"Simulator won't launch on an older Mac\"** troubleshooting note at the bottom of this section.",
+          "tone": "tan",
+          "type": "callout"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "wrap",
+      "title": "Summary & next steps",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "Installed Xcode and Claude Desktop: your iOS development environment and AI thought partner",
+            "Created a new SwiftUI iOS project in Xcode",
+            "Connected your project folder to Claude Code",
+            "Sent your first build prompt and launched a personal trainer app",
+            "Tested your app in the iOS Simulator and (optionally) on your iPhone",
+            "Established an iterative build loop with your AI tool"
+          ],
+          "title": "What you built today"
+        },
+        {
+          "text": "**Next steps after initial setup**\n\n1. **Test the initial build** on your device\n2. **Take a screenshot** of what you see\n3. **Report to your AI tool:** \"I see [what's on screen]. I like [aspect]. I'd change [aspect]. What do you recommend?\"\n4. **Iterate** on design and features based on its suggestions\n5. **Build incrementally**, one feature at a time\n6. **Use your AI tool as your design partner**: ask for feedback, improvements, and what to build next",
+          "type": "prose"
+        },
+        {
+          "type": "toggle",
+          "title": "No Mac? Build it on the web instead",
+          "children": [
+            {
+              "text": "You don't need a Mac, Xcode, or an iPhone for this workshop. You can build the same kind of app as a website that runs in any browser.\n\n1. **Install Node.js** (nodejs.org) and a code editor like **VS Code** or **Cursor**, which run on Windows, Mac, or Linux. Or skip installs entirely with a browser tool like **bolt.new**, **v0**, or **Replit**.\n2. **Create a project:** ask your AI tool to scaffold a **Vite + React** or **Next.js** app, or start from a template.\n3. **Connect your AI tool** to the project folder just like above, then send the build prompt.\n4. **Run it locally:** run **npm run dev** and open the **localhost** link in your browser. Changes hot-reload as you build.\n5. **Deploy:** connect the project to **Vercel** or **Netlify** to get a public URL you can share.\n\nOne difference: a web app can't read Apple Health, so use **manual entry or sample data** for the health metrics. Everything else (goals, plans, nutrition, streaks) works the same.",
+              "type": "prose"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

@@ -1,0 +1,210 @@
+{
+  "id": "urn:contentEntry:6ab9ae40c4325d194ee62b3b",
+  "title": "Automate your collections emails",
+  "resourceType": "TUTORIAL",
+  "description": "A system that drafts a follow-up email for every overdue invoice on your AR aging report and holds it for your review before it sends.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae40c4325d194ee62b3b",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "hubspot": {
+        "title": "HubSpot",
+        "content": "A CRM and marketing platform used by sales, marketing, and customer success teams. Common target for AI automations — students connect it to draft outreach, enrich contacts, or sync data with other tools."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Finance"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "Slow collections cost real cash. [Billtrust's Wakefield Research study](https://www.billtrust.com/news/study-finds-ai-in-accounts-receivable-reduces-dso) found 99% of companies using AI in accounts receivable report a lower average days sales outstanding, 75% by six days or more. A single day of DSO reduction is worth roughly $2.7 million in freed cash for a $1B-revenue company.",
+            "type": "prose"
+          },
+          {
+            "text": "This system reads your AR aging report and drafts a follow-up email for every overdue invoice, personalized to that customer's history and tone. Tone escalates with days overdue, gentle under 30 days, firmer past 60. Nothing goes out until you review it.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a paste-in [prompt](#tooltip-prompt) against a fresh export, a saved [skill](#tooltip-skill), or a scheduled [agent](#tooltip-agent) that runs weekly. Every version holds drafts in a queue. Sending stays a human decision.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your AR data source, tone rules by customer, escalation thresholds, and your review process.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that drafts personalized collections emails for overdue invoices. Ask me questions, one at a time, about where my AR aging data comes from, how I want tone to vary by customer relationship or payment history, what counts as overdue enough to trigger an email, whether emails go out automatically or wait for my review, and what should never appear in a collections email from my company. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview surfaces tone and escalation decisions up front, and the result becomes the brief for every build after it."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Where your AR aging data lives and how current it is when you pull it.",
+              "Which customer relationships need a human touch versus a standard template.",
+              "Whether emails send automatically after a review window or always wait for an explicit send."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first in a fresh session or a different [model](#tooltip-model). Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your accounting or invoicing system (QuickBooks, Xero, NetSuite, Bill.com), your email tool (Gmail, Outlook), and your CRM if relationship notes live there ([HubSpot](#tooltip-hubspot), Salesforce). The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Build the system your scope document describes, and test it on a real export, every overdue invoice included. The prompt below is an example. Your scope document gives you a version for your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Draft a follow-up email for each overdue invoice on this AR aging report.\n\nContext: AR aging report attached, showing customer, invoice number, amount, and days overdue. Customer notes: [any relationship context, e.g. \"long-term client, always pays eventually\" vs \"first time overdue, be firm\"]. My company's tone is [e.g. friendly but direct, never apologetic].\n\nRules:\n- Draft one email per overdue invoice.\n- Match tone to the customer notes provided. Do not invent history you weren't given.\n- Include the invoice number, amount, and due date in every email.\n- Escalate tone gradually based on days overdue: gentle reminder under 30 days, firmer language 30-60 days, final notice language over 60 days.\n- Never threaten legal action or make claims about consequences unless I explicitly authorize that language for a specific account.\n\nOutput as one draft email per invoice, labeled with customer name and days overdue, held in a list for my review before sending.",
+            "prompt_note": "How this prompt works: explicit escalation tiers keep tone consistent across dozens of invoices instead of the AI judging firmness case by case."
+          },
+          {
+            "text": "**Review.** Check each draft against your scope. Right tone for the relationship, correct invoice details, nothing that reads as a legal threat?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Correct the rules instead of editing each draft by hand. Tell it exactly what tone or threshold missed and fold the correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Add a payment-promise tracker that follows up if a promised date passes.",
+              "Escalate unresolved accounts to a phone-call task automatically.",
+              "Build a weekly digest of who's overdue and what's been sent.",
+              "Add sentiment tracking on replies to catch disputes early."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric) instead of a feel check. Have your AI chat draft rubric and run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each collections email, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, invoices drafted, tone corrections needed, emails sent as-is, and customer replies received. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call on tone, and the log makes a drifting rule visible after a few weeks."
+          },
+          {
+            "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. After a few weeks it shows which tone calls needed correction and which thresholds hold. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the system passes the rubric several runs straight, package the prompt, tone rules, and escalation tiers into a reusable AI skill. A check that fails again and again is a candidate for a skill of its own. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write the skill for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. A collections email that gets tone or amount wrong damages a customer relationship in a way a spreadsheet error never would, so route the first few weeks of drafts through human review.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Billtrust, AI in Accounts Receivable Reduces DSO (Wakefield Research)](https://www.billtrust.com/news/study-finds-ai-in-accounts-receivable-reduces-dso) — The DSO reduction rates and the cash value of a single day of DSO."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Automate your invoice bookkeeping](/content/item/urn:contentEntry:6ab9ae41e85e62d98b89da14) · Finance",
+              "[Build a cold outreach personalization engine](/content/item/urn:contentEntry:6ab9ae3bd8306bee4e72681e) · Sales",
+              "[Build a reply sorter for your outbound inbox](/content/item/urn:contentEntry:6ab9ae3ceb6e5f2dcd8f2e0a) · Sales",
+              "[Cold Email Writer](/content/item/urn:contentEntry:6ab9ae5186bbb91b4bcd5c5e) and [Personalization Engine](/content/item/urn:contentEntry:6ab9ae58b1ba1dbc62fb5def) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

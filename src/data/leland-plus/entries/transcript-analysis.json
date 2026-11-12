@@ -1,0 +1,63 @@
+{
+  "id": "urn:contentEntry:6ab9ae607788e3091188ded0",
+  "title": "Transcript Analysis",
+  "resourceType": "SKILL",
+  "description": "Extract seven layers of insight from a sales call or meeting transcript, including subtext, buying signals, objections, and missed opportunities",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae607788e3091188ded0",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Data"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Extract seven layers of insight from a call or meeting transcript. Ask the user to paste the transcript or meeting notes directly.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "the-seven-layers",
+      "title": "The Seven Layers",
+      "children": [
+        {
+          "text": "### Layer 1, What They Actually Said\nNot your interpretation: the actual words. Key phrases that reveal how they think about their situation, their goal, or their hesitation.\n\n### Layer 2, What They Meant\nThe subtext. What did their questions or hesitations signal? What were they really asking or saying?\n\n### Layer 3, Pain Signals\nSpecific moments where they expressed frustration, uncertainty, or urgency. Quote the line.\n\n### Layer 4, Buying Signals\nMoments that indicated interest, readiness, or intent. Examples: \"When does it start?\" or \"How does pricing work?\"\n\n### Layer 5, Objections (stated and unstated)\nWhat did they push back on? What did they avoid or deflect? What objection never got voiced but was implied?\n\n### Layer 6, Missed Opportunities\nQuestions that weren't asked. Threads that weren't pulled. Moments where the conversation could have gone deeper.\n\n### Layer 7, Next Steps\nWhat was committed to? What's unclear? What needs to happen before the next conversation?",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Transcript Analysis: [Meeting / Call Name]\nDate: [date]\n\n## What They Said (key quotes)\n- \"[quote]\", [context]\n\n## What They Meant\n[interpretation of subtext]\n\n## Pain Signals\n- \"[quote]\", [what it reveals]\n\n## Buying Signals\n- \"[quote]\", [what it signals]\n\n## Objections\n| Stated | Unstated / Implied |\n|--------|-------------------|\n| [objection] | [implied concern] |\n\n## Missed Opportunities\n- [moment + what could have been said]\n\n## Next Steps\n- [ ] [committed action + owner]\n- [ ] [unclear item that needs resolution]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

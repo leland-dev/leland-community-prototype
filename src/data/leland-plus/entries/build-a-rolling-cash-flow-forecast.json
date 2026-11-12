@@ -1,0 +1,218 @@
+{
+  "id": "urn:contentEntry:6ab9ae410cf214bba2c1516c",
+  "title": "Build a rolling cash flow forecast",
+  "resourceType": "TUTORIAL",
+  "description": "A system that turns your bank, AR, and AP data into a rolling cash forecast every week and flags any shortfall ahead of time.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae410cf214bba2c1516c",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "slack": {
+      "title": "Slack",
+      "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "read-only": {
+      "title": "Read-only",
+      "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+    },
+    "calibration": {
+      "title": "Calibration",
+      "content": "Checking your LLM judge against your own judgment before trusting it: score five outputs by hand, have the judge score the same five, compare. If you disagree, fix the rubric or the judge prompt — don't ship an eval you haven't calibrated."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Finance"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Cash forecasting is the hardest task in treasury. It's the single most challenging task cited by treasury professionals, named by 62% of respondents, per the [Association for Financial Professionals's 2025 AFP Treasury Benchmarking Survey Report](https://www.financialprofessionals.org/training-resources/resources/survey-research-economic-data/Details/treasury-benchmarking). This system pulls your bank balance, AR aging, and AP aging every week and turns them into a rolling 13-week forecast, flagging any week that dips below your cash minimum and naming what changed since last week's run.",
+          "type": "prose"
+        },
+        {
+          "text": "Cash management and forecasting rank as the top priority for 73% of treasury practitioners, up from 68% in 2022, per the same survey. A rolling forecast is only as reliable as the bank, AR, and AP feeds behind it, and keeping those feeds current when you pull them is the actual bottleneck most teams hit.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a weekly paste-in [prompt](#tooltip-prompt), a saved skill, or a scheduled [agent](#tooltip-agent). Every version stays [read-only](#tooltip-read-only) against your bank and accounting systems.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your forecast horizon, your data sources, your cash minimum, and who sees the forecast each week.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that keeps a rolling cash flow forecast updated every week. Ask me questions, one at a time, about how far out I need to forecast, where my bank, AR, and AP data come from, what counts as a cash shortfall worth flagging, who needs to see this and how often, and how I want week-over-week changes surfaced. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview surfaces decisions you didn't know you needed to make, and the scope document becomes the brief for every build session after."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where your bank, AR, and AP data live, and how fresh they are when you pull them.",
+            "What \"shortfall\" means for your business, since minimum cash thresholds vary a lot by company stage.",
+            "Who needs this forecast weekly versus who just needs the exception flags."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session and asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your bank or banking platform (via export or a connected banking tool), your accounting system for AR and AP aging (QuickBooks, NetSuite, Xero), and a spreadsheet (Excel, Google Sheets) for the rolling [model](#tooltip-model) itself. The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Start building the system your scope document describes, and test it on a real week's data. The prompt below is an example. Your scope document will give you a version shaped to your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Update my rolling 13-week cash flow forecast with this week's data and flag anything concerning.\n\nContext: Bank balance as of [date]: [$ amount]. AR aging report attached. AP aging / upcoming payables attached. Last week's forecast attached for comparison. My minimum cash threshold is [$ amount].\n\nRules: Project cash position week by week for the next 13 weeks using expected AR collections and AP payments. Flag any week where projected cash falls below my minimum threshold. Call out what changed from last week's forecast and why (a new invoice, a payment that moved, a collection that slipped). Do not assume collection timing beyond what the aging data supports; if uncertain, use the invoice due date.\n\nOutput format: A week-by-week table (Week, Beginning Cash, Inflows, Outflows, Ending Cash, Flag), followed by a short summary of what changed since last week.",
+          "prompt_note": "How this prompt works: comparing against last week's forecast turns a static snapshot into a running system that shows what moved."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Thirteen weeks projected, shortfalls flagged, changes explained against last week?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what went wrong (a collection timing assumption was off) and fold the correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Add scenario toggles for best case, worst case, and a delayed customer payment.",
+            "Connect a [Slack](#tooltip-slack) alert for any week that drops below threshold.",
+            "Extend the horizon to a rolling 12-month view for planning.",
+            "Add a variance check comparing forecasted versus actual cash each week to [calibrate](#tooltip-calibration) the model over time."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric) instead of a feel check. Have your AI chat draft rubric and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each weekly cash forecast, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for week, ending cash projected, ending cash actual, shortfalls flagged, and what changed since the prior run. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and comparing projected to actual ending cash each week shows how far off the model runs before a shortfall hits."
+        },
+        {
+          "text": "**Log** every run against the rubric. Note the date, what passed or failed, and what changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from the log. Once the rubric passes a few weeks straight, package the prompt and corrected rules into a reusable AI skill. A check that keeps failing is your next candidate. [Claude](#tooltip-claude)'s skill-creator skill interviews you and writes it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. Forecasts drift silently when the underlying AR/AP feed goes stale. Build in a \"data as of\" timestamp, and treat any forecast built on week-old data as unreliable.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Association for Financial Professionals, 2025 AFP Treasury Benchmarking Survey Report](https://www.financialprofessionals.org/training-resources/resources/survey-research-economic-data/Details/treasury-benchmarking) — Forecasting difficulty and priority ranking among treasury professionals."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a financial model and runway tracker](/content/item/urn:contentEntry:6ab9ae48b059a9e8cae225b7) · Entrepreneurship",
+            "[Automate your budget vs. actuals reporting](/content/item/urn:contentEntry:6ab9ae40e7196c57e98f073a) · Finance",
+            "[Build a month-end close checklist agent](/content/item/urn:contentEntry:6ab9ae410824301c8ae79dd5) · Finance",
+            "[Startup Financial Modeling](/content/item/urn:contentEntry:6ab9ae5fa543a1ee682e5bc9), [Excel Spreadsheets](/content/item/urn:contentEntry:6ab9ae522638a4b47c5afeb2), and [Financial Operations Expert](/content/item/urn:contentEntry:6ab9ae5218f60ab384a8df58) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

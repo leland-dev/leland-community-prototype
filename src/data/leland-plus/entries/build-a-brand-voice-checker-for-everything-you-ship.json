@@ -1,0 +1,220 @@
+{
+  "id": "urn:contentEntry:6ab9ae3a0daa0c064d447280",
+  "title": "Build a brand voice checker for everything you ship",
+  "resourceType": "TUTORIAL",
+  "description": "A system that scores any draft against your brand voice guide and flags the exact lines that read generic or off-tone before it ships.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae3a0daa0c064d447280",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "slack": {
+        "title": "Slack",
+        "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "triage": {
+        "title": "Triage",
+        "content": "Sorting items by urgency or importance to decide what gets attention first. Your email-manager skill triages your inbox — it separates messages that need a real reply from noise you can ignore."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "hubspot": {
+        "title": "HubSpot",
+        "content": "A CRM and marketing platform used by sales, marketing, and customer success teams. Common target for AI automations — students connect it to draft outreach, enrich contacts, or sync data with other tools."
+      },
+      "trigger": {
+        "title": "Trigger",
+        "content": "The event that kicks off an automation, like 'new email received' or 'row added to a sheet.' Every Zapier or n8n workflow starts with a trigger and then runs the actions that follow."
+      },
+      "voice-guide": {
+        "title": "Voice Guide",
+        "content": "A file that captures how you write — your tone, vocabulary, sentence structure, and preferences. Share it with Claude so it writes in your style instead of generic AI voice."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Marketing"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "48% of UK consumers, and 42% across EMEA, say they'd think less of a brand whose advertising ran next to poor-quality, spam-like AI-generated content, per DoubleVerify's 2026 Global Insights report on media quality. This system runs before a draft goes anywhere near a reader. It scores the draft against your brand [voice guide](#tooltip-voice-guide) and flags the specific lines that read generic, off-tone, or unsupported.",
+            "type": "prose"
+          },
+          {
+            "text": "\"AI slop\" is now its own named risk category, one that ad-quality vendors and industry groups benchmark directly instead of leaving it to a copywriter's complaint. A rubric a person can run quickly catches what a style guide nobody rereads never does. The check quotes the exact phrase and the rule it breaks, so whoever approves the draft can fix it before a reader flags it for them.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a paste-in [prompt](#tooltip-prompt) before publish, a saved [AI skill](#tooltip-skill) your team reuses, or a gate wired into your publishing tool.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming where your voice guide lives, what counts as a hard violation versus a softer drift, and who sees the results before something goes out.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that scores any piece of copy against our brand voice guide before it ships. Ask me questions, one at a time, about where our voice guide lives, what the most common ways our copy drifts off-voice actually are, what should automatically fail the check versus just get flagged, and who needs to see the results before something goes out. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview forces you to name the difference between a hard violation and a soft drift before you've built anything, so the check doesn't flag everything or nothing."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Where your brand voice guide lives, and whether it's current enough to check against.",
+              "What counts as a hard violation, banned words or off-brand claims, versus a softer stylistic drift worth flagging but not blocking.",
+              "Whether this runs as a manual paste-and-check step or a gate wired into your publishing tool."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather what it calls for: the brand voice guide file, a [tool connector](#tooltip-tool-connectors) to your publishing or scheduling tool (Buffer, WordPress, [HubSpot](#tooltip-hubspot)) if you want the check wired in as a gate, and your review channel ([Slack](#tooltip-slack)). The paste-in version needs nothing beyond the guide and the draft.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Build your system and test it on a real draft, with the guide attached. The prompt below is an example. Your scope document gives a version for your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Score this draft against our brand voice guide and flag specific problems.\n\nContext: Here is our brand voice guide: [paste or link the guide]. Here is the draft to check: [paste it].\n\nRules:\n- Quote the exact phrase you're flagging, don't just describe the problem generally.\n- Distinguish between a hard violation (banned words, off-brand claims) and a softer stylistic drift.\n- Do not rewrite the draft yourself, this is a check, not an edit.\n- Output format: a pass/needs-revision verdict, then a list of flagged lines with the exact quote, the rule it breaks, and a one-line reason.",
+            "prompt_note": "How this prompt works: requiring the exact quoted phrase for every flag keeps the check specific enough to act on instead of a vague sense that something's off."
+          },
+          {
+            "text": "**Review.** Check the output against your scope. Exact quotes, hard violations kept separate from soft drift, no rewrite attempted?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Tell it exactly which flag missed and fold the correction into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Add a severity score so reviewers [triage](#tooltip-triage) fast.",
+              "Track which rules [trigger](#tooltip-trigger) most often and use that to sharpen the guide itself.",
+              "Extend the same rubric to outbound emails and ad copy alongside long-form content."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric) instead of a feel check. Have your AI chat draft the rubric and a run log in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each brand voice check, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, draft checked, flags raised, flags overridden, and what rule I changed. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make it visible after a few weeks whether the check is catching real problems or just adding noise."
+          },
+          {
+            "text": "**Log** every run against the rubric. Note the date, which checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the rubric passes a couple weeks straight, package the prompt and rules into a skill. [Claude](#tooltip-claude)'s skill-creator skill writes it for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. Vague rules like \"sound more human\" produce vague flags nobody can act on, so keep every rule specific enough to quote an exact violation.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "DoubleVerify, 2026 Global Insights: Media Quality in the Age of AI — The consumer brand-perception stat."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Create a brand voice guide from content you've already written](/content/item/urn:contentEntry:6ab9ae3a8bd361a4751ff11f) · Marketing",
+              "[Build a content repurposing pipeline](/content/item/urn:contentEntry:6ab9ae3b8f20eb5acfa340ce) · Marketing",
+              "[Voice DNA](/content/item/urn:contentEntry:6ab9ae61211a9d9126a215a7) and [Humanize Writing](/content/item/urn:contentEntry:6ab9ae5366b7c1942a3d3696) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

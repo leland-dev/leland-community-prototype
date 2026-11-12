@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae5a34c0816ce514154c",
+  "title": "Rep Coaching Report",
+  "resourceType": "SKILL",
+  "description": "Generate a data-driven coaching report for a sales rep covering pipeline health, deal risks, activity patterns, and specific improvement areas",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5a34c0816ce514154c",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Data"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Build a coaching report for a specific sales rep from their pipeline data. Use before a 1:1 or coaching session.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-gather-the-rep-s-pipeline",
+      "title": "Step 1, Gather the Rep's Pipeline",
+      "children": [
+        {
+          "text": "Ask the user to provide all open deals for the rep being reviewed. For each deal, collect:\n- Stage, amount, last contact date, days in current stage\n- Price history (any changes)\n- Current status or notes",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-analyze",
+      "title": "Step 2, Analyze",
+      "children": [
+        {
+          "text": "### Pipeline Health\n- How many deals at each stage?\n- What's the total pipeline value?\n- Which deals are stalled (no movement in 7 or more days)?\n\n### Activity Patterns\n- How many deals have recent contact activity?\n- Where are deals sitting longest?\n- Any deals missing key information?\n\n### Win/Risk Balance\n- Which deals are closest to closing?\n- Which are most at risk of going cold?\n\n### Coaching Focus Areas\nIdentify 2-3 specific, high-impact areas with deal-level examples and dollar amounts at stake.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Coaching Report: [Rep Name]\nGenerated: [date]\n\n## Pipeline Snapshot\n| Stage | Count | Value |\n|-------|-------|-------|\n| [stage] | [n] | [$] |\n| Total | [n] | [$] |\n\n## Stalled Deals (7+ days no movement)\n- [Deal name], [stage], [days stalled], [$value]\n\n## Highest Priority Deals\n1. [Deal], [why it matters], [next action]\n2. [Deal], [why it matters], [next action]\n\n## Coaching Focus Areas\n\n### 1. [Focus Area]\n[Specific deals + dollar impact + recommendation]\n\n### 2. [Focus Area]\n[Specific deals + dollar impact + recommendation]\n\n## Suggested 1:1 Agenda\n1. [topic]\n2. [topic]\n3. [topic]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

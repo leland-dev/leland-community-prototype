@@ -1,0 +1,118 @@
+{
+  "id": "urn:contentEntry:6ab9ae5dd7a3f8326b84a467",
+  "title": "Share Skills",
+  "resourceType": "SKILL",
+  "description": "Package installed agent skills into shareable zip files, clean tool-specific and user-specific references, and generate ready-to-paste install commands for recipients.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae5dd7a3f8326b84a467",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Coding"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Package installed agent skills into shareable files, clean them for broad use, and give recipients ready-to-paste install commands.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-discover-installed-skills",
+      "title": "Step 1: Discover Installed Skills",
+      "children": [
+        {
+          "text": "Check both common skills directories:\n\n```bash\nls ~/.claude/skills/ 2>/dev/null && echo \"---\" && ls ~/.agents/skills/ 2>/dev/null\n```\n\nCount files per skill:\n\n```bash\nfor dir in ~/.claude/skills/*/ ~/.agents/skills/*/; do\n  [ -d \"$dir\" ] || continue\n  count=$(find \"$dir\" -type f | wc -l)\n  echo \"$count $dir\"\ndone\n```\n\nPresent the user with a table of discovered skills (name, source, file count). Ask which to package, or proceed with all if they said \"all\".",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-package-skills",
+      "title": "Step 2: Package Skills",
+      "children": [
+        {
+          "text": "Create the output directory:\n\n```bash\nmkdir -p ~/Desktop/skills-sharing\n```\n\nZip each skill regardless of file count:\n\n```bash\ncd ~/.claude/skills && zip -r ~/Desktop/skills-sharing/{skill-name}-skill.zip {skill-name}/\n```\n\nConfirm output:\n\n```bash\nls -lh ~/Desktop/skills-sharing/\n```",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-write-descriptions-and-install-commands",
+      "title": "Step 3: Write Descriptions and Install Commands",
+      "children": [
+        {
+          "text": "For each packaged skill, read its source file and write one sentence describing what it does. Save all entries to `skills-index.txt` in the sharing folder. Each entry gets a description line and an install command:\n\n```\n\"skill-name\", [one-sentence description].\nTo install: unzip ~/Downloads/{skill-name}-skill.zip -d ~/.claude/skills/{skill-name}/\n```\n\nIf `skills-index.txt` already exists, update the relevant entries rather than appending duplicates. Keep the file alphabetically sorted by skill name.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-4-clean-tool-specific-language",
+      "title": "Step 4: Clean Tool-Specific Language",
+      "children": [
+        {
+          "text": "Review each SKILL.md and replace references that tie the skill to a specific agent tool:\n\n| Find | Replace with |\n|------|--------------|\n| Tool name used as the agent | \"the AI agent\" |\n| Tool-specific CLI name | \"the AI agent\" |\n| Tool config filename | \"the agent config file (e.g., CLAUDE.md, AGENTS.md)\" |\n| Tool's skills directory path | \"the agent's skills directory\" |\n| Tool's memory directory path | \"the agent's memory directory\" |",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-5-generalize-user-specific-references",
+      "title": "Step 5: Generalize User-Specific References",
+      "children": [
+        {
+          "text": "Review each file for anything tied to a specific person, organization, or machine. Generalize using natural language rather than placeholder brackets where possible.\n\nCommon patterns to catch:\n\n| Type | Example | Generalized |\n|------|---------|-------------|\n| Person's name | \"Triage Alex's inbox\" | \"Triage the user's inbox\" |\n| Gendered pronoun | \"responding on his behalf\" | \"responding on their behalf\" |\n| Hardcoded file path | /Users/alex/Desktop/... | glob search pattern |\n| Organization domain | @company.com | \"the user's organization domain\" |\n| Internal program names | proprietary course or product names | remove or generalize |\n| Hardcoded API/account IDs | numeric IDs | descriptive label (e.g., YOUR_ACCOUNT_ID) |\n\nChecklist before finishing:\n- No person's name in the skill body or description\n- No hardcoded paths pointing to a specific machine\n- No organization-specific URLs, IDs, or brand names\n- No gendered pronouns tied to a named person\n- Tool references replaced with \"the AI agent\" or \"your agent\"",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-6-flag-intentionally-specific-skills",
+      "title": "Step 6: Flag Intentionally Specific Skills",
+      "children": [
+        {
+          "text": "Some skills are tied to a company or brand by design (a design system skill, a platform-specific builder). Flag these before generalizing:\n\n\"This skill references [company/brand] throughout by design. Do you want to generalize it for broad sharing, or keep it as-is for internal use?\"\n\nIf keeping as-is, skip Step 5 for that file.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-summary",
+      "title": "Output Summary",
+      "children": [
+        {
+          "text": "After all steps, present:\n1. All files in `~/Desktop/skills-sharing/`\n2. The contents of `skills-index.txt`\n3. Install commands for each skill (all use `unzip`)\n4. Any skills flagged as intentionally specific and left unchanged",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

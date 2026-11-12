@@ -1,0 +1,217 @@
+{
+  "id": "urn:contentEntry:6ab9ae3a8bd361a4751ff11f",
+  "title": "Create a brand voice guide from content you've already written",
+  "resourceType": "TUTORIAL",
+  "description": "A system that reads content you've already written and turns it into a written brand voice guide.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae3a8bd361a4751ff11f",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "pull": {
+      "title": "Pull",
+      "content": "Downloading the latest changes from GitHub to your computer so your local copy is up to date. Claude pulls before starting work to make sure it's building on the newest version, not an old one."
+    },
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "anthropic": {
+      "title": "Anthropic",
+      "content": "The company that created Claude. An AI safety company focused on building reliable, interpretable AI systems."
+    },
+    "voice-guide": {
+      "title": "Voice Guide",
+      "content": "A file that captures how you write — your tone, vocabulary, sentence structure, and preferences. Share it with Claude so it writes in your style instead of generic AI voice."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Marketing"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Voice consistency usually lives in one person's head, and it breaks the moment someone else drafts. This system reads content you've already written, blog posts, decks, email campaigns, website copy, and produces a structured guide. It covers tone, vocabulary to use and avoid, sentence rhythm, and annotated example passages. [Anthropic](#tooltip-anthropic)'s product marketing team saved 5 to 10 hours per launch by building a reusable skill for launch briefs instead of starting from scratch, per [Anthropic's account of how its marketing team uses Claude](https://claude.com/blog/how-anthropic-uses-claude-marketing). A [voice guide](#tooltip-voice-guide) runs the same logic. Write the pattern once and stop re-explaining it.",
+          "type": "prose"
+        },
+        {
+          "text": "[Content Marketing Institute's 2026 B2B benchmarks](https://contentmarketinginstitute.com/research/b2b-research) found AI tool investment is the top 2026 budget priority for 45% of marketing teams, while people and training ranks lowest at 9%. Output is scaling faster than the judgment to keep it consistent, and a written guide is the cheap fix.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a paste-in [prompt](#tooltip-prompt) the first time, a saved [skill](#tooltip-skill) you rerun each quarter, or a scheduled [agent](#tooltip-agent) that watches your content archive for drift.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your source samples, your voice reference points, the words to avoid, and where the finished guide will live.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that reads a batch of content I've already written or approved and extracts a structured brand voice guide from it. Ask me questions, one at a time, about which past assets best represent the voice I want, what makes our voice distinct from a generic competitor's, any words or phrases we specifically avoid, and how I want the guide organized so other builds can reference it. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview forces you to name what \"our voice\" means instead of assuming everyone already agrees, and the scope document becomes the reference every future build checks against."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "How many samples is enough. Too few overfits one piece, too many muddies the signal.",
+            "What makes your voice distinct from a generic competitor's.",
+            "Where the canonical guide will live so every other build checks one file."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for, most likely your content archive (Google Drive, [Notion](#tooltip-notion), a CMS export) and whatever tool holds the finished guide (Notion, Google Docs). The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Build your system and test it on 5 to 10 pieces you'd hold up as your strongest writing. The prompt below is an example. Your scope document gives a version for your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Produce a brand voice guide from the writing samples I provide.\n\nContext: [Paste or link 5 to 10 pieces you consider strong examples of your voice.] We are trying to sound like [2-3 reference points, e.g., a knowledgeable colleague, not a press release].\n\nRules:\n- Base every observation on patterns actually present in the samples. Do not invent stylistic rules I haven't shown you.\n- Call out any samples that seem to contradict each other.\n- Output as a one-page guide with sections for tone, sentence length and rhythm, vocabulary to use, vocabulary to avoid, and three annotated example passages showing the pattern in action.",
+          "prompt_note": "How this prompt works: restricting it to patterns present in the samples keeps the guide descriptive instead of aspirational, and naming contradictions surfaces where your writers already disagree."
+        },
+        {
+          "text": "**Review.** Check against your scope. Every claim traceable to a sample, contradictions called out, all four sections present?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it what's wrong (\"that's not our vocabulary, drop it\") and fold it into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Run the guide against a competitor's copy to sharpen what's distinct.",
+            "Add an approved-terms glossary for product names and claims.",
+            "Revisit the guide every quarter as the brand evolves."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft the rubric and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each brand voice guide draft, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date run, sample count, sections flagged as weak, changes made before acceptance, and reviewer sign-off. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log shows when the guide needs a refresh instead of quietly drifting."
+        },
+        {
+          "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the guide holds up for a full quarter without a rewrite, package the prompt, the source-sample rules, and the output sections into a reusable AI skill. [Claude](#tooltip-claude)'s built-in skill-creator skill will write it for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. A guide built from a narrow set of samples misrepresents the brand once applied broadly. [Pull](#tooltip-pull) samples from more than one campaign or era of writing before you trust it.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Anthropic, How Anthropic Uses Claude in Marketing](https://claude.com/blog/how-anthropic-uses-claude-marketing) — The codify-once time-savings stat.",
+            "[Content Marketing Institute, B2B Content Marketing Benchmarks 2026](https://contentmarketinginstitute.com/research/b2b-research) — The tools-versus-people investment gap."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a brand voice checker for everything you ship](/content/item/urn:contentEntry:6ab9ae3a0daa0c064d447280) · Marketing",
+            "[Build a content repurposing pipeline](/content/item/urn:contentEntry:6ab9ae3b8f20eb5acfa340ce) · Marketing",
+            "[Voice DNA](/content/item/urn:contentEntry:6ab9ae61211a9d9126a215a7) and [Winning Copy Extraction](/content/item/urn:contentEntry:6ab9ae6171d9f134a448ff6d) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

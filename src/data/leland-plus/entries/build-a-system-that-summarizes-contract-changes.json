@@ -1,0 +1,217 @@
+{
+  "id": "urn:contentEntry:6ab9ae45ba94dffd909934ff",
+  "title": "Build a system that summarizes contract changes",
+  "resourceType": "TUTORIAL",
+  "description": "A system that reads a redlined contract and lists what changed, the risk of each change, and the business impact.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae45ba94dffd909934ff",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "pull": {
+      "title": "Pull",
+      "content": "Downloading the latest changes from GitHub to your computer so your local copy is up to date. Claude pulls before starting work to make sure it's building on the newest version, not an old one."
+    },
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "triage": {
+      "title": "Triage",
+      "content": "Sorting items by urgency or importance to decide what gets attention first. Your email-manager skill triages your inbox — it separates messages that need a real reply from noise you can ignore."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "read-only": {
+      "title": "Read-only",
+      "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Legal & Compliance"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "A redline comes back from a counterparty and somebody has to read the whole document to find what moved. In blind testing, a legal team at [Crosby Legal reported that Claude's redlines \"matched or beat\" their existing model every time](https://claude.com/solutions/legal).",
+          "type": "prose"
+        },
+        {
+          "text": "This system takes a redlined agreement, compares it against the prior version or your standard template, and produces a plain-English list of what changed, split into material changes (liability, price, term, obligations) and cosmetic ones (formatting, renumbering, wording). Each material change gets a risk level and a business impact, so the reviewer knows what to focus on before opening the full document. Even mature legal AI deployments still hand a meaningful share of repetitive review work to a human. This system [triages](#tooltip-triage) attention. It doesn't replace the read-through.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a paste-in [prompt](#tooltip-prompt) every time a redline lands, a saved skill, or a scheduled [agent](#tooltip-agent) that watches your document store for new versions. Every version stays [read-only](#tooltip-read-only) against the source documents.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your redline format, what counts as a material change for your organization, who reads the summary, and delivery.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that takes a redlined contract and summarizes what actually changed, the risk of each change, and the business impact, in plain English. Ask me questions, one at a time, about what kinds of agreements this applies to, how redlines typically arrive (tracked changes in Word, a comparison PDF), what counts as a material change versus a cosmetic one for us, and who needs to read the summary before the full document. When you have what you need, write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview forces the material-versus-cosmetic line into words before the first real redline shows up, so you're not defining it under deadline."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "What format redlines arrive in, tracked changes in Word or a comparison PDF export.",
+            "Who reads the summary, since an executive and co-counsel need different levels of legal detail.",
+            "What counts as material versus cosmetic in your organization specifically."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your document management system (iManage, NetDocuments) for [pulling](#tooltip-pull) both versions, e-signature or CLM (DocuSign, Ironclad) where the redline originated, and team chat for delivering the summary to a non-lawyer stakeholder. The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Start building the system your scope document describes, and test it on a real redline. The prompt below is an example. Your scope document will give you a version shaped to your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Summarize what changed in [the attached redlined agreement] compared to [the prior version/our standard template], covering the change, the risk it introduces, and the business impact, in plain English.\n\nContext: This is a [contract type] with [counterparty]. Our standard positions for comparison are documented in [location]. The summary is for [an executive/a non-lawyer stakeholder/counsel] and needs to be readable without legal training.\n\nRules:\n- Compare against the actual prior version or template, not a general sense of what's standard.\n- Separate material changes (anything affecting liability, price, term, or obligations) from cosmetic ones (formatting, renumbering, non-substantive wording) explicitly.\n- State the business impact of each material change in plain terms a non-lawyer stakeholder would understand.\n- Never characterize a change as low risk without stating what would have to go wrong for it to matter.\n- Output as a short list of material changes with clause, what changed, risk level, and business impact, followed by a one-line note on cosmetic changes.",
+          "prompt_note": "How this prompt works: forcing the material-versus-cosmetic split on every run keeps the one clause that matters from getting buried under formatting noise."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Material changes separated from cosmetic ones, risk stated for each, impact written in plain language?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what it missed or miscategorized and fold the correction into your material and cosmetic rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Build a running comparison across multiple rounds of redlines on the same deal to show how a negotiation is trending.",
+            "Extend the same summarizer to policy or regulatory redlines.",
+            "Add a risk-scoring rubric so summaries are comparable across different deals.",
+            "Pair the summary with a suggested response for each material change."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat turn the scope bar into pass/fail checks and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each redline summary, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, agreement, material changes flagged, changes the reviewer later disagreed with, and what rule I changed. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make a pattern of missed or overstated changes visible after a few redlines."
+        },
+        {
+          "text": "**Log** every run against the rubric. Note the date and what changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from the log. Once the rubric passes a few runs straight, package the prompt and rules into a reusable AI skill. [Claude](#tooltip-claude)'s skill-creator skill interviews you and writes it; a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. It will treat every clause change as equally worth mentioning unless the material-versus-cosmetic split is in the prompt every time, so keep that rule in place on every run rather than trusting it to remember.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Anthropic, Claude Legal Solutions page](https://claude.com/solutions/legal) — The Crosby Legal redline-quality testimonial."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Automate contract reviews](/content/item/urn:contentEntry:6ab9ae45dc700f422210c621) · Legal & Compliance",
+            "[Build a citation checker for legal documents](/content/item/urn:contentEntry:6ab9ae458e47898a1b509dd1) · Legal & Compliance",
+            "[Word Documents](/content/item/urn:contentEntry:6ab9ae61798a2883f8bb8d9b) and [PDF Toolkit](/content/item/urn:contentEntry:6ab9ae58254e58c5b5d3bee6) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

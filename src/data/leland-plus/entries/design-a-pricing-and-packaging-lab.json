@@ -1,0 +1,217 @@
+{
+  "id": "urn:contentEntry:6ab9ae483816d8b8bdbae81d",
+  "title": "Design a pricing and packaging lab",
+  "resourceType": "TUTORIAL",
+  "description": "A system that turns customer interview notes into a three-tier pricing table with a defensible launch price for each tier.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae483816d8b8bdbae81d",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "context": {
+      "title": "Context",
+      "content": "Everything Claude can 'see' in a given session — your messages, files you've shared, instructions, and conversation history. The more relevant context you give Claude, the better its output."
+    },
+    "hubspot": {
+      "title": "HubSpot",
+      "content": "A CRM and marketing platform used by sales, marketing, and customer success teams. Common target for AI automations — students connect it to draft outreach, enrich contacts, or sync data with other tools."
+    },
+    "grounding": {
+      "title": "Grounding",
+      "content": "Feeding an AI real, current source material before it answers, so the response is based on facts instead of just training data. Copilot grounds in your organization's files; Gemini grounds in Google Search results. The main defense against hallucination."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Entrepreneurship"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Pricing moves profit more than almost any lever a company has. A roughly 1% improvement in price realization lifts operating profit more than an equivalent gain in sales volume, per [McKinsey's pricing research](https://www.mckinsey.com/capabilities/growth-marketing-and-sales/our-insights/understanding-your-options-proven-pricing-strategies-and-how-they-work). Most founders spend far less time on pricing than that lever justifies.",
+          "type": "prose"
+        },
+        {
+          "text": "This system turns what customers have said about value and budget into three price tiers with feature lines, built from real customer language rather than competitor mimicry, so the tiers hold up when a buyer has to defend the purchase to themselves.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a paste-in [prompt](#tooltip-prompt) when pricing needs a fresh look, or a saved [AI skill](#tooltip-skill) you rerun as new interview evidence comes in.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming what you're selling, who the buyer is, what customers have said about budget, and how often you expect to revisit price.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that takes my customer interview notes and turns them into a three-tier pricing structure with a defensible launch price. Ask me questions, one at a time, about what I'm selling, who the buyer is, what my customers have said about budget or willingness to pay so far, what competitors charge, and how often I expect to revisit pricing. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: naming the buyer, evidence, and competitor [context](#tooltip-context) up front turns the scope document into the brief every pricing pass builds from."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Whether pricing gets validated through real transactions or through direct conversation with customers.",
+            "How many interviews are enough to lock a price versus still testing.",
+            "Whether this runs once at launch or gets rerun on a schedule as the customer base grows."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document, pressure-test it in a fresh session or a different [model](#tooltip-model), then gather any access it calls for. Common [connectors](#tooltip-tool-connectors) are your payments or billing platform (Stripe, Paddle, Chargebee), your CRM or interview notes home ([HubSpot](#tooltip-hubspot), [Notion](#tooltip-notion)), and your landing page or checkout tool (Webflow, Framer, Carrd). The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Start building the system your scope document describes, and test it on your real interview notes and any competitor prices you have. The prompt below is an example. Your scope document will give you a version shaped to your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Turn my customer interview notes and competitor pricing into a three-tier pricing table with a recommended launch price for each tier.\n\nContext: My product is [one-line description]. My buyer is [who pays, not just who uses it]. My interview notes are in [location]. Known competitor prices are [list or \"none found yet\"].\n\nRules: Base each tier's feature split on what customers said they valued most, not on what's easiest to build. Name the tiers in plain language a buyer would use, not \"Basic/Pro/Enterprise\" by default. For each tier, state the one sentence that justifies why a customer would upgrade past it. Flag any tier where you don't have enough interview evidence to justify the price, rather than guessing a number.",
+          "prompt_note": "How this prompt works: tying every tier boundary to actual customer language keeps the price defensible."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Tiers [grounded](#tooltip-grounding) in customer language, plain tier names, an upgrade sentence for each, low-evidence tiers flagged?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what's off (\"tier two is built around what's easy to ship instead of what customers valued, redo it\") and fold the correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Build a lightweight willingness-to-pay survey and feed responses back into the tier model.",
+            "Add an annual-vs-monthly discount calculator tied to your actual churn rate.",
+            "Model what happens to revenue if 20% of customers downgrade a tier.",
+            "Draft the upgrade-nudge email for each tier transition."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric) instead of a feel check. Have your AI chat draft rubric and run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each pricing revision, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, tiers proposed, evidence cited per tier, competitor prices used, and what rule I changed. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks force every tier boundary to point at real evidence, and the log makes it visible when the same rule keeps producing a guessed number."
+        },
+        {
+          "text": "**Log** every pricing pass against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the system passes the rubric a few rounds straight, package the prompt and your corrected rules into a reusable AI skill, so every run starts from your defaults instead of a blank chat. When the log shows the same check failing again and again, that gap is a candidate for a skill of its own. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write the skill for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. A price with no evidence behind it is a guess with better formatting, so tie every tier boundary back to something a real customer said.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[McKinsey, Understanding your options: proven pricing strategies and how they work](https://www.mckinsey.com/capabilities/growth-marketing-and-sales/our-insights/understanding-your-options-proven-pricing-strategies-and-how-they-work) — The pricing-as-profit-lever figure."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a customer interview analyzer](/content/item/urn:contentEntry:6ab9ae47c28a183e845f72d5) · Entrepreneurship",
+            "[Create competitor comparison sheets for your sales team](/content/item/urn:contentEntry:6ab9ae3c7739139b9eeef6cb) · Sales",
+            "[Marketing Psychology](/content/item/urn:contentEntry:6ab9ae56c6466536c2e817eb), [Persona Development](/content/item/urn:contentEntry:6ab9ae58aca57d1134405bf1), and [Startup Financial Modeling](/content/item/urn:contentEntry:6ab9ae5fa543a1ee682e5bc9) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

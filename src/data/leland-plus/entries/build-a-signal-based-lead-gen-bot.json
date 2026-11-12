@@ -1,0 +1,217 @@
+{
+  "id": "urn:contentEntry:6ab9ae4958f570ce61bff880",
+  "title": "Build a signal-based lead gen bot",
+  "resourceType": "TUTORIAL",
+  "description": "A system that watches a specific niche for buying signals and drafts a short personalized outreach the moment one appears.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4958f570ce61bff880",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "hubspot": {
+      "title": "HubSpot",
+      "content": "A CRM and marketing platform used by sales, marketing, and customer success teams. Common target for AI automations — students connect it to draft outreach, enrich contacts, or sync data with other tools."
+    },
+    "trigger": {
+      "title": "Trigger",
+      "content": "The event that kicks off an automation, like 'new email received' or 'row added to a sheet.' Every Zapier or n8n workflow starts with a trigger and then runs the actions that follow."
+    },
+    "batch-api": {
+      "title": "Batch API",
+      "content": "A way to send a big pile of requests to Claude at once and get the results back later (usually within 24 hours) at a discount. Good for one-time bulk jobs like classifying 10,000 customer support tickets."
+    },
+    "read-only": {
+      "title": "Read-only",
+      "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Entrepreneurship"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Most B2B buyers complete their own research long before they ever talk to a salesperson, per [6sense's B2B Buyer Experience Report](https://6sense.com/science-of-b2b/buyer-experience-report-2025/), so outreach that shows up before a real signal of interest mostly gets ignored. This system watches a specific niche you pick, a subreddit, a hiring page, a public complaint thread, for posts that match your buying-signal criteria, then drafts a short outreach message that references the exact signal it found. Sending is still your call.",
+          "type": "prose"
+        },
+        {
+          "text": "Watching for one specific, timely signal turns outreach from a numbers game into a small number of messages worth sending. Reaching someone right after a signal appears, while it's still on their mind, gets a different response than the same message on a random day.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a paste-in [prompt](#tooltip-prompt) each time you check the niche, a saved skill, or a scheduled [agent](#tooltip-agent) that scans on its own and hands you a review queue. Every version stays [read-only](#tooltip-read-only) until you approve outreach.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your signal source, what counts as a real signal, your outreach voice, and how much volume you can follow up on.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that monitors a specific niche for signals that someone might need what I sell, then drafts a short, personalized outreach for each one. Ask me questions, one at a time, about what specific signals actually indicate real buying intent for my product, where those signals show up publicly, how many outreach messages I can realistically follow up on per week, and what my outreach voice normally sounds like. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview forces you to define a real signal before you build anything, and the scope document becomes the brief for every build session after it."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where signals for your niche live, a subreddit, LinkedIn, a job board, before you build the monitor.",
+            "How much outreach volume you can realistically personalize and follow up on per week.",
+            "Whether outreach sends after each draft is reviewed or only after a [batch](#tooltip-batch-api) review at the end of the day."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather access to wherever your signals live (Reddit, LinkedIn, a job board like Indeed), your outreach or email tool (Gmail, Instantly), and your CRM to track who's been contacted ([HubSpot](#tooltip-hubspot), a spreadsheet). The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Start building the system your scope document describes, and test it on a fresh scan of your niche. The prompt below is an example. Your scope document will give you a version shaped to your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Scan [specific source, e.g. a subreddit, a job board, a public complaint feed] for new posts matching my buying-signal criteria, and draft a short personalized outreach for each match.\n\nContext: A real signal looks like [describe specifically, e.g. \"someone asking for a recommendation for a tool that does X\" or \"a company posting a job for a role my product replaces\"]. My typical outreach is short, references something specific about the person, and asks one direct question.\n\nRules:\n- Only flag a post as a signal if it matches the specific criteria, and state why each match qualifies.\n- Draft outreach that quotes or references the actual signal rather than a templated opener with a name swapped in.\n- Keep each draft under 100 words.\n- Flag anything ambiguous for human judgment instead of guessing whether it counts as a signal.",
+          "prompt_note": "How this prompt works: naming the specific signal criteria up front keeps the AI tool from treating any keyword mention as a lead."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Criteria met, actual signal referenced, under 100 words, ambiguous posts flagged instead of guessed?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what a bad match looked like and fold the correction into the criteria.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Add a scoring layer that ranks signals by how strong a buying indicator they are.",
+            "Track reply rate by signal type to learn which signals convert.",
+            "Build a follow-up sequence for signals that don't get an initial reply.",
+            "Expand to a second niche once the first is producing reliable signal quality."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft rubric and run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each outreach draft, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, signals found, drafts sent, replies, and what criteria I changed. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the guesswork, and the log columns show which signal types earn a reply after a few weeks of entries."
+        },
+        {
+          "text": "**Log** every scan against the rubric, noting date and change. A single miss is noise; a repeat is an instruction you haven't written.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from the log. Once the rubric passes a few weeks straight, package the prompt and rules into a skill. [Claude](#tooltip-claude)'s skill-creator skill interviews you and writes it; a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. A keyword match on its own isn't a buying signal, since a post that mentions your category is a different thing from someone actively evaluating solutions, so give the criteria enough specificity to tell the two apart every run.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[6sense, The B2B Buyer Experience Report](https://6sense.com/science-of-b2b/buyer-experience-report-2025/) — The buyer-research-before-outreach claim."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a lead scoring and enrichment agent](/content/item/urn:contentEntry:6ab9ae3c19a6985a32723fad) · Sales",
+            "[Build a cold outreach personalization engine](/content/item/urn:contentEntry:6ab9ae3bd8306bee4e72681e) · Sales",
+            "[Intent Signals](/content/item/urn:contentEntry:6ab9ae546e0753a6988a33c0), [Trigger Mapping](/content/item/urn:contentEntry:6ab9ae601126143ee94c9b86), and [Personalization Engine](/content/item/urn:contentEntry:6ab9ae58b1ba1dbc62fb5def) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae563f2aab31bfe40f42",
+  "title": "Lead Prioritization",
+  "resourceType": "SKILL",
+  "description": "Rank a list of prospects by a weighted score across fit, intent, and engagement so you always work the best opportunities first.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae563f2aab31bfe40f42",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Product"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Rank prospects by a weighted score so you always work the best opportunities first.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "scoring-model",
+      "title": "Scoring Model",
+      "children": [
+        {
+          "text": "Three dimensions, weighted by predictive value:\n\n| Dimension | Weight | What It Measures |\n|-----------|--------|-----------------|\n| Fit | 30% | How well they match the ideal customer profile |\n| Intent | 40% | How ready they are to move (strongest predictor) |\n| Engagement | 30% | How active they have been with your outreach |\n\n### Fit Scoring (0-10)\n- 9-10: Perfect match, right profile, background, and goals\n- 6-8: Good fit with minor gaps\n- 3-5: Marginal fit\n- 0-2: Poor fit\n\n### Intent Scoring (0-10)\n- 9-10: Active trigger present (deadline imminent, recent reply, reactivation date reached)\n- 6-8: Engaged recently, no strong trigger\n- 3-5: Showed interest but has gone cold\n- 0-2: No engagement signals\n\n### Engagement Scoring (0-10)\n- 9-10: Recent reply or multi-open email activity\n- 6-8: Some opens, no replies\n- 3-5: Opened once or twice, long ago\n- 0-2: No opens",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "weighted-score-formula",
+      "title": "Weighted Score Formula",
+      "children": [
+        {
+          "text": "`(Fit x 0.3) + (Intent x 0.4) + (Engagement x 0.3)`",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-score-the-list",
+      "title": "Step 1, Score the List",
+      "children": [
+        {
+          "text": "From the input provided, score each prospect on all three dimensions. Calculate the weighted total and rank highest to lowest.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Lead Priority List, [Date]\n\n| Rank | Prospect | Fit | Intent | Engagement | Score | Next Action |\n|------|----------|-----|--------|------------|-------|-------------|\n| 1 | [name] | [n] | [n] | [n] | [weighted] | [action] |\n| 2 | ... | | | | | |\n\n## Top 5, Work These Today\n[Brief note on each: why they scored high and the specific next action]\n\n## Watch List, Check Back This Week\n[Prospects just below threshold who could move up]\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

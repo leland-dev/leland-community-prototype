@@ -1,0 +1,96 @@
+{
+  "id": "urn:contentEntry:6ab9ae56706473b2e478db6f",
+  "title": "LinkedIn Writer",
+  "resourceType": "SKILL",
+  "description": "Generate two LinkedIn posts in different proven formats, matched to the user's voice, ready to copy and post immediately",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae56706473b2e478db6f",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Writing"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Produce two LinkedIn posts on the user's topic using different proven formats. Both posts must be specific, voice-matched, and ready to paste without placeholders.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-check-for-voice-and-business-context",
+      "title": "Step 1: Check for Voice and Business Context",
+      "children": [
+        {
+          "text": "Search for a voice guide file (`*voice*guide*.md`). If found, read it and apply it to match the user's sentence patterns and tone. If not found, proceed using the defaults below. Also check for a `FOUNDER_CONTEXT.md` or similar context file in the project root; blend that brand voice in if it exists.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-auto-select-two-formats",
+      "title": "Step 2: Auto-Select Two Formats",
+      "children": [
+        {
+          "text": "Pick two different formats based on the topic:\n\n| If the topic involves... | Best format |\n|---|---|\n| Multiple tips, lessons, or mistakes | Lessons Learned |\n| A complete process or \"how to achieve X\" | Actionable Blueprint |\n| A personal experience, failure, or pivotal moment | Personal Story |\n| A specific technique or strategy with proof | Strategy Breakdown |\n| A specific company, product, or brand | Case Study |\n| A strong opinion, trend, or contrarian view | Industry Hot Take |\n| A small but impactful tip | Quick Hack |\n\nAlways choose 2 different formats. If the user specifies one, use that for Post 1 and auto-select a complementary format for Post 2.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-write-both-posts",
+      "title": "Step 3: Write Both Posts",
+      "children": [
+        {
+          "text": "For each post:\n1. Follow the format's structure (described in Writing Rules below).\n2. Make it about the user's specific topic, not generic advice.\n3. Run the Engagement Test before finishing: \"Would someone save this or leave a comment?\" If no, rewrite.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "writing-rules",
+      "title": "Writing Rules",
+      "children": [
+        {
+          "text": "**Core rules (all posts):**\n- First 2 lines must compel the click. LinkedIn cuts off at roughly 210 characters. The hook must stand alone.\n- Open with a subverted expectation or bold self-label. Never \"I'm excited to share...\"\n- Close with a single emotional truth or conviction. Not a summary.\n- Short paragraphs, 1-3 sentences each. One idea per paragraph. White space is readability.\n- Specific numbers over vague claims (\"52% increase\" not \"significant increase\").\n- Active voice, present tense preferred.\n- Conversational tone. Write like you're talking to one person.\n- No hashtags in the body. Maximum 3 at the very end, below a line break, if used at all.\n- No engagement bait (\"Like if you agree\", \"Share this with someone who needs it\").\n- No em-dashes anywhere.\n- Emojis sparingly and functionally: numbered emojis, arrows, checkmarks. No decorative overdoing it.\n- State opinions as earned truths, not hedges. Not \"I think\" or \"In my opinion.\"\n\n**Banned words (zero tolerance):** ensure, leverage, utilize, seamless, holistic, robust, comprehensive, innovative, delve, journey, paradigm, synergy, harness, Moreover, Furthermore, Additionally\n\n**Format-specific rules:**\n- **Lessons Learned:** Lead with a credential. Each numbered item needs 2-4 lines of context. End with a question.\n- **Actionable Blueprint:** Every step must be actionable with specific tools or numbers. End with math that proves the outcome.\n- **Personal Story:** Start with emotion. Short sentences for tension. Lesson must feel earned by the narrative. End with an invitation to share.\n- **Strategy Breakdown:** Lead with a surprising stat or result. Use numbered sub-points with arrows (arrow symbol). End with a next step.\n- **Case Study:** Use real company names. Lead with counterintuitive insight. Show contrast with \"normal.\" End with a question.\n- **Industry Hot Take:** Take a clear side, no hedging. Build the argument progressively. Closer must be quotable.\n- **Quick Hack:** Start with a \"Quick hack\" signal. Show before/after. Keep it short. Push to action.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```markdown\n## Your 2 LinkedIn Posts\n\n**Topic:** [User's topic]\n\n---\n\n### Post 1, [Format Name]\n\n[Full post text, ready to copy and paste]\n\n---\n\n### Post 2, [Format Name]\n\n[Full post text, ready to copy and paste]\n```\n\nHard rule: never post, schedule, or publish without the user's explicit go-ahead. Always show the draft first.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

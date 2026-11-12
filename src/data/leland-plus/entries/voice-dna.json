@@ -1,0 +1,85 @@
+{
+  "id": "urn:contentEntry:6ab9ae61211a9d9126a215a7",
+  "title": "Voice DNA",
+  "resourceType": "SKILL",
+  "description": "Analyze writing samples to extract and document a user's unique voice, tone, and style into a reusable profile that improves every future draft",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae61211a9d9126a215a7",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Writing"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Build or update a user's voice profile from writing samples, or apply an existing profile to a draft. The profile captures what makes their writing sound like them and not like generic AI output.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-determine-mode",
+      "title": "Step 1: Determine Mode",
+      "children": [
+        {
+          "text": "If the user provides writing samples (emails, messages, notes, anything they wrote):\nUse **Build/Update Mode**: analyze the samples and produce an updated voice profile, then save it as `voice-profile.md` in this skill's directory.\n\nIf the user says \"show,\" \"apply,\" or provides no samples:\nUse **Display Mode**: read the existing `voice-profile.md` and summarize the key rules so they can be applied to whatever draft is in context.\n\nIf no profile exists and no samples were provided:\nAsk the user to paste 3-5 examples of their writing (emails, messages, notes). Anything they wrote themselves.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build-update-mode-how-to-analyze",
+      "title": "Build/Update Mode: How to Analyze",
+      "children": [
+        {
+          "text": "Read every sample carefully. Extract patterns across these dimensions:\n\n### Tone and Energy\nIs it warm, direct, casual, formal, enthusiastic, measured? How does it feel to read? Like a friend, a colleague, a manager?\n\n### Sentence Structure\nShort punchy sentences or longer flowing ones? Does the user use fragments? Lists? How do they open and close messages?\n\n### Vocabulary\nSpecific words or phrases they use often. Words they avoid. Industry terms they use naturally versus ones they do not.\n\n### Persuasion Style\nHow do they make an ask or pitch something? Do they lead with context or get to the point first? How do they handle pushback?\n\n### Formatting Habits\nBullet points, bold text, line breaks? Long paragraphs or short ones? Emoji use, and if so how?",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format-build-mode",
+      "title": "Output Format (Build Mode)",
+      "children": [
+        {
+          "text": "Write a `voice-profile.md` file to this skill's directory with this structure:\n\n```\n# Voice Profile\nLast updated: [date]\n\n## Tone\n[2-3 sentences describing overall feel]\n\n## Sentence Style\n[bullet points with specific patterns]\n\n## Signature Phrases / Vocabulary\n[list of words or phrases they use]\n\n## What to Avoid\n[list of things that would sound off]\n\n## How They Make an Ask\n[describe their persuasion pattern]\n\n## Formatting Defaults\n[bullet points, line lengths, emoji use, etc.]\n\n## Reference Samples\n[1-2 of the strongest example sentences that capture their voice]\n```\n\nThen confirm: \"Voice profile saved. I'll write in your voice automatically when drafting.\"",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "display-mode",
+      "title": "Display Mode",
+      "children": [
+        {
+          "text": "Read `voice-profile.md` and output a short summary of the key rules. Apply them to whatever draft or task is currently in context.\n\nIf no profile file exists, say: \"No voice profile found yet. Paste some writing samples to get started.\"",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

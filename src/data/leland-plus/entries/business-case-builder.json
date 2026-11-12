@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae510b29ae38fd9eb352",
+  "title": "Business Case Builder",
+  "resourceType": "SKILL",
+  "description": "Build a tight, one-page business case for any initiative, tool, or investment that a manager or stakeholder can read in under two minutes.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae510b29ae38fd9eb352",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Product"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Walk through a 6-step framework to produce a persuasive business case. The output should be something the user can share directly with a decision-maker or bring to a meeting.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-understand-the-ask",
+      "title": "Step 1: Understand the Ask",
+      "children": [
+        {
+          "text": "If the user provided an argument describing what the case is for, use it as the starting point.\n\nIf the request is vague, ask up to 3 clarifying questions:\n- What specifically is being proposed?\n- Who needs to approve or be convinced?\n- Is there a timeline or deadline driving this?\n\nMake reasonable assumptions for anything else and note them at the end.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-2-build-the-case",
+      "title": "Step 2: Build the Case",
+      "children": [
+        {
+          "text": "Work through each section:\n\n**The Problem.** What is broken, slow, expensive, or risky right now? Quantify where possible: how much time, what error rate, what cost of inaction.\n\n**The Proposed Solution.** What exactly is being proposed? Be specific, not \"automate the process\" but the actual tool, workflow, or change.\n\n**Expected Outcomes.** What gets better and by how much? Cover: revenue impact, time saved (hours per week or headcount equivalent), and risk reduced.\n\n**Cost and Effort.** What does this require? Include: time to build, tools or services (and their cost), ongoing maintenance burden.\n\n**Risks and Downsides.** What could go wrong? What is the worst case if this fails? Being honest here builds credibility.\n\n**Recommendation.** Clear ask: what should the decision-maker approve, fund, or greenlight? Include a suggested timeline and who owns what.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-3-output-format",
+      "title": "Step 3: Output Format",
+      "children": [
+        {
+          "text": "Produce a clean document the user can paste into a Slack message, doc, or bring to a meeting:\n\n```\n# Business Case: [Title]\nPrepared by [Name], [Date]\n\n## The Problem\n[2-4 sentences, quantified where possible]\n\n## Proposed Solution\n[Specific description of what's being built or done]\n\n## Expected Outcomes\n| Metric | Current | Projected |\n|--------|---------|-----------|\n| [metric] | [now] | [after] |\n\n## What It Costs\n- Time: [estimate]\n- Tools/services: [cost if any]\n- Ongoing: [maintenance burden]\n\n## Risks\n- [Risk 1 and mitigation]\n- [Risk 2 and mitigation]\n\n## Recommendation\n[Clear ask and proposed timeline]\n\n---\n*Assumptions made: [list any gaps you filled in]*\n```\n\nKeep it to one page equivalent. Decision-makers skim. Every section should have a clear point, not paragraphs of hedging.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

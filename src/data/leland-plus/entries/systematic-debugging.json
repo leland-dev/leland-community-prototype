@@ -1,0 +1,118 @@
+{
+  "id": "urn:contentEntry:6ab9ae6041b0089b382e9c16",
+  "title": "Systematic Debugging",
+  "resourceType": "SKILL",
+  "description": "Find the root cause of any bug, test failure, or unexpected behavior before proposing fixes, using a four-phase investigation process that prevents thrashing and rework.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae6041b0089b382e9c16",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Coding"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Find root cause before attempting any fix. Symptom patches waste time and create new bugs.\n\n**Core principle:** Do not propose fixes until you have completed Phase 1.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "the-iron-law",
+      "title": "The Iron Law",
+      "children": [
+        {
+          "text": "```\nNO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST\n```",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "when-to-use",
+      "title": "When to Use",
+      "children": [
+        {
+          "text": "Use for any technical issue: test failures, production bugs, unexpected behavior, performance problems, build failures, integration issues.\n\nUse this especially when:\n- Under time pressure (emergencies make guessing tempting)\n- \"Just one quick fix\" seems obvious\n- You have already tried multiple fixes\n- You do not fully understand the issue\n\nDo not skip when the issue seems simple. Simple bugs have root causes too.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "the-four-phases",
+      "title": "The Four Phases",
+      "children": [
+        {
+          "text": "Complete each phase before proceeding to the next.\n\n### Phase 1: Root Cause Investigation\n\nBefore attempting any fix:\n\n1. **Read error messages carefully.** Do not skip past errors or warnings. Read stack traces completely. Note line numbers, file paths, and error codes.\n\n2. **Reproduce consistently.** Can you trigger it reliably? What are the exact steps? If not reproducible, gather more data before guessing.\n\n3. **Check recent changes.** What changed that could cause this? Review git diff, recent commits, new dependencies, config changes, and environmental differences.\n\n4. **Gather evidence in multi-component systems.** When the system has multiple layers (CI to build, API to service to database), add diagnostic instrumentation at each component boundary before proposing fixes:\n\n   ```\n   For each component boundary:\n     - Log what data enters the component\n     - Log what data exits the component\n     - Verify environment and config propagation\n     - Check state at each layer\n\n   Run once to gather evidence showing WHERE it breaks.\n   Then analyze to identify the failing component.\n   Then investigate that specific component.\n   ```\n\n5. **Trace data flow.** When the error is deep in the call stack, trace backward:\n   - Where does the bad value originate?\n   - What called this with the bad value?\n   - Keep tracing up until you find the source.\n   - Fix at the source, not at the symptom.\n\n### Phase 2: Pattern Analysis\n\nBefore fixing, find the pattern:\n\n1. Locate similar working code in the same codebase.\n2. Read any reference implementation completely, not just a skim.\n3. List every difference between the working and broken code, however small.\n4. Understand what other components, config, or environment the broken code depends on.\n\n### Phase 3: Hypothesis and Testing\n\nScientific method:\n\n1. **Form a single hypothesis.** State clearly: \"I think X is the root cause because Y.\" Be specific.\n2. **Test minimally.** Make the smallest possible change to test the hypothesis. One variable at a time.\n3. **Verify before continuing.** Did it work? Yes: move to Phase 4. No: form a new hypothesis. Do not add more fixes on top.\n4. **When you do not know:** say so. Do not pretend. Ask for help or research further.\n\n### Phase 4: Implementation\n\nFix the root cause, not the symptom:\n\n1. **Create a failing test case** before fixing. Simplest possible reproduction. Automated test if the project has a framework; a one-off script otherwise.\n2. **Implement a single fix.** Address the root cause. One change. No \"while I'm here\" improvements or bundled refactoring.\n3. **Verify the fix.** Test passes? No other tests broken? Issue actually resolved?\n4. **If the fix does not work:** stop. Count how many fixes you have tried.\n   - Fewer than 3: return to Phase 1 with new information.\n   - 3 or more: stop and question the architecture.\n\n### If 3+ Fixes Have Failed: Question the Architecture\n\nPattern indicating an architectural problem:\n- Each fix reveals new coupling or shared state in a different place\n- Fixes require massive refactoring to implement\n- Each fix creates new symptoms elsewhere\n\nStop and assess fundamentals:\n- Is this pattern fundamentally sound?\n- Should we refactor the architecture rather than continue fixing symptoms?\n\nDiscuss with the user before attempting more fixes. This is not a failed hypothesis. It is a wrong architecture.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "red-flags-stop-and-return-to-phase-1",
+      "title": "Red Flags: Stop and Return to Phase 1",
+      "children": [
+        {
+          "text": "If you catch yourself thinking any of the following, stop and restart from Phase 1:\n\n- \"Quick fix for now, investigate later\"\n- \"Just try changing X and see if it works\"\n- \"Add multiple changes and run tests\"\n- \"It is probably X, let me fix that\"\n- \"I do not fully understand but this might work\"\n- \"Here are the main problems:\" followed by a list of fixes without investigation\n- Proposing solutions before tracing data flow\n- \"One more fix attempt\" after already trying 2+",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "common-rationalizations",
+      "title": "Common Rationalizations",
+      "children": [
+        {
+          "text": "| Excuse | Reality |\n|--------|---------|\n| \"Issue is simple, do not need process\" | Simple issues have root causes too. The process is fast for simple bugs. |\n| \"Emergency, no time\" | Systematic debugging is faster than guess-and-check thrashing. |\n| \"Just try this first, then investigate\" | The first fix sets the pattern. Do it right from the start. |\n| \"Write test after confirming fix\" | Untested fixes do not stick. Test first proves it. |\n| \"Multiple fixes at once saves time\" | Cannot isolate what worked. Creates new bugs. |\n| \"I see the problem, let me fix it\" | Seeing symptoms is not understanding root cause. |",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "quick-reference",
+      "title": "Quick Reference",
+      "children": [
+        {
+          "text": "| Phase | Key Activities | Success Criteria |\n|-------|---------------|------------------|\n| 1. Root Cause | Read errors, reproduce, check changes, gather evidence | Understand what and why |\n| 2. Pattern | Find working examples, compare | Identify differences |\n| 3. Hypothesis | Form theory, test minimally | Confirmed or new hypothesis |\n| 4. Implementation | Create test, fix, verify | Bug resolved, tests pass |",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "when-investigation-reveals-no-root-cause",
+      "title": "When Investigation Reveals No Root Cause",
+      "children": [
+        {
+          "text": "If systematic investigation reveals a truly environmental, timing-dependent, or external issue:\n\n1. Document what you investigated.\n2. Implement appropriate handling (retry logic, timeouts, error messages).\n3. Add monitoring or logging for future investigation.\n\nNote: 95% of \"no root cause\" cases are incomplete investigation.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

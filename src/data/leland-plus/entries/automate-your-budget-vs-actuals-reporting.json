@@ -1,0 +1,227 @@
+{
+  "id": "urn:contentEntry:6ab9ae40e7196c57e98f073a",
+  "title": "Automate your budget vs. actuals reporting",
+  "resourceType": "TUTORIAL",
+  "description": "A system that reads your budget-vs-actual data at the end of each reporting period and writes a variance narrative you can drop into a board deck, with every number traced to source.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae40e7196c57e98f073a",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+    "tooltips": {
+      "pull": {
+        "title": "Pull",
+        "content": "Downloading the latest changes from GitHub to your computer so your local copy is up to date. Claude pulls before starting work to make sure it's building on the newest version, not an old one."
+      },
+      "agent": {
+        "title": "Agent",
+        "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+      },
+      "model": {
+        "title": "Model",
+        "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+      },
+      "skill": {
+        "title": "Skill",
+        "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+      },
+      "slack": {
+        "title": "Slack",
+        "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+      },
+      "claude": {
+        "title": "Claude",
+        "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+      },
+      "prompt": {
+        "title": "Prompt",
+        "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+      },
+      "rubric": {
+        "title": "Rubric",
+        "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+      },
+      "chatgpt": {
+        "title": "ChatGPT",
+        "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+      },
+      "context": {
+        "title": "Context",
+        "content": "Everything Claude can 'see' in a given session — your messages, files you've shared, instructions, and conversation history. The more relevant context you give Claude, the better its output."
+      },
+      "grounding": {
+        "title": "Grounding",
+        "content": "Feeding an AI real, current source material before it answers, so the response is based on facts instead of just training data. Copilot grounds in your organization's files; Gemini grounds in Google Search results. The main defense against hallucination."
+      },
+      "read-only": {
+        "title": "Read-only",
+        "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+      },
+      "tool-connectors": {
+        "title": "Tool Connectors",
+        "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+      }
+    },
+    "sections": [
+      {
+        "type": "section",
+        "id": "meta",
+        "children": [
+          {
+            "tags": [
+              {
+                "text": "Finance"
+              }
+            ],
+            "type": "tags"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "about",
+        "title": "About this automation blueprint",
+        "children": [
+          {
+            "text": "In the [AICPA & CIMA Future-Ready Finance Survey](https://www.aicpa-cima.com/news/article/ai-transformation-opens-door-for-finance-professionals-to-build-future-ready), 88% of finance professionals believe AI will make their role more strategic, while only 8% say it already has. Budget-vs-actual reporting is a template-driven part of that gap, running the same variance format every period.",
+            "type": "prose"
+          },
+          {
+            "text": "This system reads your budget-vs-actual data at the close of each reporting period and writes the variance [context](#tooltip-context) in plain language, ready to drop into a board deck. Every number in it has to trace back to a source row in the data it was given. A narrative built on a plausible but unverified figure just moves the risk downstream.",
+            "type": "prose"
+          },
+          {
+            "text": "Run it as a paste-in [prompt](#tooltip-prompt) each period, a saved [skill](#tooltip-skill) your team reuses, or a scheduled [agent](#tooltip-agent) [pulling](#tooltip-pull) fresh data automatically. Every version stays [read-only](#tooltip-read-only) against your source systems.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "plan",
+        "title": "Plan",
+        "children": [
+          {
+            "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your data sources, your real variance threshold, and how it catches a number that doesn't trace back.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "I want to build a system with my AI tool that turns my budget-vs-actual data into a written variance narrative every reporting period. Ask me questions, one at a time, about where my budget and actuals data comes from, which variance thresholds actually matter to my stakeholders, who reads this narrative and what they care about, how much explanation versus raw numbers they want, and how you'll catch a number that doesn't trace back to the source data. Then write it up as a scope document I can build from.",
+            "prompt_note": "How this prompt works: the interview forces a stakeholder-specific threshold and a provenance check into the scope before you write a single narrative."
+          },
+          {
+            "text": "Decisions the interview should settle:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Where budget and actuals data lives today, one place or scattered across systems.",
+              "What variance threshold is meaningful to your stakeholders versus noise.",
+              "Whether the narrative needs a provenance check before it reaches a board deck."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "build",
+        "title": "Build",
+        "children": [
+          {
+            "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather any access it calls for, typically your accounting or ERP system (QuickBooks, NetSuite, Sage Intacct), an FP&A or planning tool (Cube, Planful, Anaplan), and a spreadsheet for review. The paste-in version needs none.",
+            "type": "prose"
+          },
+          {
+            "text": "**Create.** Build the system your scope document describes, and test it on a real budget-vs-actual export. The prompt below is an example. Your scope document gives you a version for your setup.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "Goal: Write a variance narrative explaining what moved and why, from this period's budget-vs-actual data.\n\nContext: Budget vs. actual export attached (by line item, by department, or by cost center, specify which). Prior period's narrative attached for tone reference: [attach or paste]. My variance threshold for \"worth explaining\" is [e.g. more than 10% or $5,000].\n\nRules: Only write about variances above the stated threshold. Every number cited in the narrative must appear in the source data you were given; do not estimate or round in a way that changes the reported figure. State the direction (over/under), the dollar amount, and the percentage for each variance called out. If you cannot explain why a variance happened from the data alone, say so instead of guessing a cause.\n\nOutput format: A short narrative (200-400 words) organized by department or line item, followed by a table of every variance above threshold with Line Item, Budget, Actual, Variance $, Variance %.",
+            "prompt_note": "How this prompt works: the same-data-only rule keeps the narrative from padding out an explanation it can't back up with a real source row."
+          },
+          {
+            "text": "**Review.** Check every cited number against the export. Threshold followed, no cause invented?",
+            "type": "prose"
+          },
+          {
+            "text": "**Feedback.** Name exactly which number or threshold was wrong and fold it into the rules.",
+            "type": "prose"
+          },
+          {
+            "text": "Go further:",
+            "type": "prose"
+          },
+          {
+            "type": "list",
+            "items": [
+              "Add a mid-period [Slack](#tooltip-slack) alert through a [tool connector](#tooltip-tool-connectors) whenever a variance crosses threshold.",
+              "Build a rolling library of past narratives so it flags recurring patterns.",
+              "Pair it with a board deck builder to go straight from narrative to slide.",
+              "Have it cite the exact source row for every number before the narrative counts as final."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "learn",
+        "title": "Learn",
+        "children": [
+          {
+            "text": "**Measure** with a [rubric](#tooltip-rubric) instead of a feel check. Have your AI chat draft both in one pass.",
+            "type": "prose"
+          },
+          {
+            "type": "prompt",
+            "prompt": "From my scope document, write a rubric for judging each variance narrative, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for period, variances flagged, numbers that failed the source-trace check, threshold changed, and reviewer sign-off. Give me both in a format I can paste into my notes.",
+            "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the source-trace column catches drift before a bad number reaches a board deck."
+          },
+          {
+            "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. After a few periods it shows which thresholds surface real signal versus noise. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+            "type": "prose"
+          },
+          {
+            "text": "**Make skills** from what the log shows. Once the system passes the rubric a few periods straight, package the prompt, thresholds, and output format into a reusable AI skill. A check that fails again and again is a candidate for a skill of its own. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write the skill for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+            "type": "prose"
+          },
+          {
+            "text": "One durable failure mode. A hallucinated number in a board deck is a career event. Nothing ships until every figure has been traced back to a source row.",
+            "type": "prose"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "sources",
+        "title": "Sources",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[AICPA & CIMA, Future-Ready Finance Survey](https://www.aicpa-cima.com/news/article/ai-transformation-opens-door-for-finance-professionals-to-build-future-ready) — The gap between AI's promised strategic value and its current daily use.",
+              "[Anthropic, Reduce hallucinations](https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations) — [Grounding](#tooltip-grounding) every generated number in source data."
+            ]
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "id": "related",
+        "title": "Related blueprints and skills",
+        "children": [
+          {
+            "type": "list",
+            "items": [
+              "[Build a month-end close checklist agent](/content/item/urn:contentEntry:6ab9ae410824301c8ae79dd5) · Finance",
+              "[Create financial reports with accurate data and formatting](/content/item/urn:contentEntry:6ab9ae39145f62682627ec04) · Finance",
+              "[Create board updates from your operating data](/content/item/urn:contentEntry:6ab9ae464312b8f229471292) · Leadership",
+              "[Investor Revenue Report](/content/item/urn:contentEntry:6ab9ae553149d018b07cf693), [Excel Spreadsheets](/content/item/urn:contentEntry:6ab9ae522638a4b47c5afeb2), and [Financial Operations Expert](/content/item/urn:contentEntry:6ab9ae5218f60ab384a8df58) pair well with this build. · Skills"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

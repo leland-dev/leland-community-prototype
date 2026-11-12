@@ -1,0 +1,234 @@
+{
+  "id": "urn:contentEntry:6ab9ae43fd30fff006b1a5c7",
+  "title": "Build an idea-to-PRD generator",
+  "resourceType": "TUTORIAL",
+  "description": "A system that turns a rough feature idea into a first-draft PRD ready for a human editor.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae43fd30fff006b1a5c7",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "mvp": {
+      "title": "MVP (Minimum Viable Product)",
+      "content": "The smallest version that actually works end to end. Applies to automations too: ship the two-step version, confirm it holds up in real use, then extend it — instead of building the ten-step version blind."
+    },
+    "prd": {
+      "title": "PRD (Product Requirements Document)",
+      "content": "A structured spec for something you want built: the problem, the users, what it must do, what's out of scope. Producing a PRD first and handing it to Claude Code beats describing the build conversationally — the requirements survive the whole session."
+    },
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "slack": {
+      "title": "Slack",
+      "content": "The team messaging app most companies run on. In Level 2, students connect Slack to their AI tools to trigger workflows from messages, post AI-generated updates to channels, or summarize threads automatically."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "notion": {
+      "title": "Notion",
+      "content": "An all-in-one workspace for docs, wikis, databases, and project tracking. Used heavily across the AI Builder program as a destination for AI-generated content and as a connected app in Level 2 automations."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "granola": {
+      "title": "Granola",
+      "content": "An AI meeting notes app that listens to your calls and produces structured summaries, action items, and transcripts. Works in the background during Zoom, Google Meet, and in-person meetings. Useful as a source of raw material for AI workflows — feed transcripts into Claude for follow-ups or CRM updates."
+    },
+    "handoff": {
+      "title": "Handoff",
+      "content": "When your main agent passes a job to a sub-agent and waits for the result. Cleaner than mixing two agents' contexts in one thread, and the moment to inspect for prompt injection if either agent is reading untrusted input."
+    },
+    "anthropic": {
+      "title": "Anthropic",
+      "content": "The company that created Claude. An AI safety company focused on building reliable, interpretable AI systems."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Product & R&D"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "A rough feature idea usually turns into a PRD from a blank page. [Anthropic](#tooltip-anthropic)'s [Product Management Plugin](https://claude.com/plugins/product-management) ships a /write-spec command that turns a problem statement into a structured PRD with user stories, prioritization, and success metrics. This system does the same job standalone. Hand it a sketch or a meeting note and it returns a first-draft PRD ready for a human editor.",
+          "type": "prose"
+        },
+        {
+          "text": "Only 13.5% of product teams consistently use a formal scoring or prioritization framework, and just 4.1% use any AI-assisted scoring at all, per [Product-Led Alliance's State of Product Management Report 2026](https://productledalliance.com/product-management-statistics). A structured PRD brings more rigor to a feature's reasoning than most teams apply before it reaches engineering.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a paste-in [prompt](#tooltip-prompt) whenever an idea surfaces, a saved [skill](#tooltip-skill) you invoke on demand, or an [agent](#tooltip-agent) that watches your idea intake channel and drafts a PRD the moment a new one lands.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming your PRD sections, where ideas usually start, and where the draft lands.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that turns a rough feature idea into a first-draft PRD. Ask me questions, one at a time, about what sections every PRD should include, where my ideas usually start, how much of my own past PRDs to feed in as examples, and where the draft should land. When you have what you need, write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview surfaces decisions you haven't made yet, and the scope document becomes the brief for every draft after it."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where feature ideas typically start (a meeting note, a [Slack](#tooltip-slack) thread, a one-liner).",
+            "Which sections every PRD needs, and whether past [PRDs](#tooltip-prd) feed in as style examples.",
+            "Whether the draft stays a standalone doc or syncs into a ticketing system for [handoff](#tooltip-handoff)."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Common connectors are a docs tool ([Notion](#tooltip-notion), Google Docs), a ticketing system (Linear, Jira), and a meeting notes tool ([Granola](#tooltip-granola)). The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Start building the system your scope document describes, and test it on a real idea. The prompt below is an example. Your scope document will give you a version shaped to your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Turn a rough feature idea into a first-draft PRD.\n\nContext: [the idea or meeting notes], [primary user segment], [known technical constraints]\n\nRules:\n- Include a problem statement, goals, non-goals, 3 to 5 user stories, acceptance criteria, edge cases, and open questions.\n- Mark any unsupported assumption as [ASSUMPTION].\n- Keep the draft to one page.\n- Never invent a launch date or headcount.",
+          "prompt_note": "How this prompt works: marking assumptions keeps you from mistaking a guess for a requirement, and the one-page limit forces the draft to prioritize instead of padding."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Every section present, assumptions flagged, no invented dates?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what's missing and fold the correction into your rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Stress-test the PRD against edge cases in a second pass.",
+            "Generate an [MVP](#tooltip-mvp), full, and stretch version in the same pass.",
+            "Version each draft so changes stay traceable.",
+            "Connect it to your idea intake channel through a [tool connector](#tooltip-tool-connectors) so a new idea drafts itself."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric), not a feel check. Have your AI chat draft the rubric and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each PRD draft, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for date, idea, sections missing, assumptions flagged, and whether the draft needed a full rewrite. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks catch a missing section before a stakeholder does, and the log shows which parts you keep rewriting by hand."
+        },
+        {
+          "text": "**Log** every run against the rubric. Note the date, which checks passed or failed, and what changed. After a handful of runs it shows which sections you rewrite most. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the rubric passes a few runs straight, package the prompt and your corrected rules into a reusable AI skill, so every run starts from your defaults. A repeated failure earns its own skill. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write it, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. A PRD generator will confidently fill gaps you never asked it to fill with an invented metric or fabricated research, so flag every unverified claim and treat the output as an early draft.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Anthropic, Product Management Plugin](https://claude.com/plugins/product-management) — The write-spec PRD pattern.",
+            "[Product-Led Alliance, State of Product Management Report 2026](https://productledalliance.com/product-management-statistics) — The prioritization-rigor stat."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a backlog prioritizer](/content/item/urn:contentEntry:6ab9ae42e4af7bd005835afc) · Product & R&D",
+            "[Design an agent system that turns specs into prototypes](/content/item/urn:contentEntry:6ab9ae430627ffe1b1012dc3) · Product & R&D",
+            "[Agent Spec Writer](/content/item/urn:contentEntry:6ab9ae500c926f41bf699e8b) and [Business Case Builder](/content/item/urn:contentEntry:6ab9ae510b29ae38fd9eb352) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

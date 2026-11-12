@@ -1,0 +1,74 @@
+{
+  "id": "urn:contentEntry:6ab9ae58aca57d1134405bf1",
+  "title": "Persona Development",
+  "resourceType": "SKILL",
+  "description": "Build a detailed buyer persona with pain hierarchies, motivations, objections, and language patterns to ground all writing and strategy in who you're actually talking to.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae58aca57d1134405bf1",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Research"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "Build an 8-component buyer persona that can be referenced when writing, drafting, or strategizing.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "the-8-components",
+      "title": "The 8 Components",
+      "children": [
+        {
+          "text": "### 1. Identity\nWho is this person? Role, background, life stage, goals.\n\n### 2. Primary Pain\nThe number one problem they're trying to solve. In their words, not yours.\n\n### 3. Pain Hierarchy\nSecondary and tertiary pains. What else keeps them up at night?\n\n### 4. Motivations\nWhat do they actually want? Career change, income, status, stability, flexibility?\n\n### 5. Objections\nWhat stops them from buying? Price, timing, credibility, fear of failure, uncertainty?\n\n### 6. Language Patterns\nWords and phrases they use. How do they describe their own problem? What language signals they are in market?\n\n### 7. Where They Are in the Journey\nAwareness stage: unaware, problem aware, solution aware, product aware, or most aware.\n\n### 8. What a Win Looks Like\nWhat does success look like to them 6 months after buying?",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "step-1-build-the-persona",
+      "title": "Step 1, Build the Persona",
+      "children": [
+        {
+          "text": "From `$ARGUMENTS`, develop each component using specific, concrete language. Not \"career growth\" but \"wants to move from their current role into a target role within 12 months.\"\n\nIf data or examples are provided, use them. If not, reason from what is known about this audience type.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "output-format",
+      "title": "Output Format",
+      "children": [
+        {
+          "text": "```\n# Persona: [Name / Type]\n\n## Identity\n[who they are]\n\n## Primary Pain\n\"[in their voice]\"\n\n## Pain Hierarchy\n1. [primary pain]\n2. [secondary pain]\n3. [tertiary pain]\n\n## Motivations\n- [motivation 1]\n- [motivation 2]\n\n## Objections\n| Objection                      | Underlying Fear        | Best Response |\n|-------------------------------|------------------------|---------------|\n| \"Too expensive\"               | Risk of wasting money  | [response]    |\n| \"Not sure it'll work for me\"  | Fear of failure        | [response]    |\n\n## Their Language\nWords they use: [list]\nWords they don't use: [list]\nHow they describe their problem: \"[example phrase]\"\n\n## Journey Stage\n[where they are + what they need at this stage]\n\n## What a Win Looks Like\n\"[success in their voice]\"\n```",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}

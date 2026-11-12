@@ -1,0 +1,213 @@
+{
+  "id": "urn:contentEntry:6ab9ae4ac38b20d89a85ee61",
+  "title": "Build a subscription and bill watchdog",
+  "resourceType": "TUTORIAL",
+  "description": "A system that checks a month of transactions and flags price hikes and unused subscriptions for you to cancel.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae4ac38b20d89a85ee61",
+  "viewableFile": null,
+  "thumbnail": "tutorial-thumbnail.png",
+  "body": {
+  "tooltips": {
+    "csv": {
+      "title": "CSV",
+      "content": "Comma-Separated Values — a plain-text file format for spreadsheet data. Each row is a line; each column is separated by a comma. Claude can read, create, and edit CSV files easily."
+    },
+    "agent": {
+      "title": "Agent",
+      "content": "An AI that works independently to complete a goal — planning steps, picking tools, running them, and deciding what to do next without you prompting it at every step. Unlike a chatbot, an agent takes action."
+    },
+    "model": {
+      "title": "Model",
+      "content": "A specific trained version of an AI. Claude has several models (like Opus, Sonnet, Haiku) that differ in capability and speed. Larger models are smarter but slower; smaller ones are faster and cheaper."
+    },
+    "skill": {
+      "title": "Skill",
+      "content": "A plain-text file with instructions for a specific repeatable workflow. Save it once, then trigger it with a slash command like /research-competitive. Same steps and output format every time — like a macro for Claude."
+    },
+    "claude": {
+      "title": "Claude",
+      "content": "The AI made by Anthropic. Available as a chat tool at claude.ai, as a desktop app (Claude Desktop), and as a terminal tool (Claude Code). The different interfaces are suited for different types of work."
+    },
+    "prompt": {
+      "title": "Prompt",
+      "content": "The instruction or message you give to an AI. The quality of your prompt directly shapes the quality of the output. Writing better prompts is one of the highest-leverage skills in this program."
+    },
+    "rubric": {
+      "title": "Rubric",
+      "content": "The written definition of what a good output looks like, in 3–5 scoreable dimensions. Evals grade against a rubric; without one, 'is this good?' is a vibe, not a measurement."
+    },
+    "chatgpt": {
+      "title": "ChatGPT",
+      "content": "OpenAI's chat assistant. The most widely known AI tool — works similarly to Claude but with different strengths and weaknesses. Useful to have access to for cross-checking outputs or trying alternate models."
+    },
+    "read-only": {
+      "title": "Read-only",
+      "content": "The first rung of the trust gradient: the agent can see your inbox, calendar, or docs but can't change anything. The default starting state for every new tool connection. Tiny blast radius, fast to ship, and confirms the read side works before you graduate the write side."
+    },
+    "tool-connectors": {
+      "title": "Tool Connectors",
+      "content": "Integrations that let Claude read from and write to apps you use (Gmail, Slack, Google Calendar, Notion, HubSpot, etc.). Set up once in Customize → Connectors. Each connector opens up a new category of tasks Claude can automate."
+    }
+  },
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Life & Personal"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "about",
+      "title": "About this automation blueprint",
+      "children": [
+        {
+          "text": "Subscription creep is invisible by design. Consumers underestimate their own monthly subscription spend by more than half, guessing $86 against an actual $219, per [C+R Research's subscription cost study](https://www.crresearch.com/blog/subscription-service-statistics-and-costs/). This system takes a month of transactions and turns them into a categorized list of active subscriptions, a flag on anything that got more expensive, and a drafted cancellation email for whatever you confirm you don't want.",
+          "type": "prose"
+        },
+        {
+          "text": "The same study found 74% say forgetting a recurring charge is too easy, and over 40% were still paying for something they no longer used.",
+          "type": "prose"
+        },
+        {
+          "text": "Run it as a monthly paste-in [prompt](#tooltip-prompt), a saved skill, or a scheduled [agent](#tooltip-agent) that checks in on billing day. Every version stays [read-only](#tooltip-read-only) against your bank account. Only an export ever moves.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "plan",
+      "title": "Plan",
+      "children": [
+        {
+          "text": "Open your AI chat and have it interview you into a scope document. Done means a written scope naming where your transaction data comes from, what counts as a price hike, and how cancellation emails get drafted.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "I want to build a system with my AI tool that watches my subscriptions and bills. Ask me questions, one at a time, about where my transaction data comes from, how often to check, what counts as a price hike worth flagging, and whether cancellation emails draft automatically or only on request. Then write it up as a scope document I can build from.",
+          "prompt_note": "How this prompt works: the interview forces a real definition of \"price hike\" and \"unused\" before either term gets applied to your actual charges."
+        },
+        {
+          "text": "Decisions the interview should settle:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "How transaction data gets exported, since this should never touch live banking credentials.",
+            "How often the audit runs.",
+            "Whether \"unused\" gets flagged from patterns alone or only after you confirm it."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "build",
+      "title": "Build",
+      "children": [
+        {
+          "text": "Bring the scope document. Pressure-test it first by pasting it into a fresh session or a different [model](#tooltip-model) and asking it to poke holes. Then gather what it calls for. Common [connectors](#tooltip-tool-connectors) are a bank or card statement export ([CSV](#tooltip-csv), never live credentials), a budgeting app if you use one, and email for the cancellation draft. The paste-in version needs none.",
+          "type": "prose"
+        },
+        {
+          "text": "**Create.** Start building the system your scope document describes, and test it on a real month of transactions. The prompt below is an example of the core task. Your scope document will give you a version shaped to your setup.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "Goal: Review my transactions and produce a subscription audit with cancellation drafts.\n\nContext: [Paste your exported transactions. Include last month's known subscriptions too, if you have them.]\n\nRules:\n- Identify recurring charges across at least 2 months of data. Don't flag a one-time purchase as a subscription.\n- Flag any charge that increased, and state by how much.\n- Confirm with me before assuming something is unused. Never decide that on your own.\n- Draft a plain cancellation email for anything I confirm I don't want. Never send it.\n- Output as: Active Subscriptions table (Merchant | Amount | Change | Flag), then Cancellation Drafts.",
+          "prompt_note": "How this prompt works: requiring two months of matching charges before calling something a subscription keeps a one-off purchase from getting flagged as a recurring bill."
+        },
+        {
+          "text": "**Review.** Check the output against your scope. Recurring charges confirmed across months, hikes stated with the actual amount, nothing marked unused without asking first?",
+          "type": "prose"
+        },
+        {
+          "text": "**Feedback.** Tell it exactly what went wrong (say the audit read an annual charge as monthly) and fold each correction into the rules.",
+          "type": "prose"
+        },
+        {
+          "text": "Go further:",
+          "type": "prose"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Track total subscription spend over time.",
+            "Compare each subscription to how much you used it that month.",
+            "Build an annual pass that catches yearly-billed subscriptions the monthly run misses."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "learn",
+      "title": "Learn",
+      "children": [
+        {
+          "text": "**Measure** with a [rubric](#tooltip-rubric). Have your AI chat draft it and a run log in one pass.",
+          "type": "prose"
+        },
+        {
+          "type": "prompt",
+          "prompt": "From my scope document, write a rubric for judging each subscription audit, with 4 to 6 pass/fail checks. Then set up a simple run log I can keep in a doc or spreadsheet, with columns for month, subscriptions flagged, price hikes caught, false positives, and what rule I changed. Give me both in a format I can paste into my notes.",
+          "prompt_note": "How this prompt works: pass/fail checks remove the judgment call, and the log columns make a wrongly flagged subscription visible after a couple of months of entries."
+        },
+        {
+          "text": "**Log** every run against the rubric. Each entry takes a minute. Note the date, which rubric checks passed or failed, and what you changed. A single miss is noise, and a repeated miss is an instruction you haven't written yet.",
+          "type": "prose"
+        },
+        {
+          "text": "**Make skills** from what the log shows. Once the system passes the rubric a few runs straight, package the prompt and your corrected rules into a reusable AI skill, so every run starts from your defaults instead of a blank chat. When the log shows the same check failing again and again, that gap is a candidate for a skill of its own. [Claude](#tooltip-claude)'s built-in skill-creator skill will interview you and write the skill for you, and a custom GPT does the same in [ChatGPT](#tooltip-chatgpt).",
+          "type": "prose"
+        },
+        {
+          "text": "One durable failure mode. It can't tell a subscription you use occasionally from one you've abandoned unless you confirm it, so a false positive risks canceling something you wanted. Never connect live banking credentials either. Export and paste by hand, every time.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "sources",
+      "title": "Sources",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[C+R Research, Subscription Service Statistics and Costs](https://www.crresearch.com/blog/subscription-service-statistics-and-costs/) — The spend-underestimate, forgotten-charge, and unused-subscription figures."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "related",
+      "title": "Related blueprints and skills",
+      "children": [
+        {
+          "type": "list",
+          "items": [
+            "[Build a life maintenance renewal tracker](/content/item/urn:contentEntry:6ab9ae4a35c1e8d4795d7c63) · Life & Personal",
+            "[Build a contract renewal tracker](/content/item/urn:contentEntry:6ab9ae4547908e200ddceb98) · Legal & Compliance",
+            "[Build a churn-risk watcher](/content/item/urn:contentEntry:6ab9ae479b58a5b0600ca5c9) · Entrepreneurship",
+            "[Financial Operations Expert](/content/item/urn:contentEntry:6ab9ae5218f60ab384a8df58), [Email Manager](/content/item/urn:contentEntry:6ab9ae5254bac698edfe450a), and [Data Cleaner](/content/item/urn:contentEntry:6ab9ae51a1bfd0785cb3341a) pair well with this build. · Skills"
+          ]
+        }
+      ]
+    }
+  ]
+}
+}

@@ -1,0 +1,107 @@
+{
+  "id": "urn:contentEntry:6ab9ae59fb07c1251e79b90a",
+  "title": "PowerPoint Decks",
+  "resourceType": "SKILL",
+  "description": "Create, edit, or analyze .pptx files, from scratch, from a template, or by modifying existing slides, with proper XML-level control and visual validation.",
+  "link": "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae59fb07c1251e79b90a",
+  "viewableFile": null,
+  "thumbnail": null,
+  "body": {
+  "sections": [
+    {
+      "type": "section",
+      "id": "meta",
+      "children": [
+        {
+          "tags": [
+            {
+              "text": "Design"
+            },
+            {
+              "text": "Updated Jun 2026",
+              "color": "white"
+            }
+          ],
+          "type": "tags"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "overview",
+      "children": [
+        {
+          "text": "You create, edit, and analyze PowerPoint presentations (.pptx files). A .pptx\nfile is a ZIP archive of XML files. You have different workflows for reading,\ncreating, and editing.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "reading-a-presentation",
+      "title": "Reading a presentation",
+      "children": [
+        {
+          "text": "To extract text content, convert to markdown:\n\n```bash\npython -m markitdown path/to/file.pptx\n```\n\nFor comments, speaker notes, animations, or design details, unpack the raw XML:\n\n```bash\npython ooxml/scripts/unpack.py <file.pptx> <output_dir>\n```\n\nKey paths inside the unpacked folder:\n- `ppt/presentation.xml`, metadata and slide references\n- `ppt/slides/slide{N}.xml`, individual slide content\n- `ppt/notesSlides/notesSlide{N}.xml`, speaker notes\n- `ppt/theme/theme1.xml`, colors and fonts",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "creating-a-new-presentation-from-scratch",
+      "title": "Creating a new presentation (from scratch)",
+      "children": [
+        {
+          "text": "Use the html2pptx workflow: author slides as HTML, then convert to .pptx.\n\n**Before writing any code**, state your design approach: what tone, palette, and\nlayout the content calls for. Choose colors that match the subject matter.\nAvoid generic defaults.\n\nDesign requirements:\n- Web-safe fonts only (Arial, Georgia, Trebuchet MS, Verdana, Courier New, etc.)\n- Clear visual hierarchy through size, weight, and color contrast\n- Consistent spacing and visual language across all slides\n- For slides with charts or tables: use a two-column layout (header full-width,\n  then text left + chart right) or a full-bleed layout. Never stack vertically.\n\nWorkflow:\n1. Read `html2pptx.md` fully before writing any code.\n2. Author one HTML file per slide at the correct dimensions (720pt x 405pt for 16:9).\n3. Run the `html2pptx.js` script to convert HTML to .pptx.\n4. Generate thumbnails for visual validation: `python scripts/thumbnail.py output.pptx --cols 4`\n5. Inspect for text cutoff, overlap, contrast issues, and boundary violations.\n6. Fix and regenerate until all slides pass visual review.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "creating-a-presentation-from-a-template",
+      "title": "Creating a presentation from a template",
+      "children": [
+        {
+          "text": "1. Extract template text (`markitdown`) and create thumbnail grids.\n2. Save a template inventory listing every slide with its index (0-based).\n3. Choose layouts that match your actual content structure. Don't force a\n   3-column layout when you have 2 items.\n4. Use `rearrange.py` to duplicate and order the slides you need.\n5. Run `inventory.py` to extract a JSON map of all text shapes.\n6. Write a `replacement-text.json` with new paragraph content, preserving\n   font, alignment, bullet, and color properties from the inventory.\n7. Apply with `replace.py`. All shapes not listed are cleared automatically.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "editing-an-existing-presentation",
+      "title": "Editing an existing presentation",
+      "children": [
+        {
+          "text": "1. Read `ooxml.md` fully before editing.\n2. Unpack: `python ooxml/scripts/unpack.py <file.pptx> <output_dir>`\n3. Edit the relevant `ppt/slides/slide{N}.xml` files.\n4. Validate after each edit: `python ooxml/scripts/validate.py <dir> --original <file>`\n5. Repack: `python ooxml/scripts/pack.py <input_dir> <output_file>`",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "visual-validation",
+      "title": "Visual validation",
+      "children": [
+        {
+          "text": "Generate a thumbnail grid at any stage:\n\n```bash\npython scripts/thumbnail.py file.pptx --cols 4\n```\n\nCheck every slide for: text cutoff, overlap, poor contrast, and content too\nclose to slide edges. Fix before declaring done.",
+          "type": "prose"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "id": "code-style",
+      "title": "Code style",
+      "children": [
+        {
+          "text": "Write concise scripts. No verbose variable names, no redundant operations, no\nunnecessary print statements.",
+          "type": "prose"
+        }
+      ]
+    }
+  ]
+}
+}
