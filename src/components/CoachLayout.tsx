@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { useExpertMode } from "../contexts/ExpertModeContext";
@@ -124,7 +124,7 @@ const childNavLinkClass = ({ isActive }: { isActive: boolean }) =>
 // ---------------------------------------------------------------------------
 // Sidebar v1 — the current, shipping layout.
 // ---------------------------------------------------------------------------
-function SidebarV1() {
+function SidebarV1({ iconOnly = false }: { iconOnly?: boolean }) {
   const [listingsOpen, setListingsOpen] = useState(false);
   const { pathname } = useLocation();
   const base = useCoachBase();
@@ -134,23 +134,50 @@ function SidebarV1() {
 
   const inStore = base !== "/coach";
 
+  // Icon-only centers the glyph and drops the label; the highlight becomes a
+  // fixed-width pill inset from the card edges (not a full-bleed row), and the
+  // row is tooltipped so the destination stays legible while collapsed.
+  const rowClass = ({ isActive }: { isActive: boolean }) =>
+    iconOnly
+      ? `relative flex w-10 items-center justify-center self-center rounded-lg py-[10px] text-[15px] transition-colors ${
+          isActive ? "bg-[#222222]/5 font-semibold text-gray-dark" : "font-medium text-gray-light hover:text-gray-dark"
+        }`
+      : navLinkClass({ isActive });
+
   // A single top-level nav row from an item definition. An optional badge shows
-  // a red count bubble on the far right (matching the top-nav Messages badge).
-  const navRow = ({ to, label, icon, badge }: { to: string; label: string; icon: string; badge?: number }) => (
-    <NavLink key={to} to={rebase(to, base)} className={navLinkClass}>
-      <NavIcon src={icon} className="h-[22px] w-[22px]" />
-      <span className="flex-1">{label}</span>
-      {badge != null && (
-        <span className="flex min-h-[16px] min-w-[16px] items-center justify-center rounded-full bg-[#F3392C] px-2 py-0.5 text-[11px] font-semibold leading-none text-white">
-          {badge}
+  // a red count bubble on the far right (matching the top-nav Messages badge);
+  // in icon-only mode it shrinks to a dot pinned to the icon's corner.
+  const navRow = ({ to, label, icon, badge }: { to: string; label: string; icon: string; badge?: number }) =>
+    iconOnly ? (
+      <NavLink key={to} to={rebase(to, base)} title={label} className={rowClass}>
+        <span className="relative flex">
+          <NavIcon src={icon} className="h-[22px] w-[22px]" />
+          {badge != null && (
+            <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-[1.5px] border-white bg-[#F3392C]" />
+          )}
         </span>
-      )}
-    </NavLink>
-  );
+      </NavLink>
+    ) : (
+      <NavLink key={to} to={rebase(to, base)} className={rowClass}>
+        <NavIcon src={icon} className="h-[22px] w-[22px]" />
+        <span className="min-w-0 flex-1 truncate">{label}</span>
+        {badge != null && (
+          <span className="flex min-h-[16px] min-w-[16px] items-center justify-center rounded-full bg-[#F3392C] px-2 py-0.5 text-[11px] font-semibold leading-none text-white">
+            {badge}
+          </span>
+        )}
+      </NavLink>
+    );
   const findItem = (to: string) => [...topItems, ...bottomItems].find((i) => i.to === to)!;
 
   // Storefront accordion — shared between both layouts (lives in "Expert tools").
-  const offeringsAccordion = (
+  // Collapsed to a single tooltipped icon when the sidebar is icon-only; the
+  // children only have room to render in the full-width state.
+  const offeringsAccordion = iconOnly ? (
+    <NavLink to={rebase("/coach/manage/mba", base)} title="Offerings" className={() => rowClass({ isActive: onStorefront })}>
+      <NavIcon src={storeIcon} className="h-[22px] w-[22px]" />
+    </NavLink>
+  ) : (
     <div>
       <button
         onClick={() => setListingsOpen((o) => !o)}
@@ -206,7 +233,7 @@ function SidebarV1() {
                     <path d="M12 6v12M6 12h12" vectorEffect="non-scaling-stroke" />
                   </svg>
                 </span>
-                New category
+                New
               </button>
             </div>
           </motion.div>
@@ -223,9 +250,9 @@ function SidebarV1() {
         {/* Personal group */}
         <div className="shrink-0 rounded-[12px] border border-[#222222]/[0.12] bg-white p-2 shadow-[0px_4px_8px_-2px_rgba(16,24,40,0.10),0px_2px_4px_-2px_rgba(16,24,40,0.06)]">
           <nav className="flex flex-col gap-1">
-            <NavLink to={base} end className={navLinkClass}>
+            <NavLink to={base} end title={iconOnly ? "Dashboard" : undefined} className={rowClass}>
               <NavIcon src={layoutGridIcon} className="h-[22px] w-[22px]" />
-              Dashboard
+              {!iconOnly && "Dashboard"}
             </NavLink>
             {navRow({ to: "/coach/messages", label: "Messages", icon: chatIcon, badge: 1 })}
             {navRow(findItem("/coach/profile"))}
@@ -241,10 +268,14 @@ function SidebarV1() {
             dashboard; the trailing arrow signals that. Only once the user is on a team. */}
         {team && (
           <div className="shrink-0 rounded-[12px] border border-[#222222]/[0.12] bg-white p-2 shadow-[0px_4px_8px_-2px_rgba(16,24,40,0.10),0px_2px_4px_-2px_rgba(16,24,40,0.06)]">
-            <NavLink to="/team" className="group flex w-full items-center gap-3 rounded-lg px-3 py-[10px] text-[15px] font-medium text-gray-light transition-colors hover:text-gray-dark">
+            <NavLink to="/team" title={iconOnly ? team.name : undefined} className={`group flex items-center rounded-lg text-[15px] font-medium text-gray-light transition-colors hover:text-gray-dark ${iconOnly ? "w-10 justify-center self-center py-[10px]" : "w-full gap-3 px-3 py-[10px]"}`}>
               <TeamLogo name={team.name} logo={team.logo} size={22} circle />
-              <span className="flex-1 truncate">{team.name}</span>
-              <NavIcon src={arrowDiagonalIcon} className="h-4 w-4 opacity-60 transition-opacity group-hover:opacity-100" />
+              {!iconOnly && (
+                <>
+                  <span className="flex-1 truncate">{team.name}</span>
+                  <NavIcon src={arrowDiagonalIcon} className="h-4 w-4 opacity-60 transition-opacity group-hover:opacity-100" />
+                </>
+              )}
             </NavLink>
           </div>
         )}
@@ -252,9 +283,11 @@ function SidebarV1() {
         {/* Expert tools — only for experts; a non-expert sees just the card above */}
         {expert && (
           <div className="shrink-0 overflow-hidden rounded-[12px] border border-[#222222]/[0.12] bg-white shadow-[0px_4px_8px_-2px_rgba(16,24,40,0.10),0px_2px_4px_-2px_rgba(16,24,40,0.06)]">
-            <p className="bg-gray-hover px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-gray-extra-light">
-              Expert tools
-            </p>
+            {!iconOnly && (
+              <p className="bg-gray-hover px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-gray-extra-light">
+                Expert tools
+              </p>
+            )}
             <nav className="flex flex-col gap-1 p-2">
               {offeringsAccordion}
               {navRow(findItem("/coach/opportunities"))}
@@ -270,7 +303,7 @@ function SidebarV1() {
         )}
 
         {/* Non-experts get a prompt to set up their expert tools instead */}
-        {!expert && (
+        {!expert && !iconOnly && (
           <div
             className="shrink-0 rounded-[12px] bg-[#222222]/[0.04] p-5"
             style={{
@@ -312,7 +345,7 @@ function SidebarV1() {
 // dropdown, pinned to the sidebar's bottom so both states are quick to test.
 // Prototype-only; reads/writes the shared ExpertMode context (localStorage).
 // ---------------------------------------------------------------------------
-function AdminExpertToggle() {
+function AdminExpertToggle({ iconOnly = false }: { iconOnly?: boolean }) {
   const { expert, toggle } = useExpertMode();
 
   return (
@@ -322,9 +355,10 @@ function AdminExpertToggle() {
         role="switch"
         aria-checked={expert}
         onClick={toggle}
-        className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors hover:bg-[#222222]/5"
+        title={iconOnly ? "Expert" : undefined}
+        className={`flex w-full items-center rounded-lg px-3 py-2 text-left transition-colors hover:bg-[#222222]/5 ${iconOnly ? "justify-center" : "justify-between"}`}
       >
-        <span className="text-[14px] font-medium text-gray-dark">Expert</span>
+        {!iconOnly && <span className="text-[14px] font-medium text-gray-dark">Expert</span>}
         <span
           className={`relative h-[22px] w-[38px] shrink-0 rounded-full transition-colors ${
             expert ? "bg-gray-dark" : "bg-[#222222]/20"
@@ -341,9 +375,68 @@ function AdminExpertToggle() {
   );
 }
 
+// My Leland sidebar sizing. 264 is the max (its shipped width); dragging the
+// right edge narrower than COLLAPSE_AT snaps to the icon-only rail.
+const SIDEBAR_MAX = 264;
+const SIDEBAR_MIN = 188;
+const SIDEBAR_COLLAPSE_AT = 168;
+const SIDEBAR_COLLAPSED_W = 76;
+const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
+
 export default function CoachLayout() {
   const { pathname } = useLocation();
   const { boxedMode } = useProfileBoxedMode();
+
+  // Collapsible / resizable My Leland sidebar. `collapsed` is the icon-only rail;
+  // `expandedWidth` is the user's chosen width while expanded. Both persist so a
+  // demo survives reloads. While collapsed, hovering opens an overlay panel on
+  // top of the content (it does not reflow the page).
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem("myLelandSidebarCollapsed") === "1");
+  const [expandedWidth, setExpandedWidth] = useState(() => {
+    const v = parseInt(localStorage.getItem("myLelandSidebarWidth") ?? "", 10);
+    return Number.isFinite(v) && v ? clamp(v, SIDEBAR_MIN, SIDEBAR_MAX) : SIDEBAR_MAX;
+  });
+  const [dragging, setDragging] = useState(false);
+  const [hovering, setHovering] = useState(false);
+  const asideRef = useRef<HTMLElement>(null);
+  const asideLeftRef = useRef(0);
+
+  useEffect(() => {
+    localStorage.setItem("myLelandSidebarCollapsed", collapsed ? "1" : "0");
+    localStorage.setItem("myLelandSidebarWidth", String(expandedWidth));
+  }, [collapsed, expandedWidth]);
+
+  // Drag the right edge: width tracks the cursor live; below COLLAPSE_AT it snaps
+  // to the icon rail, otherwise it clamps between MIN and MAX.
+  useEffect(() => {
+    if (!dragging) return;
+    const onMove = (e: MouseEvent) => {
+      const desired = e.clientX - asideLeftRef.current;
+      if (desired < SIDEBAR_COLLAPSE_AT) {
+        setCollapsed(true);
+      } else {
+        setCollapsed(false);
+        setExpandedWidth(clamp(desired, SIDEBAR_MIN, SIDEBAR_MAX));
+      }
+    };
+    const onUp = () => setDragging(false);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [dragging]);
+
+  const startDrag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    asideLeftRef.current = asideRef.current?.getBoundingClientRect().left ?? 0;
+    setDragging(true);
+  };
   // The My Leland dashboard (store root) and calendar get a subtle beige tint
   // (brand beige at 50% opacity) across the whole content region — as does the
   // Profile Edit-mode page (always) and the Inline page when Boxed mode is on
@@ -365,20 +458,54 @@ export default function CoachLayout() {
   // leftover space directly (no centered/padded content wrapper).
   const isMessages = pathname === "/my-leland/messages";
 
+  // Hover-to-peek only applies while collapsed and not mid-drag. `reservedWidth`
+  // is the space the aside holds in the flex row; `panelWidth` is what the inner
+  // panel actually draws — when peeking it overflows that reserved box, floating
+  // over the content instead of pushing it. `iconOnly` strips labels on the rail.
+  const hoverOpen = hovering && !dragging;
+  const overlaying = collapsed && hoverOpen;
+  const iconOnly = collapsed && !hoverOpen;
+  const reservedWidth = collapsed ? SIDEBAR_COLLAPSED_W : expandedWidth;
+  const panelWidth = overlaying ? SIDEBAR_MAX : reservedWidth;
+  const widthTransition = dragging ? "" : "transition-[width] duration-200 ease-out";
+
   return (
     <div className={`flex min-h-[calc(100vh-61px)] ${beigePage ? "bg-[#F3F1E6]/50" : ""}`}>
       {inMyLeland ? (
-        /* My Leland — floating cards on the page background. The aside itself is the
-           scroll container (matching PageShell), so a tall list scrolls internally
-           while keeping its top margin. The Expert admin toggle sits at the bottom
-           via mt-auto, and scrolls with the list once it overflows. */
-        <aside className="hidden w-[264px] shrink-0 self-start sticky top-[61px] h-[calc(100vh-61px)] flex-col gap-4 overflow-y-auto px-4 pb-4 pt-5 md:flex">
-          <SidebarV1 />
-          {/* Pinned to the bottom while there's free space (mt-auto); once the cards
-              overflow, the auto margin collapses to 0 and everything scrolls together. */}
-          <div className="mt-auto shrink-0">
-            <AdminExpertToggle />
+        /* My Leland — floating cards on the page background. The aside is a
+           fixed-width spacer in the flex row (reservedWidth); the sticky inner
+           panel is the scroll container and can grow past the spacer to overlay
+           the content when peeking. A drag handle on the right edge resizes it. */
+        <aside
+          ref={asideRef}
+          style={{ width: reservedWidth }}
+          className={`relative hidden shrink-0 md:block ${widthTransition}`}
+        >
+          <div
+            onMouseEnter={() => setHovering(true)}
+            onMouseLeave={() => setHovering(false)}
+            style={{ width: panelWidth }}
+            className={`sticky top-[61px] flex h-[calc(100vh-61px)] flex-col gap-4 overflow-y-auto overflow-x-hidden pb-4 pt-5 ${iconOnly ? "px-2" : "px-4"} ${widthTransition} ${overlaying ? "z-40" : ""}`}
+          >
+            <SidebarV1 iconOnly={iconOnly} />
+            {/* Pinned to the bottom while there's free space (mt-auto); once the cards
+                overflow, the auto margin collapses to 0 and everything scrolls together. */}
+            <div className="mt-auto shrink-0">
+              <AdminExpertToggle iconOnly={iconOnly} />
+            </div>
           </div>
+
+          {/* Right-edge drag handle — straddles the border so it's easy to grab.
+              Hidden while peeking (the panel's visual edge has moved past it). */}
+          {!overlaying && (
+            <div
+              onMouseDown={startDrag}
+              title="Drag to resize"
+              className="group absolute top-0 right-0 z-[41] flex h-full w-3 translate-x-1/2 cursor-col-resize items-center justify-center"
+            >
+              <span className={`h-12 w-1 rounded-full bg-gray-stroke transition-opacity ${dragging ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
+            </div>
+          )}
         </aside>
       ) : (
         /* /coach — original flush, bordered sidebar. */

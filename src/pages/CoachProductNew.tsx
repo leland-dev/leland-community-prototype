@@ -459,7 +459,7 @@ function isConfigComplete(item: OfferingItem, v2 = false): boolean {
 }
 
 // One-line summary of a finished offering's config, shown under its title.
-function configSummary(item: OfferingItem): string {
+export function configSummary(item: OfferingItem): string {
   const c = item.config;
   if (item.slug === "coaching-time") {
     if (c.mode === "range") return `${c.minHours}–${c.maxHours} hours of coaching`;
@@ -2253,7 +2253,7 @@ function coachingHours(item: OfferingItem): number {
 // is derived from hours × the expert's hourly rate; every other priceable
 // product carries a manual price in its config. Non-priceable placeholder
 // products contribute nothing.
-function productListPrice(item: OfferingItem): number {
+export function productListPrice(item: OfferingItem): number {
   // Range-mode coaching is priced manually; set mode is auto-priced from hours,
   // unless the coach opted into a custom price for it.
   if (item.slug === "coaching-time") {
@@ -4630,7 +4630,7 @@ export const collectionCountLabel = (n: number): string => `${n} ${n === 1 ? "re
 // Reuse-first picker shown when adding a Collection to an offering: browse the
 // buckets built on the Content page and attach one, or jump into the builder to
 // create a new one. Mirrors the content library's "reuse existing" pattern.
-function CollectionPickerModal({ open, onClose, onPick, onCreateNew }: { open: boolean; onClose: () => void; onPick: (c: Collection) => void; onCreateNew: () => void }) {
+export function CollectionPickerModal({ open, onClose, onPick, onCreateNew }: { open: boolean; onClose: () => void; onPick: (c: Collection) => void; onCreateNew: () => void }) {
   const collections = useCollections();
   const [query, setQuery] = useState("");
   useEffect(() => { if (open) setQuery(""); }, [open]);

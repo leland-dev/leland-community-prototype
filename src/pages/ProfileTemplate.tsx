@@ -66,6 +66,7 @@ export default function ProfileTemplate() {
   const [video, setVideo] = useState(true);
   const [supercoach, setSupercoach] = useState(true);
   const [coverMode, setCoverMode] = useState<"default" | "dark" | "beige" | "none">("default");
+  const [offeringsLayout, setOfferingsLayout] = useState<"grid" | "sections">("sections");
   const [myProfile, setMyProfile] = useState(isMe);
   const coachId = person?.coachId ?? "samantha";
 
@@ -184,6 +185,9 @@ export default function ProfileTemplate() {
         onBack={handleBack}
         coach={expert}
         coachId={coachId}
+        slug={slug}
+        category={category}
+        offeringsLayout={offeringsLayout}
         name={displayName}
         photo={displayPhoto}
         cover={cover}
@@ -235,6 +239,16 @@ export default function ProfileTemplate() {
                   { value: "dark", label: "Dark" },
                   { value: "beige", label: "Beige" },
                   { value: "none", label: "None" },
+                ]}
+              />
+              <div className="my-1 border-t border-gray-100" />
+              <AdminSelect
+                label="Offerings layout"
+                value={offeringsLayout}
+                onChange={(v) => setOfferingsLayout(v as "grid" | "sections")}
+                options={[
+                  { value: "grid", label: "Grid" },
+                  { value: "sections", label: "Sections" },
                 ]}
               />
             </motion.div>

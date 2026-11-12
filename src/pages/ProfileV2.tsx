@@ -91,6 +91,7 @@ import eventImg3 from "../assets/placeholder images/placeholder-event-03.png";
 import bootcampImg1 from "../assets/placeholder images/bootcamp-1.webp";
 import aiBuilderCourseImg from "../assets/placeholder images/ai-builder-course.avif";
 import { OFFERINGS, AB_COLLAPSED_COUNT, type Offering } from "../lib/offerings";
+import OfferingSections from "../components/OfferingSections";
 import lelandPlusImg1 from "../assets/placeholder images/leland-plus-images/3cf6e985-7397-4e50-8e06-ef9a8f40491c.webp";
 import lelandPlusImg2 from "../assets/placeholder images/leland-plus-images/b9669ad2-4b6f-4c32-83e1-d1370dbf9484.webp";
 import lelandPlusImg3 from "../assets/placeholder images/leland-plus-images/db2eb673-d212-41d5-8df9-6fa6de57bc23.webp";
@@ -641,7 +642,7 @@ function CredentialRow({ item, darkMode }: { item: ProfileCredential; darkMode?:
   );
 }
 
-export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, altReviews = true, altSchedule = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack, embedded = false, abTest = true, abVersion = "v3" }: { coach?: boolean; coachId?: string; unified?: boolean; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; altReviews?: boolean; altSchedule?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void; embedded?: boolean; abTest?: boolean; abVersion?: "v1" | "v2" | "v3" }) {
+export default function ProfileV2({ coach = false, coachId = "samantha", unified = false, slug, category, name, photo, cover, customerFavorite, coachNote, coachVideo, supercoach, ownProfile, offeringsTab, offeringsLayout = "grid", altReviews = true, altSchedule = false, mvp = false, coverMode = "default", highLevel = false, categoryLabel, categoryHeadline, categories = [], onSelectCategory, onBack, embedded = false, abTest = true, abVersion = "v3" }: { coach?: boolean; coachId?: string; unified?: boolean; slug?: string; category?: string; name?: string; photo?: string; cover?: string; customerFavorite?: boolean; coachNote?: boolean; coachVideo?: boolean; supercoach?: boolean; ownProfile?: boolean; offeringsTab?: boolean; offeringsLayout?: "grid" | "sections"; altReviews?: boolean; altSchedule?: boolean; mvp?: boolean; coverMode?: "default" | "dark" | "beige" | "none"; highLevel?: boolean; categoryLabel?: string; categoryHeadline?: string; categories?: { slug: string; label: string; icon?: string }[]; onSelectCategory?: (slug: string) => void; onBack?: () => void; embedded?: boolean; abTest?: boolean; abVersion?: "v1" | "v2" | "v3" }) {
   const coachConfig = COACH_CONFIGS[coachId] ?? COACH_CONFIGS.samantha;
   const { dark: darkMode } = useDarkMode();
   useEffect(() => { document.title = "Leland Prototype | Profile"; }, []);
@@ -672,7 +673,11 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
   const [showSupercoach, setShowSupercoach] = useState(false);
   // In the unified template, coaches use a tabbed layout (About first) instead
   // of the long scroll; this tracks the active tab.
-  const [coachTab, setCoachTab] = useState<"about" | "offerings" | "activity" | "saved" | "likes">("about");
+  // Land on Offerings when it's available (unified expert profile with the tab);
+  // otherwise fall back to the Profile ("about") tab.
+  const [coachTab, setCoachTab] = useState<"about" | "offerings" | "activity" | "saved" | "likes">(
+    unified && coach && Boolean(offeringsTab) ? "offerings" : "about",
+  );
   const [showCoverImage, setShowCoverImage] = useState(unified ? true : false);
   const [showGrayHeader, setShowGrayHeader] = useState(false);
   const [searchParams] = useSearchParams();
@@ -2119,10 +2124,11 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
             <div ref={tabAnchorRef} aria-hidden className="mt-3 h-0" />
             <div className="sticky top-14 z-10 -mx-4 flex border-b border-gray-stroke bg-white md:top-0 md:mx-0">
               {([
+                // Offerings leads — it's the default landing tab.
+                ...(showOfferingsTab ? ["offerings" as const] : []),
                 "about" as const,
                 // Activity is hidden in MVP mode.
                 ...(mvp ? [] : (["activity"] as const)),
-                ...(showOfferingsTab ? ["offerings" as const] : []),
                 // Saved appears only when viewing your own profile. (Likes is
                 // hidden on your own profile for now.)
                 ...(viewingOwnProfile ? (["saved"] as const) : []),
@@ -2473,6 +2479,39 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                       /* v1 & v2 — plain section in its normal position. */
                       renderWorkWithPreview()
                     )
+                  ) : offeringsLayout === "sections" && !highLevel ? (
+                    /* Sectioned storefront — distinct Group sessions / Memberships
+                       / Packages / Content blocks, each linking out to the full
+                       offerings page when truncated. */
+                    <div ref={setSectionRef("offerings")} className="scroll-mt-[60px]">
+                      {/* Callout linking to the Profile tab for background/reviews. */}
+                      <button
+                        onClick={() => { setCoachTab("about"); scrollTabsIntoView(); }}
+                        className="group mb-8 flex w-full items-center gap-3 rounded-2xl bg-gray-hover px-4 py-3.5 text-left transition-colors hover:bg-gray-stroke"
+                      >
+                        <img src={profilePhoto} alt="" className="-my-2 -ml-6 h-[50px] w-[50px] shrink-0 -rotate-[4deg] rounded-[4px] border-2 border-white object-cover shadow-[0_6px_16px_rgba(16,24,40,0.18)] transition-transform duration-200 ease-out group-hover:rotate-0 group-hover:scale-105" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[16px] font-semibold text-gray-dark">Learn more about {profileName.split(" ")[0]}</p>
+                          <p className="mt-0.5 text-[14px] text-gray-light">Background, experience, and reviews</p>
+                        </div>
+                        <svg className="h-5 w-5 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+                      </button>
+
+                      <OfferingSections slug={slug} category={category} variant="full" />
+
+                      {/* Catch-all — book custom hourly coaching for anything not
+                          covered by the offerings above. */}
+                      <div className="mt-10 flex flex-col items-center rounded-3xl bg-[#F3F1E6]/60 p-8 text-center">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white shadow-[0_1px_3px_rgba(16,24,40,0.08)]">
+                          <img src={timeClockHourglassIcon} alt="" className="h-7 w-7" />
+                        </div>
+                        <h3 className="mt-4 font-serif text-[24px] leading-tight text-gray-dark md:text-[28px]">Custom hourly coaching</h3>
+                        <p className="mt-2 max-w-[460px] text-[15px] leading-snug text-gray-light">
+                          Book 1:1 hourly coaching with {profileName.split(" ")[0]} for anything the offerings above don't cover — application strategy, essays, interview prep, and more.
+                        </p>
+                        <Button size="lg" variant="primary" rounded="rounded-full" className="mt-5">Buy time for $390/hr</Button>
+                      </div>
+                    </div>
                   ) : (
                     <>
                       {abTest && !highLevel ? (

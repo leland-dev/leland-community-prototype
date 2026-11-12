@@ -77,6 +77,7 @@ import ConversationRelationship from "./pages/ConversationRelationship";
 import Profile from "./pages/Profile";
 import ProfileV2 from "./pages/ProfileV2";
 import ProfileTemplate from "./pages/ProfileTemplate";
+import ProfileOfferingsPage from "./pages/ProfileOfferingsPage";
 import CoachBadgeMockups from "./pages/CoachBadgeMockups";
 import CoachAgent from "./pages/CoachAgent";
 import CoachAgentEdit from "./pages/CoachAgentEdit";
@@ -107,6 +108,7 @@ import PostTest from "./pages/PostTest";
 import ProfileCardTest from "./pages/ProfileCardTest";
 import GroupCardTest from "./pages/GroupCardTest";
 import Components from "./pages/Components";
+import StorefrontCardsTest from "./pages/StorefrontCardsTest";
 import ProgramHub from "./pages/ProgramHub";
 import CourseDetail from "./pages/CourseDetail";
 import CourseBuilder from "./pages/CourseBuilder";
@@ -225,6 +227,9 @@ export default function App() {
         <Route path="/offering/:slug/session/:sessionId" element={<GroupSessionPage />} />
         <Route path="/profile-badges" element={<CoachBadgeMockups />} />
         <Route path="/profile/:slug" element={<ProfileTemplate />} />
+        {/* Full "all offerings" storefront linked from the Offerings tab. Static
+            segment outranks the :category route below. */}
+        <Route path="/profile/:slug/offerings" element={<ProfileOfferingsPage />} />
         <Route path="/profile/:slug/:category" element={<ProfileTemplate />} />
         <Route path="/coach-profile" element={<ProfileV2 coach coachId="samantha" />} />
         <Route path="/coach-profile-john" element={<ProfileV2 coach coachId="john" />} />
@@ -325,6 +330,7 @@ export default function App() {
         <Route path="/components/post" element={<PostTest />} />
         <Route path="/components/profile-card" element={<ProfileCardTest />} />
         <Route path="/components/group-card" element={<GroupCardTest />} />
+        <Route path="/components/storefront-cards" element={<StorefrontCardsTest />} />
 
         {/* Context-driven pages (sidebar/variant via hooks) */}
         <Route element={<ContextLayout />}>

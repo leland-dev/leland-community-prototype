@@ -13,6 +13,8 @@ import OfferingCard from "../components/OfferingCard";
 import Post, { type PostData } from "../components/Post";
 import ProfileCard, { type ProfileCardData } from "../components/ProfileCard";
 import GroupCard from "../components/GroupCard";
+import { MediumCard } from "../components/StorefrontCards";
+import { getStorefrontItem } from "../lib/storefrontSections";
 import groupImg1 from "../assets/placeholder images/group images/18603db620e37b489d2d52da4c9c1f86.jpg";
 import pic1 from "../assets/profile photos/pic-1.png";
 import pic4 from "../assets/profile photos/pic-4.png";
@@ -231,6 +233,21 @@ export default function Components() {
           <div className="flex flex-col gap-1 px-5 py-4">
             <span className="text-[16px] font-medium text-gray-dark">Group Card</span>
             <span className="text-[14px] text-[#707070]">Displays a user's group membership with name, member count, and recent activity.</span>
+          </div>
+        </Link>
+
+        <Link
+          to="/components/storefront-cards"
+          className="overflow-hidden rounded-[16px] border border-[#E5E5E5] transition-colors hover:border-[#CCCCCC]"
+        >
+          <div className="flex h-[220px] items-center rounded-[12px] bg-[#F5F5F5] p-10 mx-3 mt-3">
+            <div className="w-full rounded-[12px] pointer-events-none" style={{ boxShadow: "0 4px 8px -2px rgba(16, 24, 40, 0.10), 0 2px 4px -2px rgba(16, 24, 40, 0.06)" }}>
+              <MediumCard item={getStorefrontItem("gs1")!} />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1 px-5 py-4">
+            <span className="text-[16px] font-medium text-gray-dark">Storefront Cards</span>
+            <span className="text-[14px] text-[#707070]">Every card style (small / medium / large) for offerings, memberships, group sessions, and livestreams.</span>
           </div>
         </Link>
       </div>

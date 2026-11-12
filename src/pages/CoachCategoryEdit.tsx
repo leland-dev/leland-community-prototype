@@ -8,6 +8,7 @@ import { OFFERINGS, type Offering } from "../lib/offerings";
 import { EventRow, upcoming as upcomingLivestreams } from "./CoachLivestreams";
 import { WorkshopRow, upcoming as upcomingWorkshops } from "./CoachWorkshops";
 import { ContentRowV1, ContentTableHeader } from "./CoachContent";
+import CategorySectionBuilder from "./CategorySectionBuilder";
 import { formatViews } from "./CoachProductNew";
 import { RESOURCES } from "../lib/resources";
 import { CalendarIcon } from "../components/SessionCard";
@@ -159,11 +160,11 @@ function modalityForOffering(o: Offering): string {
   return "package";
 }
 
-// Admin-toggleable layout version for this page — persisted so a demo survives
-// reloads. v2 is the current design (the default); v1/v3/v4/v5 are kept for
-// comparison via the admin menu.
-type CategoryVersion = "v1" | "v2" | "v3" | "v4" | "v5";
-const VERSION_KEY = "coachCategoryVersion";
+// Admin-toggleable layout version for this page. v6 (the storefront builder) is
+// the default everyone sees; v1–v5 are kept for comparison via the admin menu.
+// We deliberately don't read/persist the choice, so a stale value from an
+// earlier visit can never override v6 for teammates opening a shared link.
+type CategoryVersion = "v1" | "v2" | "v3" | "v4" | "v5" | "v6";
 
 // Dashed border drawn as an SVG background so we can set a larger dash length
 // and a lower-opacity stroke than CSS `border-dashed` allows. Stroke is
@@ -654,9 +655,9 @@ export type UpcomingEvent = {
 // A single Upcoming events row — hover-highlighted (no dividers), with a price-
 // per-seat + enrolled column that's consistent across free and paid (free rows
 // read "Free"), and a Join now / Details action.
-export function UpcomingEventRow({ ev, onJoin, onDetails, showPrice = true, enrolledNoun = "enrolled" }: { ev: UpcomingEvent; onJoin: () => void; onDetails: () => void; showPrice?: boolean; enrolledNoun?: string }) {
+export function UpcomingEventRow({ ev, onJoin, onDetails, showPrice = true, enrolledNoun = "enrolled", hideMenu = false, joinLabel }: { ev: UpcomingEvent; onJoin: () => void; onDetails: () => void; showPrice?: boolean; enrolledNoun?: string; hideMenu?: boolean; joinLabel?: string }) {
   return (
-    <div className="group flex items-center gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-[#F7F7F7]">
+    <div className="group flex items-center gap-6 rounded-xl px-3 py-3 transition-colors hover:bg-[#F7F7F7]">
       {ev.thumb ? (
         <img src={ev.thumb} alt="" className="h-[60px] w-[100px] shrink-0 rounded-md object-cover" />
       ) : (
@@ -668,22 +669,21 @@ export function UpcomingEventRow({ ev, onJoin, onDetails, showPrice = true, enro
         <h3 className="truncate text-[15px] font-semibold text-gray-dark">{ev.title}</h3>
         <p className="mt-0.5 truncate text-[14px] text-gray-light">{ev.dateTime} · {ev.duration}</p>
       </div>
-      {/* Price per seat + enrolled — shown on every row (free reads "Free").
-          showPrice=false drops the price line and lets the column hug its text
-          (e.g. membership-included sessions). */}
-      <div className={`hidden shrink-0 md:block ${showPrice ? "w-[116px]" : ""}`}>
+      {/* Price per seat + enrolled — fixed-width so prices line up across rows
+          (free reads "Free"); dropped to a hugging column in compact mode. */}
+      <div className={`hidden shrink-0 md:block ${showPrice ? "w-[88px]" : ""}`}>
         {showPrice && <p className="text-[15px] font-semibold text-gray-dark">{ev.free ? "Free" : ev.price}</p>}
         <p className={`${showPrice ? "text-[13px]" : "text-[14px]"} text-gray-light`}>{ev.enrolled != null ? `${ev.enrolled} ${enrolledNoun}` : "Draft"}</p>
       </div>
-      {/* Action + menu. Fixed width keeps buttons aligned across varied labels;
-          dropped when the row is compact (showPrice=false). */}
-      <div className={`flex shrink-0 items-center justify-end gap-2 ${showPrice ? "lg:w-[184px]" : ""}`}>
+      {/* Action + menu. Fixed width keeps the buttons/menu aligned across rows
+          regardless of label; dropped when the row is compact (showPrice=false). */}
+      <div className={`flex shrink-0 items-center justify-end gap-2 ${showPrice ? "lg:w-[160px]" : ""}`}>
         {ev.joinable ? (
-          <Button size="md" variant="dark" rounded="rounded-full" className="font-semibold" onClick={onJoin}>Join now</Button>
+          <Button size="md" variant="dark" rounded="rounded-full" className="font-semibold" onClick={onJoin}>{joinLabel ?? "Join now"}</Button>
         ) : (
-          <Button size="md" variant="white" rounded="rounded-full" className="border border-gray-stroke font-semibold" onClick={onDetails}>Details</Button>
+          <Button size="md" variant="white" rounded="rounded-full" className="border border-gray-stroke font-semibold" onClick={onDetails}>{joinLabel ?? "Details"}</Button>
         )}
-        <EventRowMenu />
+        {!hideMenu && <EventRowMenu />}
       </div>
     </div>
   );
@@ -691,7 +691,7 @@ export function UpcomingEventRow({ ev, onJoin, onDetails, showPrice = true, enro
 
 // v2 subscription card — a horizontal row (thumbnail + details) in the style of
 // the Meetup "Organizer" card, denser than v5's vertical SubscriptionCard.
-function SubscriptionRowCard({ plan, onOpen }: { plan: SubscriptionPlan; onOpen: () => void }) {
+export function SubscriptionRowCard({ plan, onOpen }: { plan: SubscriptionPlan; onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}
@@ -713,20 +713,20 @@ function SubscriptionRowCard({ plan, onOpen }: { plan: SubscriptionPlan; onOpen:
             Membership
           </span>
         </div>
-        <span className="mt-1 inline-flex w-fit items-center gap-0.5 text-[14px] font-medium text-gray-light transition-colors group-hover:text-gray-dark">
+        <span className="mt-1 inline-flex w-fit items-center gap-0.5 whitespace-nowrap text-[14px] font-medium text-gray-light transition-colors group-hover:text-gray-dark">
           Membership details
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
         </span>
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-gray-stroke pt-2.5">
-          <div className="flex items-center gap-1.5">
+          <div className="flex min-w-0 items-center gap-1.5">
             <div className="flex -space-x-1">
               {[pic1, pic2, pic3].map((src, i) => (
-                <img key={i} src={src} alt="" className="h-[18px] w-[18px] rounded-full border border-white object-cover" />
+                <img key={i} src={src} alt="" className="h-[18px] w-[18px] shrink-0 rounded-full border border-white object-cover" />
               ))}
             </div>
-            <span className="text-[13px] text-gray-light">{plan.members} members</span>
+            <span className="truncate text-[13px] text-gray-light">{plan.members} members</span>
           </div>
-          <p className="text-[14px] text-gray-light">
+          <p className="shrink-0 whitespace-nowrap text-[14px] text-gray-light">
             <span className="font-semibold text-gray-dark">${plan.monthly}</span>/mo
           </p>
         </div>
@@ -743,11 +743,11 @@ function CategoryV2Sections({ category }: { category: string | undefined }) {
   const onPreview = (o: Offering) => navigate(`/offering/${o.slug}`);
   const onEdit = (o: Offering) => navigate(`/my-leland/manage/${category}/new-product?edit=${o.slug}`);
 
-  // Content sold on its own vs. everything else (hourly, bundles, the cohort),
-  // which anchors the public profile. Live/paid *events* come from their own
-  // schedules, not the offerings catalog.
-  const contentOfferings = OFFERINGS.filter((o) => modalityForOffering(o) === "async");
+  // Core offerings (hourly, bundles, the cohort) anchor the public profile.
+  // Live/paid *events* come from their own schedules, not the offerings catalog.
   const coreOfferings = OFFERINGS.filter((o) => modalityForOffering(o) !== "async");
+  // Content for this category — the same library rows shown on the Content page.
+  const categoryContent = RESOURCES.filter((r) => resourceMatchesCategory(r.category, data?.name ?? ""));
 
   // Reorderable display order for the Offerings grid (same ReorderModal as v1).
   const [reorderOpen, setReorderOpen] = useState(false);
@@ -844,23 +844,51 @@ function CategoryV2Sections({ category }: { category: string | undefined }) {
         {SUBSCRIPTIONS.length === 0 ? (
           <p className="rounded-xl bg-gray-hover px-4 py-6 text-center text-[14px] text-gray-light">No subscriptions yet.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {SUBSCRIPTIONS.map((p) => (
-              <SubscriptionRowCard
-                key={p.slug}
-                plan={p}
-                onOpen={() => navigate(`/my-leland/manage/${category}/membership/${p.slug}`)}
-              />
-            ))}
+          // Container query (not a viewport breakpoint): these wide row-cards only
+          // go 2-up once the section itself is wide enough that each card keeps a
+          // comfortable width — otherwise the labels/price would crowd when the
+          // right column narrows in the two-column layout.
+          <div className="@container">
+            <div className="grid grid-cols-1 gap-4 @3xl:grid-cols-2">
+              {SUBSCRIPTIONS.map((p) => (
+                <SubscriptionRowCard
+                  key={p.slug}
+                  plan={p}
+                  onOpen={() => navigate(`/my-leland/manage/${category}/membership/${p.slug}`)}
+                />
+              ))}
+            </div>
           </div>
         )}
       </StorefrontSection>
 
       {/* 3 — Content: standalone content offerings, plus a banner for library
           content that isn't for sale yet. */}
-      <StorefrontSection title="Content" tooltip="Guides, templates, and recordings people buy and use on their own." count={contentOfferings.length} addLabel="New" onAdd={() => navigate(`/my-leland/manage/${category}/new-content`)}>
+      <StorefrontSection title="Content" tooltip="Guides, templates, and recordings people buy and use on their own." count={categoryContent.length} addLabel="New" onAdd={() => navigate(`/my-leland/manage/${category}/new-content`)}>
         {notForSaleCount > 0 && !bannerDismissed && <ContentNotForSaleBanner count={notForSaleCount} onReview={() => navigate("/my-leland/content")} onDismiss={() => setBannerDismissed(true)} />}
-        <OfferingGrid offerings={contentOfferings} addLabel="Add content" onAdd={() => navigate(`/my-leland/manage/${category}/new-content`)} onPreview={onPreview} onEdit={onEdit} />
+        {categoryContent.length === 0 ? (
+          <p className="rounded-xl bg-gray-hover px-4 py-6 text-center text-[14px] text-gray-light">No content yet.</p>
+        ) : (
+          <div>
+            {categoryContent.map((r, i) => (
+              <ContentRowV1
+                key={r.id}
+                isLast={i === categoryContent.length - 1}
+                d={{
+                  cover: <img src={r.cover} alt="" className="h-10 w-[60px] shrink-0 rounded-lg object-cover" />,
+                  title: r.title,
+                  meta: r.fileType,
+                  lelandPlus: r.lelandPlus,
+                  views: `${formatViews(r.views)} views`,
+                  offerings: r.offerings.length,
+                  onClick: () => navigate("/my-leland/content"),
+                  onOfferings: () => navigate("/my-leland/content"),
+                  ariaLabel: `View details for ${r.title}`,
+                }}
+              />
+            ))}
+          </div>
+        )}
       </StorefrontSection>
 
       {/* 4 — Offerings: hourly coaching, bundles, and the cohort — the core of the
@@ -2222,12 +2250,9 @@ export default function CoachCategoryEdit() {
     setHourlyRate(data.hourlyRate);
   }, [category]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Admin: v1/v2 layout switch (bottom-right 3-dot menu), persisted for demos.
-  const [version, setVersion] = useState<CategoryVersion>(() => {
-    const stored = localStorage.getItem(VERSION_KEY);
-    return stored === "v1" || stored === "v2" || stored === "v3" || stored === "v4" || stored === "v5" ? stored : "v2";
-  });
-  useEffect(() => { localStorage.setItem(VERSION_KEY, version); }, [version]);
+  // Admin: v1–v6 layout switch (bottom-right 3-dot menu). Always starts on v6 so
+  // everyone sees the storefront builder; switching is session-only (not saved).
+  const [version, setVersion] = useState<CategoryVersion>("v6");
   const [adminOpen, setAdminOpen] = useState(false);
   // Admin toggle: show/hide the pricing card (hourly rate + first step).
   const [showPricingCard, setShowPricingCard] = useState(true);
@@ -2276,7 +2301,7 @@ export default function CoachCategoryEdit() {
   // Back + category-options menu — shared by both versions.
   const topBar = (
     <div className="mb-6 flex items-center justify-between gap-3">
-      <Button size="sm" variant="secondary" iconOnly onClick={() => navigate("/coach/profile")} aria-label="Go back">
+      <Button size="sm" variant="secondary" iconOnly onClick={() => navigate("/my-leland/profile")} aria-label="Go back">
         <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
       </Button>
       <div className="relative" ref={catMenuRef}>
@@ -2309,7 +2334,32 @@ export default function CoachCategoryEdit() {
 
   return (
     <div>
-      {version === "v5" ? (
+      {version === "v6" ? (
+        // v6 — storefront builder. Same two-column shell as v2 (sticky identity +
+        // pricing on the left), but the right column is the section/offerings
+        // builder, which writes the shared config that drives the public profile.
+        <div className="sm:[margin-left:min(0px,calc(660px_-_50vw))] sm:[margin-right:min(0px,calc(660px_-_50vw))]">
+          <div className="mx-auto max-w-[1320px]">
+          {topBar}
+
+          <div>
+            <h1 className="font-serif text-[42px] leading-[1.05] text-gray-dark md:text-[48px]">{data.name}</h1>
+            <p className="mt-3 text-[18px] leading-relaxed text-gray-light">
+              Build your storefront: group offerings into sections and pick a card style for each.
+            </p>
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 gap-6 xl:grid-cols-[340px_minmax(0,1fr)] xl:gap-x-10">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-1 xl:sticky xl:top-[77px] xl:self-start">
+              <CategoryInfoCard settings={settings} onEdit={() => setEditOpen(true)} category={category} />
+              {showPricingCard && <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />}
+            </div>
+
+            <CategorySectionBuilder category={category} />
+          </div>
+          </div>
+        </div>
+      ) : version === "v5" ? (
         // v5 — a tabbed workspace on the same beige full-bleed page. Hero + a
         // horizontal tab bar, then the active tab's panel.
         <>
@@ -2352,10 +2402,10 @@ export default function CoachCategoryEdit() {
             </p>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 gap-6 2xl:grid-cols-[340px_minmax(0,1fr)] 2xl:gap-x-10">
+          <div className="mt-10 grid grid-cols-1 gap-6 xl:grid-cols-[340px_minmax(0,1fr)] xl:gap-x-10">
             {/* Left rail — identity + pricing. Side-by-side when stacked on top;
-                stacks vertically once it's the sticky side rail (2xl). */}
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-1 2xl:sticky 2xl:top-[77px] 2xl:self-start">
+                stacks vertically once it's the sticky side rail (xl). */}
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-1 xl:sticky xl:top-[77px] xl:self-start">
               <CategoryInfoCard settings={settings} onEdit={() => setEditOpen(true)} category={category} />
               {showPricingCard && <CategoryPricingCard firstStep={firstStep} onFirstStepChange={setFirstStep} rate={hourlyRate} onRateChange={setHourlyRate} />}
             </div>
@@ -2454,7 +2504,7 @@ export default function CoachCategoryEdit() {
             >
               <p className="px-2 pb-1.5 pt-1 text-[12px] font-medium text-gray-light">Layout version</p>
               <div className="flex gap-1 rounded-lg bg-gray-hover p-1">
-                {(["v1", "v2", "v3", "v4", "v5"] as const).map((v) => (
+                {(["v1", "v2", "v3", "v4", "v5", "v6"] as const).map((v) => (
                   <button
                     key={v}
                     onClick={() => setVersion(v)}
