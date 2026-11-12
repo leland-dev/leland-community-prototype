@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { Button, LinkButton } from "../components/Button";
 import MaskIcon from "../components/MaskIcon";
 import { Pivot, type PivotTab } from "../components/Pivot";
