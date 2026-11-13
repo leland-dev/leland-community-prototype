@@ -9,6 +9,7 @@ import { TeamProvider } from "./contexts/TeamContext";
 import { TeamPrototypeProvider } from "./contexts/TeamPrototypeContext";
 import { TopNavStyleProvider } from "./contexts/TopNavStyleContext";
 import { SelectedCategoryProvider } from "./contexts/SelectedCategoryContext";
+import { DisplayNameProvider } from "./contexts/DisplayNameContext";
 import { ProfileBarModeProvider } from "./contexts/ProfileBarModeContext";
 import { FeedDemoProvider } from "./contexts/FeedDemoContext";
 import { PageExitProvider } from "./contexts/PageExitContext";
@@ -178,6 +179,7 @@ export default function App() {
     <TeamPrototypeProvider>
     <TopNavStyleProvider>
     <SelectedCategoryProvider>
+    <DisplayNameProvider>
     <BookmarksProvider>
     <SavedToastProvider>
     <ProfileBarModeProvider>
@@ -391,6 +393,7 @@ export default function App() {
     </ProfileBarModeProvider>
     </SavedToastProvider>
     </BookmarksProvider>
+    </DisplayNameProvider>
     </SelectedCategoryProvider>
     </TopNavStyleProvider>
     </TeamPrototypeProvider>

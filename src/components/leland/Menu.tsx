@@ -422,6 +422,16 @@ export const Menu: FC<MenuProps> = ({
   const parentMenuRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const itemListRef = useRef<HTMLDivElement>(null);
+  // Whatever resets the page to scrollY 0 on open (traced to somewhere
+  // between pointerdown and the click/onOpenChange — not any scrollTo,
+  // scrollIntoView, or focus call in this codebase) has already happened by
+  // the time onOpenChange fires, so capturing scrollY there is too late.
+  // Capture it in the capture phase, ahead of Radix's own bubble-phase
+  // pointerdown handler, instead.
+  const pointerDownScrollY = useRef<number | null>(null);
+  const capturePointerDownScroll = useCallback(() => {
+    pointerDownScrollY.current = window.scrollY;
+  }, []);
 
   const { onMouseEnter, open, onOpenChange, containerRef, menuItemRefs } =
     useControlledHoverState({
@@ -434,6 +444,22 @@ export const Menu: FC<MenuProps> = ({
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
+      if (nextOpen) {
+        // Something between pointerdown and here resets the page to the top
+        // on a long page — pin it back to where it was at pointerdown for a
+        // few frames to outlast that, rather than chasing it further into
+        // Radix/browser internals.
+        const y = pointerDownScrollY.current ?? window.scrollY;
+        if (y > 0) {
+          let frames = 0;
+          const restore = () => {
+            if (window.scrollY !== y) window.scrollTo(0, y);
+            frames += 1;
+            if (frames < 6) requestAnimationFrame(restore);
+          };
+          requestAnimationFrame(restore);
+        }
+      }
       setIsOpenInternally(nextOpen);
       onOpenChange?.(nextOpen);
     },
@@ -454,7 +480,11 @@ export const Menu: FC<MenuProps> = ({
     if (!searchable || loading || !effectiveOpen) {
       return;
     }
-    const frame = requestAnimationFrame(() => searchInputRef.current?.focus());
+    // preventScroll: Radix hasn't finished positioning the popover on this
+    // first frame, so a default-scrolling focus() here drags the whole page
+    // to wherever the unpositioned element currently sits (the top), before
+    // snapping the popover to its real spot a frame later.
+    const frame = requestAnimationFrame(() => searchInputRef.current?.focus({ preventScroll: true }));
     return () => cancelAnimationFrame(frame);
   }, [searchable, loading, effectiveOpen]);
 
@@ -526,6 +556,7 @@ export const Menu: FC<MenuProps> = ({
         }`}
         asChild={asChild}
         onMouseEnter={onMouseEnter}
+        onPointerDownCapture={capturePointerDownScroll}
         ref={containerRef}
       >
         {children}
@@ -533,6 +564,12 @@ export const Menu: FC<MenuProps> = ({
       <Container>
         <DropdownMenuContent
           className="min-w-48 max-w-80 rounded-md border border-leland-gray-stroke bg-leland-white p-2 shadow-md z-dropdown"
+          // Radix's own default open-autofocus also scrolls the page to
+          // wherever the content sits before it's been positioned, the same
+          // issue the manual searchInputRef.focus() below works around.
+          // Suppress it here and let the searchable input (or nothing, for a
+          // non-searchable menu) take focus itself.
+          {...(searchable ? { onOpenAutoFocus: (e: Event) => e.preventDefault() } : {})}
           collisionPadding={
             !ignoreCollisions
               ? { top: 80, bottom: 80, left: 20, right: 20 }

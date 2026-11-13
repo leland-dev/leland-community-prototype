@@ -60,7 +60,6 @@ import {
   IconStarOutline,
   IconWrite,
   IconX,
-  Menu,
   Modal,
   ModalContent,
   ModalSize,
@@ -77,6 +76,7 @@ import {
   type ModalProps,
 } from "../components/leland";
 import { useSelectedCategory } from "../contexts/SelectedCategoryContext";
+import { CategoryPicker } from "../components/CategoryPicker";
 import { CATEGORIES } from "../lib/categories";
 import lessonData from "../data/aiBuilderL1Lessons.json";
 import type {
@@ -102,10 +102,9 @@ import { SwitchInput } from "../components/leland";
 import { GettingStartedFlow, type FlowKey } from "../components/getting-started";
 import { COHORT_MEMBERS } from "./Group";
 import { SelectCohortModal } from "../components/LiveCourseCard";
-import { TrackPickerModal, type CourseTrack, TRACK_STORAGE_KEY, getLogoSrc } from "../components/TrackPickerModal";
+import { TrackPickerModal, type CourseTrack, TRACK_STORAGE_KEY, TRACKS, getLogoSrc } from "../components/TrackPickerModal";
 import { RoleModal } from "../components/RoleModal";
 import {
-  PersonalizationModal,
   PERSONALIZATION_KEY,
   loadPersonalizationData,
   summarizePersonalizationParts,
@@ -113,7 +112,6 @@ import {
   type PersonalizationData,
 } from "../components/PersonalizationModal";
 import { AboutMeEditModal } from "../components/AboutMeEditModal";
-import { TextRemindersModal, TEXT_REMINDERS_KEY, hasVerifiedPhone } from "../components/TextRemindersModal";
 import { NoAccessModal } from "../components/NoAccessModal";
 
 // ─── Types & seed data ───────────────────────────────────────────────────────
@@ -1400,6 +1398,8 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   onSetVariant,
   role,
   onSetRole,
+  selectedTrack,
+  onSetSelectedTrack,
   selectedCategory,
   onSetSelectedCategory,
   cardStyle,
@@ -1417,6 +1417,8 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   onSetVariant: (variant: LiveSessionVariant) => void;
   role: string | null;
   onSetRole: (role: string | null) => void;
+  selectedTrack: CourseTrack | null;
+  onSetSelectedTrack: (track: CourseTrack) => void;
   selectedCategory: string | null;
   onSetSelectedCategory: (category: string | null) => void;
   cardStyle: BuildCardStyle;
@@ -1457,25 +1459,41 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
             </div>
           )}
           <div className="flex flex-col gap-1.5 rounded-lg p-3">
+            <span className="leland-paragraph-base font-medium text-leland-gray-dark">AI tool</span>
+            <span className="text-[12px] text-leland-gray-light">Drives the "Set up your tools" content and tool mentions throughout the course.</span>
+            <div className="flex flex-wrap gap-1.5">
+              {TRACKS.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => onSetSelectedTrack(t.id)}
+                  className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+                >
+                  <Tag text={t.label} tagColor={TagColor.GRAY} size={TagSize.SMALL} selected={selectedTrack === t.id} />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5 rounded-lg p-3">
             <span className="leland-paragraph-base font-medium text-leland-gray-dark">Selected category</span>
             <span className="text-[12px] text-leland-gray-light">Carries over to Program Hub too — drives Recommended for you, Browse by use case, and the lesson build picker below.</span>
-            <Menu
-              searchable
-              searchPlaceholder="Search categories"
-              hasCustomTriggerRadius
-              itemSections={[
-                [{ label: "None", selected: selectedCategory === null, onSelect: () => onSetSelectedCategory(null) }],
-                CATEGORIES.map((c) => ({ label: c, selected: selectedCategory === c, onSelect: () => onSetSelectedCategory(c) })),
-              ]}
-            >
-              <button
-                type="button"
-                className="flex w-full items-center justify-between gap-2 rounded-lg border border-leland-gray-stroke bg-white px-4 py-3 text-left leland-paragraph-base font-medium text-leland-gray-dark hover:bg-leland-gray-hover"
-              >
-                <span className="truncate">{selectedCategory ?? "None"}</span>
-                <IconChevronDown className="size-4 shrink-0 text-leland-gray-light" />
-              </button>
-            </Menu>
+            <CategoryPicker
+              value={selectedCategory}
+              onChange={onSetSelectedCategory}
+              options={CATEGORIES}
+              allLabel="None"
+              trigger={({ onClick, ref }) => (
+                <button
+                  ref={ref}
+                  type="button"
+                  onClick={onClick}
+                  className="flex w-full items-center justify-between gap-2 rounded-lg border border-leland-gray-stroke bg-white px-4 py-3 text-left leland-paragraph-base font-medium text-leland-gray-dark hover:bg-leland-gray-hover"
+                >
+                  <span className="truncate">{selectedCategory ?? "None"}</span>
+                  <IconChevronDown className="size-4 shrink-0 text-leland-gray-light" />
+                </button>
+              )}
+            />
           </div>
           <div className="flex flex-col gap-1.5 rounded-lg p-3">
             <span className="leland-paragraph-base font-medium text-leland-gray-dark">
@@ -2349,7 +2367,6 @@ export default function ContentViewer() {
   const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
   const [cohortModalOpen, setCohortModalOpen] = useState(false);
   const [trackPickerOpen, setTrackPickerOpen] = useState(false);
-  const [personalizationModalOpen, setPersonalizationModalOpen] = useState(false);
   const [aboutMe, setAboutMe] = useState<PersonalizationData | null>(() => loadPersonalizationData());
   const { selectedCategory, setSelectedCategory } = useSelectedCategory();
   const cardStyle = useBuildCardStyle();
@@ -2361,7 +2378,6 @@ export default function ContentViewer() {
         (o) => o.value === aboutMe.role,
       )?.label ?? aboutMe.role)
     : null;
-  const [textRemindersModalOpen, setTextRemindersModalOpen] = useState(false);
   const [noAccessModalOpen, setNoAccessModalOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<CourseTrack | null>(
     () => localStorage.getItem(TRACK_STORAGE_KEY) as CourseTrack | null,
@@ -2984,6 +3000,11 @@ export default function ContentViewer() {
         options={options}
         onToggle={toggleOption}
         onSetVariant={(variant) => setOption("liveSessionVariant", variant)}
+        selectedTrack={selectedTrack}
+        onSetSelectedTrack={(track) => {
+          localStorage.setItem(TRACK_STORAGE_KEY, track);
+          setSelectedTrack(track);
+        }}
         selectedCategory={selectedCategory}
         onSetSelectedCategory={setSelectedCategory}
         role={aboutMe?.role ?? null}
@@ -3012,7 +3033,6 @@ export default function ContentViewer() {
           localStorage.removeItem(COURSE_RATING_KEY);
           localStorage.removeItem(TRACK_STORAGE_KEY);
           localStorage.removeItem(PERSONALIZATION_KEY);
-          localStorage.removeItem(TEXT_REMINDERS_KEY);
           window.location.reload();
         }}
       />
@@ -3026,21 +3046,8 @@ export default function ContentViewer() {
         onOpenChange={setTrackPickerOpen}
         onSelect={(track) => {
           setSelectedTrack(track);
-          setPersonalizationModalOpen(true);
         }}
         currentTrack={selectedTrack}
-      />
-      <PersonalizationModal
-        open={personalizationModalOpen}
-        onOpenChange={(next) => {
-          setPersonalizationModalOpen(next);
-          if (!next) {
-            setAboutMe(loadPersonalizationData());
-            // Mirrors openModalIfNecessary from usePhoneNumberModal — don't
-            // ask again if there's already a verified number on file.
-            if (!hasVerifiedPhone()) setTextRemindersModalOpen(true);
-          }
-        }}
       />
       <AboutMeEditModal
         open={aboutMeModalOpen}
@@ -3053,10 +3060,6 @@ export default function ContentViewer() {
         onOpenChange={setRoleModalOpen}
         roleData={aboutMe}
         onSaveRole={setAboutMe}
-      />
-      <TextRemindersModal
-        open={textRemindersModalOpen}
-        onOpenChange={setTextRemindersModalOpen}
       />
       <NoAccessModal
         open={noAccessModalOpen}

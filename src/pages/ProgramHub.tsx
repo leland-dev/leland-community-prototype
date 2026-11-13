@@ -4,11 +4,14 @@ import { Button } from "../components/Button";
 import { QuickPreferencesModal } from "../components/QuickPreferencesModal";
 import { SelectCohortModal } from "../components/LiveCourseCard";
 import { loadPersonalizationData, type PersonalizationData } from "../components/PersonalizationModal";
-import { FontWeight, IconChevronDown, IconCode, IconDotsHorizontal, IconLightBulb, IconPencil, IconSparkle, Menu, Modal, ModalContent, ModalSize, SwitchInput, Tag, TagColor, TagSize } from "../components/leland";
+import { FontWeight, IconChevronDown, IconCode, IconDotsHorizontal, IconLightBulb, IconPencil, IconSearch, IconSparkle, Modal, ModalContent, ModalSize, SwitchInput, Tag, TagColor, TagSize } from "../components/leland";
+import { CategoryPicker } from "../components/CategoryPicker";
+import { MultiSelectDropdown } from "../components/MultiSelectDropdown";
 import { IconUserProfileGroup } from "../components/icons/IconUserProfileGroup";
 import { type BuildCardStyle, setBuildCardStyle, useBuildCardStyle } from "../components/lesson-blocks";
 import { useTopNavStyle } from "../contexts/TopNavStyleContext";
 import { useSelectedCategory } from "../contexts/SelectedCategoryContext";
+import { useDisplayName } from "../contexts/DisplayNameContext";
 import { CATEGORIES, CATEGORY_TO_USE_CASES, ROLE_TO_CATEGORY } from "../lib/categories";
 import homeIcon from "../assets/img/program-hub/hdr-e8a6d.svg";
 import calendarArrowIcon from "../assets/img/program-hub/hdr-03896.svg";
@@ -54,6 +57,18 @@ import imgInteractiveSopChecklist from "../assets/img/leland-plus-thumbnails/int
 // Real screenshots from the live community-build submissions (fetched from
 // each content entry's public /thumbnail endpoint — a video-frame grab, not
 // the gated page content).
+// On-brand generated mockups (preview batch) — first pass at unique,
+// on-palette Tutorial thumbnails (tan/rust/blue/red/yellow/gray/green/slate
+// only, no off-brand orange/purple/teal), with a couple using the "content
+// bleeds past the card" treatment for tall documents.
+import imgContractReview from "../assets/img/builds-v2/contract-review.svg";
+import imgCashFlowForecast from "../assets/img/builds-v2/cash-flow-forecast.svg";
+import imgResumeScreening from "../assets/img/builds-v2/resume-screening.svg";
+import imgDocsQaBot from "../assets/img/builds-v2/docs-qa-bot.svg";
+import imgCitationChecker from "../assets/img/builds-v2/citation-checker.svg";
+import imgAbTestReadout from "../assets/img/builds-v2/ab-test-readout.svg";
+import imgOnboardingChecklist from "../assets/img/builds-v2/onboarding-checklist.svg";
+import imgAuditEvidence from "../assets/img/builds-v2/audit-evidence.svg";
 import imgHoaPortal from "../assets/img/community-build-thumbnails/hoa-portal.jpg";
 import imgLuxTravel from "../assets/img/community-build-thumbnails/lux-travel.jpg";
 import imgSiftCeliac from "../assets/img/community-build-thumbnails/sift-celiac.jpg";
@@ -207,28 +222,28 @@ const ITEMS: Item[] = [
   { title: "Create an agent that helps you think through decisions", description: "A system that interviews you for your own decision criteria and weights, then builds a matrix that pressure-tests your reasoning", author: "Leland Team", avatar: lelandProfileIcon, image: imgInvoice, categories: ["Executive"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Notion" },
   { title: "Build a customer interview analyzer", description: "A system that reads your customer interview notes and keeps a running document of validated pain points, objections, and quotes", author: "Leland Team", avatar: lelandProfileIcon, image: imgNotes, categories: ["Product", "Design"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Hubspot" },
   { title: "Design your AI chief of staff", description: "A system that pulls your calendar, inbox, Slack, and dashboards into one short briefing naming what needs your decision", author: "Leland Team", avatar: lelandProfileIcon, image: imgOnboarding, categories: ["Executive"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Google Drive" },
-  { title: "Automate your A/B test readouts", description: "A system that turns your A/B test results into a plain-language readout naming the outcome, the uncertainty behind it, and one recommended next step", author: "Leland Team", avatar: lelandProfileIcon, image: imgCrm, categories: ["Business Analytics & Intelligence", "Product", "Marketing"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Asana" },
+  { title: "Automate your A/B test readouts", description: "A system that turns your A/B test results into a plain-language readout naming the outcome, the uncertainty behind it, and one recommended next step", author: "Leland Team", avatar: lelandProfileIcon, image: imgAbTestReadout, categories: ["Business Analytics & Intelligence", "Product", "Marketing"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Asana" },
   { title: "Automate your recurring reports", description: "A system that pulls your recurring report's numbers, compares them to last period, and drafts the write-up for you to review and send", author: "Leland Team", avatar: lelandProfileIcon, image: imgCallCoach, categories: ["Business Analytics & Intelligence"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Slack" },
   { title: "Build an agent that finds where work gets stuck", description: "A system that reads your tracker's timestamp data and ranks the process stages costing you the most time", author: "Leland Team", avatar: lelandProfileIcon, image: imgLeadBrief, categories: ["Operations"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Wordpress" },
   { title: "Build a bot to answer common HR questions", description: "A system that answers employee HR questions from your own policy documents and escalates whatever it shouldn't guess at", author: "Leland Team", avatar: lelandProfileIcon, image: imgColdOutboundEmail, categories: ["Human Resources"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Notion" },
-  { title: "Build a Q&A bot for your internal docs", description: "A system that answers your team's questions from your own SOPs and process docs, citing which doc it pulled from, instead of guessing", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrecallBriefing, categories: ["Operations"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Hubspot" },
-  { title: "Build a rolling cash flow forecast", description: "A system that turns your bank, AR, and AP data into a rolling cash forecast every week and flags any shortfall ahead of time", author: "Leland Team", avatar: lelandProfileIcon, image: imgTriage, categories: ["Finance & Accounting", "Executive"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Google Drive" },
+  { title: "Build a Q&A bot for your internal docs", description: "A system that answers your team's questions from your own SOPs and process docs, citing which doc it pulled from, instead of guessing", author: "Leland Team", avatar: lelandProfileIcon, image: imgDocsQaBot, categories: ["Operations"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Hubspot" },
+  { title: "Build a rolling cash flow forecast", description: "A system that turns your bank, AR, and AP data into a rolling cash forecast every week and flags any shortfall ahead of time", author: "Leland Team", avatar: lelandProfileIcon, image: imgCashFlowForecast, categories: ["Finance & Accounting", "Executive"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Google Drive" },
   { title: "Automate your invoice bookkeeping", description: "A system that reads each vendor invoice as it arrives and drafts a journal entry for you to approve before it posts", author: "Leland Team", avatar: lelandProfileIcon, image: imgMetrics, categories: ["Finance & Accounting"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Asana" },
   { title: "Automate invoice and PO data entry", description: "A system that pulls vendor, amount, line items, and dates off invoices or POs and gets them into your tracker without manual entry", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrompts, categories: ["Finance & Accounting"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Slack" },
-  { title: "Automate contract reviews", description: "A system that checks a new contract against your playbook, clause by clause, and flags every deviation by risk before anyone reads it", author: "Leland Team", avatar: lelandProfileIcon, image: imgInvoice, categories: ["Legal"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Wordpress" },
+  { title: "Automate contract reviews", description: "A system that checks a new contract against your playbook, clause by clause, and flags every deviation by risk before anyone reads it", author: "Leland Team", avatar: lelandProfileIcon, image: imgContractReview, categories: ["Legal"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Wordpress" },
   { title: "Build a contract renewal tracker", description: "A system that scans your contract repository on a schedule and drafts a memo before any renewal or termination deadline slips by", author: "Leland Team", avatar: lelandProfileIcon, image: imgNotes, categories: ["Legal"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Notion" },
   { title: "Build a system that summarizes contract changes", description: "A system that reads a redlined contract and lists what changed, the risk of each change, and the business impact", author: "Leland Team", avatar: lelandProfileIcon, image: imgOnboarding, categories: ["Legal"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Hubspot" },
   { title: "Build an NDA triage system", description: "A system that sorts incoming NDAs into auto-approve, minor edits, or attorney review before anyone reads the whole document", author: "Leland Team", avatar: lelandProfileIcon, image: imgCrm, categories: ["Legal"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Google Drive" },
-  { title: "Automate resume screens", description: "A system that scores resumes against your criteria, then reruns blinded to catch bias before anyone acts on the ranking", author: "Leland Team", avatar: lelandProfileIcon, image: imgCallCoach, categories: ["Human Resources"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Asana" },
+  { title: "Automate resume screens", description: "A system that scores resumes against your criteria, then reruns blinded to catch bias before anyone acts on the ranking", author: "Leland Team", avatar: lelandProfileIcon, image: imgResumeScreening, categories: ["Human Resources"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Asana" },
   { title: "Build a 1:1 prep assistant", description: "A system that pulls prior notes, goals, and open commitments for one person before your 1:1 and hands you a short brief", author: "Leland Team", avatar: lelandProfileIcon, image: imgLeadBrief, categories: ["Human Resources"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Slack" },
   { title: "Automate interview scheduling", description: "A system that checks interviewer and candidate availability, proposes times across a full panel, and locks a confirmed schedule", author: "Leland Team", avatar: lelandProfileIcon, image: imgColdOutboundEmail, categories: ["Human Resources"], useCase: "Content Creation", collection: "Tutorials", tool: "Wordpress" },
   { title: "Automate interview debrief summaries", description: "A system that turns raw interviewer notes into a structured debrief keyed to your scorecard so every candidate gets compared the same way", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrecallBriefing, categories: ["Human Resources"], useCase: "Content Creation", collection: "Tutorials", tool: "Notion" },
   { title: "Automate the user interview process", description: "A system that reads a batch of interview transcripts and returns recurring pains and contradictions, each tied to a quote", author: "Leland Team", avatar: lelandProfileIcon, image: imgTriage, categories: ["Product", "Design"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Hubspot" },
   { title: "Create interview scorecards for every role", description: "A system that turns a job description into a structured scorecard so every interviewer rates the same things the same way", author: "Leland Team", avatar: lelandProfileIcon, image: imgMetrics, categories: ["Human Resources"], useCase: "Content Creation", collection: "Tutorials", tool: "Google Drive" },
   { title: "Build a feedback theme tracker", description: "A system that pulls in tickets, reviews, and surveys, and returns them clustered into ranked themes backed by quotes", author: "Leland Team", avatar: lelandProfileIcon, image: imgPrompts, categories: ["Product"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Asana" },
-  { title: "Build a new hire onboarding assistant", description: "A system that walks new hires through their first-week checklist day by day and tracks what's done", author: "Leland Team", avatar: lelandProfileIcon, image: imgInvoice, categories: ["Human Resources"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Slack" },
-  { title: "Build an audit evidence collector", description: "A system that gathers audit evidence from your systems, maps it to the control it satisfies, and keeps a folder ready before your next audit", author: "Leland Team", avatar: lelandProfileIcon, image: imgNotes, categories: ["Legal", "Finance & Accounting"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Wordpress" },
-  { title: "Build a citation checker for legal documents", description: "A system that checks every citation in a draft against a live source before the document goes out", author: "Leland Team", avatar: lelandProfileIcon, image: imgOnboarding, categories: ["Legal"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Notion" },
+  { title: "Build a new hire onboarding assistant", description: "A system that walks new hires through their first-week checklist day by day and tracks what's done", author: "Leland Team", avatar: lelandProfileIcon, image: imgOnboardingChecklist, categories: ["Human Resources"], useCase: "Productivity & Planning", collection: "Tutorials", tool: "Slack" },
+  { title: "Build an audit evidence collector", description: "A system that gathers audit evidence from your systems, maps it to the control it satisfies, and keeps a folder ready before your next audit", author: "Leland Team", avatar: lelandProfileIcon, image: imgAuditEvidence, categories: ["Legal", "Finance & Accounting"], useCase: "Automation & Ops", collection: "Tutorials", tool: "Wordpress" },
+  { title: "Build a citation checker for legal documents", description: "A system that checks every citation in a draft against a live source before the document goes out", author: "Leland Team", avatar: lelandProfileIcon, image: imgCitationChecker, categories: ["Legal"], useCase: "Reporting & Analytics", collection: "Tutorials", tool: "Notion" },
 ];
 
 // Each upcoming session's featured/capstone build — shown on the "Upcoming
@@ -354,6 +369,10 @@ const USE_CASES = ["Productivity & Planning", "Content Creation", "Personal webs
 const COLLECTIONS = ["Community builds", "Tutorials", "Skills"];
 const TOOLS = ["Notion", "Hubspot", "Google Drive", "Asana", "Slack", "Wordpress"];
 const USE_CASE_TILES = ["Productivity & Planning", "Content Creation", "Personal website", "Reporting & Analytics", "App development", "Outreach", "Automation & Ops", "Research & Intelligence"];
+// The full universe of use-case tags — a superset of USE_CASES (that list is
+// just the default/narrowed one) — so searching the Use Case filter can find
+// any tag that exists, not only the ones currently shown by default.
+const ALL_USE_CASES = Array.from(new Set([...USE_CASES, ...USE_CASE_TILES]));
 
 // ─── Small pieces ─────────────────────────────────────────────────────────────
 
@@ -390,11 +409,39 @@ function RoundArrow({ dir, disabled, onClick, floating }: { dir: "left" | "right
   );
 }
 
+// Production's Skill thumbnail: no featured image, just one of three soft
+// gradient backgrounds (cycled per item) with a code icon in a white badge —
+// matching the real joinleland.com skill cards exactly, rather than reusing
+// a generic illustration image like Tutorials get.
+const SKILL_GRADIENTS = [
+  "bg-gradient-to-tr from-leland-yellow/35 via-leland-tan-light to-leland-slate/20",
+  "bg-gradient-to-r from-leland-yellow/35 via-leland-tan-light to-leland-slate/20",
+  "bg-gradient-to-tr from-leland-slate/20 via-leland-tan-light to-leland-yellow/35",
+];
+function skillGradientForTitle(title: string): string {
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) hash = (hash * 31 + title.charCodeAt(i)) >>> 0;
+  return SKILL_GRADIENTS[hash % SKILL_GRADIENTS.length];
+}
+function SkillThumb({ title }: { title: string }) {
+  return (
+    <div className={`flex h-full w-full items-center justify-center ${skillGradientForTitle(title)}`}>
+      <div className="flex size-8 items-center justify-center rounded-full bg-white shadow-md">
+        <IconCode className="size-5 shrink-0 text-gray-dark" />
+      </div>
+    </div>
+  );
+}
+
 function ContentCard({ item }: { item: Item }) {
   return (
     <div className="group min-w-[200px] cursor-pointer overflow-hidden">
       <div className="aspect-[120/63] w-full overflow-hidden rounded-lg border border-gray-stroke bg-gray-hover">
-        <img src={item.image} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
+        {item.collection === "Skills" ? (
+          <SkillThumb title={item.title} />
+        ) : (
+          <img src={item.image} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
+        )}
       </div>
       <div className="flex flex-col gap-1.5 pt-2">
         <p className="line-clamp-2 text-[14px] font-semibold leading-[1.35] text-gray-dark">{item.title}</p>
@@ -433,7 +480,11 @@ function ContentCardLarge({ item }: { item: Item }) {
   return (
     <div className="flex cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-stroke bg-white transition-shadow hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)]">
       <div className="aspect-[120/63] w-full shrink-0 overflow-hidden bg-gray-hover">
-        <img src={item.image} alt="" className="h-full w-full object-cover" />
+        {item.collection === "Skills" ? (
+          <SkillThumb title={item.title} />
+        ) : (
+          <img src={item.image} alt="" className="h-full w-full object-cover" />
+        )}
       </div>
       <div className="flex flex-1 flex-col gap-2.5 p-4">
         <div className="flex flex-1 flex-col gap-1.5">
@@ -581,6 +632,7 @@ export default function ProgramHub() {
   const learnerRole = aboutMe?.role ?? null;
   const roleCategory = learnerRole ? ROLE_TO_CATEGORY[learnerRole] : null;
   const { selectedCategory, setSelectedCategory } = useSelectedCategory();
+  const { displayName, setDisplayName } = useDisplayName();
   // One-time hydration: if nothing has been explicitly selected yet (on
   // either page — this is shared, localStorage-backed state), default to
   // the learner's own category from onboarding rather than "All".
@@ -592,6 +644,11 @@ export default function ProgramHub() {
   const [filters, setFilters] = useState<{ useCase: string[]; collection: string[]; tool: string[] }>({ useCase: [], collection: [], tool: [] });
   const [open, setOpen] = useState<Record<string, boolean>>({ category: true, useCase: true, collection: true, tool: false });
   const [query, setQuery] = useState("");
+  // Each searchable FilterGroup's own search text — lifted up here rather
+  // than kept in local state inside FilterGroup, since that component is
+  // redefined on every render (a new function identity each time), which
+  // would reset any state defined inside it on every keystroke.
+  const [groupSearch, setGroupSearch] = useState<Record<string, string>>({});
   const { showUseCaseSection, setShowUseCaseSection } = useProgramHubOptions();
   const cardStyle = useBuildCardStyle();
   const { hideNavSelections, setHideNavSelections } = useTopNavStyle();
@@ -604,6 +661,24 @@ export default function ProgramHub() {
     setFilters((f) => ({ ...f, [group]: f[group].includes(value) ? f[group].filter((v) => v !== value) : [...f[group], value] }));
   const activeCount = (g: keyof typeof filters) => filters[g].length;
   const anyFilter = !!selectedCategory || Object.values(filters).some((v) => v.length > 0) || query !== "";
+
+  // Recommended for you follows the shared selected category — filtered
+  // straight from the main library rather than a hand-curated set, so every
+  // category responds the same way — the first 8 matches, with any tagged
+  // to a use case the learner has shown interest in (the Use Case filter
+  // selections) bubbled to the front of that set. Falls back to the legacy
+  // curated Sales set only when no category is selected at all. Computed
+  // before `results` so Browse All can demote whatever's shown here (below).
+  const recommendedItems = useMemo(() => {
+    if (!selectedCategory) return SALES_RECOMMENDED_ITEMS;
+    const matches = ITEMS.filter((it) => it.collection !== "Community builds" && it.categories.includes(selectedCategory));
+    if (!matches.length) return SALES_RECOMMENDED_ITEMS;
+    const interested = filters.useCase;
+    const ranked = interested.length
+      ? [...matches].sort((a, b) => Number(interested.includes(b.useCase)) - Number(interested.includes(a.useCase)))
+      : matches;
+    return ranked.slice(0, 8);
+  }, [selectedCategory, filters.useCase]);
 
   const results = useMemo(() => {
     const filtered = ITEMS.filter((it) => {
@@ -631,22 +706,26 @@ export default function ProgramHub() {
       if (skills[i]) mixed.push(skills[i]);
       if (tutorials[i]) mixed.push(tutorials[i]);
     }
+
+    // With no use-case/collection/tool/search filter active (category alone
+    // doesn't count — it's the baseline, not an "other" filter), anything
+    // already shown in Recommended for you is bumped to the bottom here
+    // instead of appearing twice near the top of the page.
+    const noOtherFilters = !filters.useCase.length && !filters.collection.length && !filters.tool.length && !query;
+    if (noOtherFilters && recommendedItems.length) {
+      const recommendedTitles = new Set(recommendedItems.map((it) => it.title));
+      const notRecommended = mixed.filter((it) => !recommendedTitles.has(it.title));
+      const alreadyRecommended = mixed.filter((it) => recommendedTitles.has(it.title));
+      return [...notRecommended, ...alreadyRecommended, ...communityBuilds];
+    }
+
     return [...mixed, ...communityBuilds];
-  }, [selectedCategory, filters, query]);
+  }, [selectedCategory, filters, query, recommendedItems]);
 
   const shippedItems = useMemo(() => ITEMS.filter((i) => i.collection === "Community builds").slice(0, 8), []);
   const shippedCarousel = useCardCarousel(shippedItems);
 
   const [aboutMeModalOpen, setAboutMeModalOpen] = useState(false);
-  // Recommended for you follows the shared selected category — filtered
-  // straight from the main library rather than a hand-curated set, so every
-  // category responds the same way. Falls back to the legacy curated Sales
-  // set only when no category is selected at all.
-  const recommendedItems = useMemo(() => {
-    if (!selectedCategory) return SALES_RECOMMENDED_ITEMS;
-    const matches = ITEMS.filter((it) => it.collection !== "Community builds" && it.categories.includes(selectedCategory));
-    return matches.length ? matches : SALES_RECOMMENDED_ITEMS;
-  }, [selectedCategory]);
   const recommendedCarousel = useCardCarousel(recommendedItems);
   // Which "Browse by use case" tiles are relevant to the selected category —
   // no point surfacing a use case nothing in that category actually has.
@@ -656,12 +735,25 @@ export default function ProgramHub() {
     const filtered = USE_CASE_TILES.filter((u) => present.has(u));
     return filtered.length ? filtered : USE_CASE_TILES;
   }, [selectedCategory]);
-  // The sidebar "Use Case" filter's default chip set — the category's
-  // authoritative use cases (see CATEGORY_TO_USE_CASES), not just the ones
-  // that happen to be in the library yet. Only applies before a search.
-  const useCaseFilterOptions = (selectedCategory && CATEGORY_TO_USE_CASES[selectedCategory]) || USE_CASES;
-
-  const FilterGroup = ({ id, title, options, search }: { id: keyof typeof filters; title: string; options: string[]; search?: boolean }) => (
+  const FilterGroup = ({
+    id,
+    title,
+    options,
+    searchOptions,
+    search,
+  }: {
+    id: keyof typeof filters;
+    title: string;
+    options: string[];
+    // The fuller list to search across, when it differs from the default
+    // (narrowed) `options` shown before a search — e.g. Use Case's default
+    // is category-scoped, but a search should reach every use case tag.
+    searchOptions?: string[];
+    search?: boolean;
+  }) => {
+    const q = (groupSearch[id] ?? "").trim().toLowerCase();
+    const visible = q ? (searchOptions ?? options).filter((o) => o.toLowerCase().includes(q)) : options;
+    return (
     <div className="border-t border-gray-stroke">
       <button type="button" onClick={() => setOpen((o) => ({ ...o, [id]: !o[id] }))} className="flex w-full items-center gap-2.5 px-4 py-5 text-left">
         <span className="flex-1 text-[14px] font-semibold text-black">{title}</span>
@@ -677,11 +769,21 @@ export default function ProgramHub() {
           {search && (
             <div className="flex items-center gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#767676" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>
-              <span className="text-[14px] text-gray-extra-light">Search</span>
+              <input
+                type="text"
+                value={groupSearch[id] ?? ""}
+                onChange={(e) => setGroupSearch((g) => ({ ...g, [id]: e.target.value }))}
+                placeholder="Search"
+                aria-label={`Search ${title.toLowerCase()}`}
+                className="w-full min-w-0 border-none bg-transparent text-[14px] text-gray-dark outline-none placeholder:text-gray-extra-light"
+              />
             </div>
           )}
           <div className="flex flex-wrap gap-2">
-            {options.map((o) => (
+            {visible.length === 0 ? (
+              <p className="text-[14px] text-gray-light">No matches for "{groupSearch[id]}"</p>
+            ) : (
+              visible.map((o) => (
               <button
                 key={o}
                 type="button"
@@ -690,12 +792,14 @@ export default function ProgramHub() {
               >
                 {o}
               </button>
-            ))}
+              ))
+            )}
           </div>
         </div>
       )}
     </div>
-  );
+    );
+  };
 
   // Category is a single-select, searchable dropdown rather than a chip list —
   // there's one category per learner, so chips implying multi-select were
@@ -704,46 +808,80 @@ export default function ProgramHub() {
   const CategoryFilter = () => (
     <div className="flex flex-col gap-3 border-t border-gray-stroke px-4 py-5">
       <span className="text-[14px] font-semibold text-black">Category</span>
-      <Menu
-        searchable
-        searchPlaceholder="Search categories"
-        hasCustomTriggerRadius
-        itemSections={[
-          [
-            {
-              label: "All categories",
-              selected: selectedCategory === null,
-              onSelect: () => setSelectedCategory(null),
-            },
-          ],
-          CATEGORIES.map((c) => ({
-            label: c,
-            selected: selectedCategory === c,
-            onSelect: () => setSelectedCategory(c),
-          })),
-        ]}
-      >
-        <button
-          type="button"
-          className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3 text-left text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
-        >
-          <span className="truncate">{selectedCategory ?? "All categories"}</span>
-          <IconChevronDown className="size-4 shrink-0 text-gray-light" />
-        </button>
-      </Menu>
+      <CategoryPicker
+        value={selectedCategory}
+        onChange={setSelectedCategory}
+        options={CATEGORIES}
+        allLabel="All categories"
+        trigger={({ onClick, ref }) => (
+          <button
+            ref={ref}
+            type="button"
+            onClick={onClick}
+            className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3 text-left text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+          >
+            <span className="truncate">{selectedCategory ?? "All categories"}</span>
+            <IconChevronDown className="size-4 shrink-0 text-gray-light" />
+          </button>
+        )}
+      />
     </div>
   );
 
+  // Use Case is a searchable, multi-select dropdown too — a scrollable list
+  // instead of a wall of chips, searchable across every tag that exists
+  // (not just the ones relevant to the selected category).
+  const UseCaseFilter = () => {
+    // The role-relevant set shows as quick-pick chips; anything picked via
+    // search that isn't in that set (e.g. a use case from a different role)
+    // still gets its own chip, so a search pick doesn't just disappear.
+    const roleOptions = (selectedCategory && CATEGORY_TO_USE_CASES[selectedCategory]) || USE_CASES;
+    const extraSelected = filters.useCase.filter((u) => !roleOptions.includes(u));
+    const chips = [...roleOptions, ...extraSelected];
+    return (
+      <div className="flex flex-col gap-3 border-t border-gray-stroke px-4 py-5">
+        <span className="text-[14px] font-semibold text-black">Use Case</span>
+        <div className="flex flex-wrap gap-2">
+          {chips.map((o) => (
+            <button
+              key={o}
+              type="button"
+              onClick={() => toggleChip("useCase", o)}
+              className={`rounded-lg bg-white px-3 py-2 text-[12px] font-semibold leading-[1.5] text-gray-dark ${filters.useCase.includes(o) ? "border-[1.5px] border-gray-dark" : "border border-gray-stroke"}`}
+            >
+              {o}
+            </button>
+          ))}
+          <MultiSelectDropdown
+            values={filters.useCase}
+            onChange={(v) => setFilters((f) => ({ ...f, useCase: v }))}
+            options={ALL_USE_CASES}
+            searchPlaceholder="Search use case"
+            trigger={({ onClick, ref }) => (
+              <button
+                ref={ref}
+                type="button"
+                onClick={onClick}
+                className="flex items-center gap-1.5 rounded-lg border border-gray-stroke bg-white px-3 py-2 text-[12px] font-semibold leading-[1.5] text-gray-dark hover:bg-gray-hover"
+              >
+                <IconSearch className="size-3.5 shrink-0" />
+                Search
+              </button>
+            )}
+          />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="relative min-h-screen bg-[#F9F8F3] pb-24">
-      {/* Tan band behind the header */}
-      <div className="absolute inset-x-0 top-0 h-[320px] bg-[#F3F1E6]" aria-hidden />
 
       <div className="relative mx-auto max-w-[1280px] px-4 sm:px-6">
         {/* Header */}
         <div className="flex flex-col gap-6 pt-16">
           <div className="flex flex-col gap-3">
-            <h1 className="font-serif text-[36px] font-medium leading-[1.1] text-gray-dark sm:text-[46px]">Welcome, Maddy</h1>
+            <h1 className="font-serif text-[36px] font-medium leading-[1.1] text-gray-dark sm:text-[46px]">Welcome, {displayName}</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 !bg-black/5 font-semibold">
@@ -1029,7 +1167,7 @@ export default function ProgramHub() {
                 </Button>
               </div>
               <CategoryFilter />
-              <FilterGroup id="useCase" title="Use Case" options={useCaseFilterOptions} search />
+              <UseCaseFilter />
               <FilterGroup id="collection" title="Collection" options={COLLECTIONS} />
               <FilterGroup id="tool" title="Tool" options={TOOLS} search />
             </aside>
@@ -1081,25 +1219,36 @@ export default function ProgramHub() {
           <div className="flex flex-col gap-4 p-6">
             <h2 className="text-[18px] font-semibold text-gray-dark">Prototype options</h2>
             <div className="flex flex-col gap-1.5">
+              <span className="text-[14px] font-medium text-gray-dark">First name</span>
+              <span className="text-[12px] text-gray-light">Shown in the "Welcome, ___" header — handy for demos, so you can preset the prospect's name.</span>
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Maddy"
+                className="w-full rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[14px] text-gray-dark outline-none placeholder:text-gray-extra-light focus:border-gray-dark"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
               <span className="text-[14px] font-medium text-gray-dark">Selected category</span>
               <span className="text-[12px] text-gray-light">Carries over to the course viewer too — drives Recommended for you, Browse by use case, and the lesson build picker.</span>
-              <Menu
-                searchable
-                searchPlaceholder="Search categories"
-                hasCustomTriggerRadius
-                itemSections={[
-                  [{ label: "None", selected: selectedCategory === null, onSelect: () => setSelectedCategory(null) }],
-                  CATEGORIES.map((c) => ({ label: c, selected: selectedCategory === c, onSelect: () => setSelectedCategory(c) })),
-                ]}
-              >
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3 text-left text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
-                >
-                  <span className="truncate">{selectedCategory ?? "None"}</span>
-                  <IconChevronDown className="size-4 shrink-0 text-gray-light" />
-                </button>
-              </Menu>
+              <CategoryPicker
+                value={selectedCategory}
+                onChange={setSelectedCategory}
+                options={CATEGORIES}
+                allLabel="None"
+                trigger={({ onClick, ref }) => (
+                  <button
+                    ref={ref}
+                    type="button"
+                    onClick={onClick}
+                    className="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-stroke bg-white px-4 py-3 text-left text-[14px] font-medium text-gray-dark hover:bg-gray-hover"
+                  >
+                    <span className="truncate">{selectedCategory ?? "None"}</span>
+                    <IconChevronDown className="size-4 shrink-0 text-gray-light" />
+                  </button>
+                )}
+              />
             </div>
             <SwitchInput
               label="Show 'Browse by use case' section"

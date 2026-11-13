@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630"><rect width="1200" height="630" fill="#869AA6"/><rect x="90" y="52" width="1020" height="520" rx="18" fill="#FFFFFF"/>
+    <rect x="90" y="52" width="1020" height="40" rx="10" fill="#F6F5F1"/>
+    <rect x="90" y="74" width="1020" height="18" fill="#F6F5F1"/>
+    <circle cx="112" cy="66" r="6" fill="#FF6159"/>
+    <circle cx="132" cy="66" r="6" fill="#FFBD2E"/>
+    <circle cx="152" cy="66" r="6" fill="#28C941"/>
+    <text x="600.0" y="71" font-size="13" font-weight="600" fill="#4C4C4C" text-anchor="middle" font-family="Arial, sans-serif">Internal docs Q&A</text>
+    <rect x="650" y="138" width="408" height="56" rx="14" fill="#9F5B34"/><text x="674" y="172" font-size="15" fill="#FFFFFF" font-family="Arial, sans-serif">What's our PTO carryover policy?</text><rect x="138" y="228" width="560" height="100" rx="14" fill="#F5EADA"/><text x="162" y="262" font-size="14" fill="#222222" font-family="Arial, sans-serif">Up to 5 days carry over into Q1, per the</text><text x="162" y="286" font-size="14" fill="#222222" font-family="Arial, sans-serif">2026 Handbook, section 4.2.</text><rect x="162" y="300" width="150" height="14" rx="4" fill="#80ACED"/><rect x="790" y="358" width="268" height="56" rx="14" fill="#9F5B34"/><text x="814" y="392" font-size="15" fill="#FFFFFF" font-family="Arial, sans-serif">Source?</text><rect x="138" y="502" width="924" height="46" rx="23" fill="#E5E5E5"/><circle cx="1036" cy="525" r="16" fill="#9F5B34"/></svg>

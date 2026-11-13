@@ -2,6 +2,12 @@
 // lesson-blocks renderer (demo of the block/CMS model). Text is adapted from the
 // real Session 1 guide. Lessons 2–4 still use the legacy HTML iframe manifest.
 import type { Block, BlockSection } from "./lessonBlocks";
+import {
+  TOOL_SETUP_CLAUDE,
+  TOOL_SETUP_CODEX,
+  TOOL_SETUP_GEMINI,
+  TOOL_SETUP_COPILOT,
+} from "./toolSetupSections";
 import leadGenBotImg from "../assets/community-builds/lead-gen-bot.png";
 import churnedCustomerInterviewsImg from "../assets/community-builds/churned-customer-interviews.png";
 import followUpEmailImg from "../assets/community-builds/follow-up-email.png";
@@ -42,133 +48,10 @@ export const LESSON_1_TOP_BLOCKS: Block[] = [
 ];
 
 export const LESSON_1_SECTIONS: BlockSection[] = [
-  {
-    kind: "blocks",
-    id: "tool-setup",
-    title: "Set up your tools",
-    durationMin: 5,
-    meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    blocks: [
-      {
-        kind: "markdown",
-        body: [
-          "Go through this page before your first live session so everything is set up.",
-          "",
-          "We demo everything in **Claude**, so ask the TAs for help with anything that looks different in your tool.",
-        ].join("\n"),
-      },
-      {
-        kind: "banner",
-        text: "Stuck? Get help at pre-course office hours",
-        subtext: "A TA will walk you through setup before your first session.",
-        href: "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours",
-        icon: "IconHeadset",
-      },
-      {
-        kind: "markdown",
-        body: "### Set up the Claude desktop app",
-      },
-      {
-        kind: "steps",
-        items: [
-          {
-            text: "**Download the Claude desktop app.** Go to [claude.com/download](https://claude.com/download) and download the version for your computer. On a Mac, open the `.dmg` file and drag Claude into your Applications folder — if it asks to install Git, click **Install** and let it finish. On Windows, double-click the installer and follow the prompts.",
-          },
-          {
-            text: "**Sign in.** Open the app and click **Sign in**. No account yet? Create one at [claude.ai](https://claude.ai).",
-          },
-          {
-            text: "**Confirm you have a paid plan.** You need Claude Pro, Max, Team, or Enterprise — Pro starts at $20/month. Check or upgrade at [claude.ai/upgrade](https://claude.ai/upgrade).",
-          },
-          {
-            text: "**Windows only: turn on Virtual Machine Platform.** Cowork needs one Windows feature turned on before it shows up in the app — skip this on a Mac.",
-            blocks: [
-              {
-                kind: "markdown",
-                body: [
-                  "1. Press the Windows key and type **Turn Windows features on or off**. Open it.",
-                  "2. Scroll the list and check the box next to **Virtual Machine Platform**.",
-                  "3. Click **OK** and let Windows apply the change.",
-                  "4. Click **Restart now**.",
-                  "5. After the restart, open the Claude desktop app again.",
-                ].join("\n"),
-              },
-            ],
-          },
-          {
-            text: "**Open Claude and send a test message.** Click the **Chat** button in the top-left corner and send this:",
-            blocks: [
-              {
-                kind: "code",
-                language: "prompt",
-                filename: "Prompt",
-                code: "I'm starting a course learning how to use AI as a tool at work. Tell me what features the desktop app has that can help me in my work.",
-              },
-              {
-                kind: "table",
-                headers: ["", "Chat", "Code"],
-                firstColumnBold: false,
-                rows: [
-                  ["Use for", "Ask, connect your tools, and run tasks", "Open a folder and build agents"],
-                  ["Used in", "Level 1 and Level 2", "Level 3 and Level 4"],
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        kind: "markdown",
-        body: [
-          "### Prefer the terminal?",
-          "",
-          "**Claude Code** does the same thing, through a text window instead of an app. You don't need to know how to code — most people can skip this section.",
-        ].join("\n"),
-      },
-      {
-        kind: "toggle",
-        rows: [
-          {
-            title: "Set up Claude in the terminal on a Mac",
-            body: [
-              "1. **Open Terminal** — Press **Cmd + Space**, type **Terminal**, and press Enter.",
-              "2. **Install Claude** — Paste this command and press Enter: `curl -fsSL https://claude.ai/install.sh | bash`. Wait until you see **'Installation complete!'** (about 30 seconds).",
-              "3. **Verify your plan** — Terminal mode requires **Claude Pro, Max, Team, or Enterprise**. Check or upgrade at [claude.ai/upgrade](https://claude.ai/upgrade).",
-              "4. **Sign in** — Type `claude` and press Enter. A browser window will open — sign in with your Anthropic account and return to Terminal. Once you see a `>` prompt, you're ready.",
-            ].join("\n"),
-          },
-          {
-            title: "Set up Claude in the terminal on Windows",
-            body: [
-              "1. **Open PowerShell** — Press the **Windows key**, search for **PowerShell**, and open it.",
-              "2. **Install Claude** — Paste this command and press Enter: `irm https://claude.ai/install.ps1 | iex`. Wait for the installation to complete.",
-              "3. **Verify your plan** — Terminal mode requires **Claude Pro, Max, Team, or Enterprise**. Check or upgrade at [claude.ai/upgrade](https://claude.ai/upgrade).",
-              "4. **Sign in** — Type `claude` and press Enter. A browser window will open — sign in and return to PowerShell. Once you see a `>` prompt, you're ready.",
-            ].join("\n"),
-          },
-        ],
-      },
-      {
-        kind: "markdown",
-        body: "### You're ready when",
-      },
-      {
-        kind: "markdown",
-        body: [
-          "- Your AI tool opens, you're signed in, and it answered your test message",
-          "- You're on a paid plan",
-          "- You've joined the AI Builder Slack community and have the Slack app open",
-        ].join("\n"),
-      },
-      {
-        kind: "banner",
-        text: "Stuck? Get help at pre-course office hours",
-        subtext: "A TA will walk you through setup before your first session.",
-        href: "https://calendly.com/bootcamps-joinleland/ai-builder-program-office-hours",
-        icon: "IconHeadset",
-      },
-    ],
-  },
+  TOOL_SETUP_CLAUDE,
+  TOOL_SETUP_CODEX,
+  TOOL_SETUP_GEMINI,
+  TOOL_SETUP_COPILOT,
   {
     kind: "blocks",
     id: "how-program-works",
