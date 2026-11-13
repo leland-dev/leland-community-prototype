@@ -9,11 +9,12 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "../components/Button";
-import { SectionItems, type CardManage } from "../components/StorefrontCards";
+import { SectionItems, MediumCard, type CardManage } from "../components/StorefrontCards";
 import {
   loadSections,
   saveSections,
   resolveItems,
+  getStorefrontItem,
   getUnassignedItems,
   CATCH_ALL_TITLE,
   CATCH_ALL_SIZE,
@@ -25,6 +26,8 @@ import {
 } from "../lib/storefrontSections";
 import addPlusIcon from "../assets/icons/add-plus.svg";
 import layoutGridIcon from "../assets/icons/layout-grid.svg";
+import storeIcon from "../assets/icons/store.svg";
+import eyeClosedIcon from "../assets/icons/eye-closed.svg";
 import trashIcon from "../assets/icons/trash.svg";
 import dotsIcon from "../assets/icons/dots-horizontal.svg";
 import dragDotsIcon from "../assets/icons/drag-dots.svg";
@@ -34,6 +37,84 @@ import dragDotsIcon from "../assets/icons/drag-dots.svg";
 // id, so moveItem finds no match and simply strips it.
 const CATCH_ALL_DROP_ID = "__all_offerings__";
 
+// Private offerings — not listed on the public storefront; shared by direct link
+// or invitation only. (Reuses catalog imagery for the prototype.)
+const privateImg = (id: string) => getStorefrontItem(id)?.image;
+const PRIVATE_ITEMS: StorefrontItem[] = [
+  { id: "priv-vip-partnership", kind: "package", title: "VIP Application Partnership", meta: "Invite-only · full end-to-end support", price: "$6,000", image: privateImg("10-hour-coaching-package") },
+  { id: "priv-essay-intensive", kind: "package", title: "Private Essay Intensive", meta: "Shared by direct link only", price: "$1,800", image: privateImg("essay-review-package") },
+  { id: "priv-strategy-call", kind: "package", title: "Referral-Only Strategy Call", meta: "By invitation", price: "$300", image: privateImg("mba-application-package") },
+];
+
+// "Private" corner badge overlaid on a private offering card.
+function PrivateBadge() {
+  return (
+    <span className="pointer-events-none absolute left-2 top-2 z-10 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[11px] font-semibold text-gray-dark shadow-[0_1px_3px_rgba(16,24,40,0.12)] backdrop-blur">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+      Private
+    </span>
+  );
+}
+
+// Draft offerings — saved but not yet published. Opened from the "Drafts" button
+// in the builder's toggle row so the expert can jump back in and finish them.
+type DraftOffering = { id: string; title: string; typeLabel: string; edited: string };
+const DRAFT_OFFERINGS: DraftOffering[] = [
+  { id: "waitlist-strategy-clinic", title: "Waitlist Strategy Clinic", typeLabel: "Group session", edited: "Edited 2 days ago" },
+  { id: "essay-intensive-bootcamp", title: "Essay Intensive Bootcamp", typeLabel: "Package", edited: "Edited 5 days ago" },
+];
+
+// Modal listing the expert's draft offerings; clicking one opens its editor.
+function DraftsModal({ open, drafts, onEdit, onClose }: { open: boolean; drafts: DraftOffering[]; onEdit: (id: string) => void; onClose: () => void }) {
+  if (!open) return null;
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" role="dialog" aria-modal>
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <motion.div
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.18 }}
+        className="relative flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white sm:max-w-[520px] sm:rounded-2xl"
+      >
+        <div className="flex items-center justify-between gap-3 border-b border-gray-stroke px-5 py-4">
+          <div>
+            <h2 className="text-[17px] font-semibold text-gray-dark">Drafts</h2>
+            <p className="text-[13px] text-gray-light">Finish and publish your in-progress offerings</p>
+          </div>
+          <Button size="sm" variant="secondary" iconOnly onClick={onClose} aria-label="Close">
+            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </Button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          {drafts.length === 0 ? (
+            <p className="rounded-xl bg-gray-hover px-4 py-8 text-center text-[14px] text-gray-light">No drafts yet.</p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {drafts.map((d) => (
+                <button
+                  key={d.id}
+                  onClick={() => onEdit(d.id)}
+                  className="flex items-center gap-3 rounded-xl border border-gray-stroke p-3 text-left transition-colors hover:bg-gray-hover"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#222222]/5 text-gray-light">
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[15px] font-semibold text-gray-dark">{d.title}</p>
+                    <p className="truncate text-[13px] text-gray-light">{d.typeLabel} · {d.edited}</p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-[#FBF5E4] px-2.5 py-1 text-[12px] font-semibold text-[#8A6D1B]">Draft</span>
+                  <svg className="h-5 w-5 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </div>,
+    document.body
+  );
+}
 
 function MaskIcon({ src, className = "" }: { src: string; className?: string }) {
   return (
@@ -242,6 +323,15 @@ export default function CategorySectionBuilder({ category }: { category?: string
   const [sections, setSections] = useState<SectionConfig[]>(() => loadSections(category));
   // Section targeted by the "Choose from existing" move modal.
   const [moveFor, setMoveFor] = useState<string | null>(null);
+  const [tab, setTab] = useState<"storefront" | "private">("storefront");
+  const [draftsOpen, setDraftsOpen] = useState(false);
+
+  // Private offerings open their editor on click/edit (they aren't on the public
+  // storefront, so there's no public page to preview).
+  const privateManage: CardManage = useMemo(() => {
+    const open = (item: StorefrontItem) => navigate(`/my-leland/manage/${category}/new-product?edit=${item.id}`);
+    return { onEdit: open, onPreview: open };
+  }, [navigate, category]);
 
   // Render cards in their expert (manage) form — member counts, a "Manage" CTA,
   // the hover Preview/Edit overlay — and open an item's detail/edit page on
@@ -420,6 +510,45 @@ export default function CategorySectionBuilder({ category }: { category?: string
 
   return (
     <div className="min-w-0">
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <div className="inline-flex gap-1 rounded-full bg-[#222222]/5 p-1">
+          {([
+            { id: "storefront", label: "My Storefront", icon: storeIcon },
+            { id: "private", label: "Private Offerings", icon: eyeClosedIcon },
+          ] as const).map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[15px] font-semibold transition-colors ${
+                tab === t.id ? "bg-white text-gray-dark shadow-[0_1px_2px_rgba(16,24,40,0.12)]" : "text-gray-light hover:text-gray-dark"
+              }`}
+            >
+              <MaskIcon src={t.icon} className="h-[18px] w-[18px]" />
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <Button size="md" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => setDraftsOpen(true)}>
+          Drafts ({DRAFT_OFFERINGS.length})
+        </Button>
+      </div>
+
+      {tab === "private" ? (
+        <div>
+          <p className="mb-5 text-[14px] text-gray-light">
+            Offerings that aren't listed on your public storefront — share them by direct link or invitation.
+          </p>
+          <div className="flex flex-col gap-4">
+            {PRIVATE_ITEMS.map((item) => (
+              <div key={item.id} className="relative">
+                <MediumCard item={item} manage={privateManage} />
+                <PrivateBadge />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+      <>
       <button
         type="button"
         onClick={addSection}
@@ -516,6 +645,8 @@ export default function CategorySectionBuilder({ category }: { category?: string
           );
         })()}
       </div>
+      </>
+      )}
 
       <MoveOfferingsModal
         open={moveFor != null}
@@ -523,6 +654,13 @@ export default function CategorySectionBuilder({ category }: { category?: string
         sections={sections}
         onMove={(itemId) => moveFor && moveItem(itemId, moveFor, null)}
         onClose={() => setMoveFor(null)}
+      />
+
+      <DraftsModal
+        open={draftsOpen}
+        drafts={DRAFT_OFFERINGS}
+        onEdit={(id) => { setDraftsOpen(false); navigate(`/my-leland/manage/${category}/new-product?edit=${id}`); }}
+        onClose={() => setDraftsOpen(false)}
       />
     </div>
   );
