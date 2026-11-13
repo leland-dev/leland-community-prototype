@@ -76,6 +76,8 @@ import {
   type MenuItemSection,
   type ModalProps,
 } from "../components/leland";
+import { useSelectedCategory } from "../contexts/SelectedCategoryContext";
+import { CATEGORIES } from "../lib/categories";
 import lessonData from "../data/aiBuilderL1Lessons.json";
 import type {
   Block,
@@ -1141,9 +1143,8 @@ function CombinedSidebar({
                   <button
                     type="button"
                     onClick={onSwitchCohort}
-                    className="flex h-9 items-center gap-1.5 rounded-full border border-leland-gray-stroke bg-white px-3 py-1 hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                    className="flex h-9 items-center gap-1.5 rounded-full bg-leland-gray-hover px-3 py-1 hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
                   >
-                    <IconCalendar className="size-4 shrink-0 text-leland-gray-dark" />
                     <span className="leland-paragraph-base text-leland-gray-dark">May 16th cohort</span>
                     <IconChevronDown className="size-4 shrink-0 text-leland-gray-light" />
                   </button>
@@ -1151,12 +1152,10 @@ function CombinedSidebar({
                     <button
                       type="button"
                       onClick={onOpenTrackPicker}
-                      className="flex h-9 items-center gap-1.5 rounded-full border border-leland-gray-stroke bg-white px-3 py-1 hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                      aria-label={`Switch AI tool, currently ${selectedTrack}`}
+                      className="flex h-9 items-center gap-1.5 rounded-full bg-leland-gray-hover px-3 py-1 hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
                     >
-                      <img src={getLogoSrc(selectedTrack)} alt="" className="size-4 shrink-0" />
-                      <span className="leland-paragraph-base text-leland-gray-dark">
-                        {selectedTrack.charAt(0).toUpperCase() + selectedTrack.slice(1)}
-                      </span>
+                      <img src={getLogoSrc(selectedTrack)} alt={selectedTrack} className="size-4 shrink-0" />
                       <IconChevronDown className="size-4 shrink-0 text-leland-gray-light" />
                     </button>
                   ) : null}
@@ -1164,7 +1163,7 @@ function CombinedSidebar({
                     <button
                       type="button"
                       onClick={onOpenRole}
-                      className="flex h-9 items-center gap-1.5 rounded-full border border-leland-gray-stroke bg-white px-3 py-1 hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                      className="flex h-9 items-center gap-1.5 rounded-full bg-leland-gray-hover px-3 py-1 hover:bg-leland-gray-stroke focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
                     >
                       <IconBriefcase className="size-4 shrink-0 text-leland-gray-dark" />
                       <span className="leland-paragraph-base text-leland-gray-dark">{roleLabel ?? "Set your role"}</span>
@@ -1401,6 +1400,8 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   onSetVariant,
   role,
   onSetRole,
+  selectedCategory,
+  onSetSelectedCategory,
   cardStyle,
   onSetCardStyle,
   onOpenFeedback,
@@ -1416,6 +1417,8 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   onSetVariant: (variant: LiveSessionVariant) => void;
   role: string | null;
   onSetRole: (role: string | null) => void;
+  selectedCategory: string | null;
+  onSetSelectedCategory: (category: string | null) => void;
   cardStyle: BuildCardStyle;
   onSetCardStyle: (style: BuildCardStyle) => void;
   onOpenFeedback: () => void;
@@ -1453,6 +1456,27 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
               </div>
             </div>
           )}
+          <div className="flex flex-col gap-1.5 rounded-lg p-3">
+            <span className="leland-paragraph-base font-medium text-leland-gray-dark">Selected category</span>
+            <span className="text-[12px] text-leland-gray-light">Carries over to Program Hub too — drives Recommended for you, Browse by use case, and the lesson build picker below.</span>
+            <Menu
+              searchable
+              searchPlaceholder="Search categories"
+              hasCustomTriggerRadius
+              itemSections={[
+                [{ label: "None", selected: selectedCategory === null, onSelect: () => onSetSelectedCategory(null) }],
+                CATEGORIES.map((c) => ({ label: c, selected: selectedCategory === c, onSelect: () => onSetSelectedCategory(c) })),
+              ]}
+            >
+              <button
+                type="button"
+                className="flex w-full items-center justify-between gap-2 rounded-lg border border-leland-gray-stroke bg-white px-4 py-3 text-left leland-paragraph-base font-medium text-leland-gray-dark hover:bg-leland-gray-hover"
+              >
+                <span className="truncate">{selectedCategory ?? "None"}</span>
+                <IconChevronDown className="size-4 shrink-0 text-leland-gray-light" />
+              </button>
+            </Menu>
+          </div>
           <div className="flex flex-col gap-1.5 rounded-lg p-3">
             <span className="leland-paragraph-base font-medium text-leland-gray-dark">
               Role (for the Lesson 1 build picker)
@@ -2327,6 +2351,7 @@ export default function ContentViewer() {
   const [trackPickerOpen, setTrackPickerOpen] = useState(false);
   const [personalizationModalOpen, setPersonalizationModalOpen] = useState(false);
   const [aboutMe, setAboutMe] = useState<PersonalizationData | null>(() => loadPersonalizationData());
+  const { selectedCategory, setSelectedCategory } = useSelectedCategory();
   const cardStyle = useBuildCardStyle();
   const aboutMeParts = aboutMe ? summarizePersonalizationParts(aboutMe) : null;
   const [aboutMeModalOpen, setAboutMeModalOpen] = useState(false);
@@ -2959,6 +2984,8 @@ export default function ContentViewer() {
         options={options}
         onToggle={toggleOption}
         onSetVariant={(variant) => setOption("liveSessionVariant", variant)}
+        selectedCategory={selectedCategory}
+        onSetSelectedCategory={setSelectedCategory}
         role={aboutMe?.role ?? null}
         onSetRole={(role) => {
           const current = loadPersonalizationData();

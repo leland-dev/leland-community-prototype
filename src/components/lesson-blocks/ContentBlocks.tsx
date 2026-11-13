@@ -3,6 +3,8 @@ import aiBuilderTile from "../../assets/ai-onboarding/aibp-tile.png";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../Button";
 import { loadPersonalizationData } from "../PersonalizationModal";
+import { useSelectedCategory } from "../../contexts/SelectedCategoryContext";
+import { CATEGORY_TO_ROLE } from "../../lib/categories";
 
 import {
   BrandSlack,
@@ -556,7 +558,7 @@ function BuildOptionCard({
       <button
         type="button"
         onClick={onClick}
-        className={`flex h-full flex-col items-start gap-2 rounded-lg p-4 text-left transition-[colors,box-shadow] focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
+        className={`flex h-full flex-col items-start gap-2 rounded-xl p-4 text-left transition-[colors,box-shadow] focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
           selected
             ? "border-[1.5px] border-leland-gray-dark bg-white"
             : "border border-leland-gray-stroke bg-white hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)]"
@@ -573,7 +575,7 @@ function BuildOptionCard({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-full flex-col gap-4 rounded-lg p-4 text-left transition-[colors,box-shadow] focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
+      className={`flex h-full flex-col gap-4 rounded-xl p-4 text-left transition-[colors,box-shadow] focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary ${
         selected
           ? "border-[1.5px] border-leland-gray-dark bg-white"
           : "border border-leland-gray-stroke bg-white hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)]"
@@ -581,9 +583,6 @@ function BuildOptionCard({
     >
       <div className="relative h-16 w-[120px] shrink-0 overflow-hidden rounded-md border border-leland-gray-hover">
         <img src={image ?? aiBuilderTile} alt="" className="h-full w-full object-cover" />
-        <span className="absolute left-2 top-2 rounded-[4px] bg-leland-black/[87%] px-1 pt-[3px] pb-[4px] text-[0.75rem] font-semibold leading-none text-white shadow-[0_1px_3px_rgba(0,0,0,0.25)]">
-          Level {level}
-        </span>
       </div>
       <div className="flex flex-1 flex-col items-start">
         <span className={`line-clamp-2 text-[16px] font-semibold leading-[1.3] ${completed ? "text-leland-gray-light" : "text-leland-gray-dark"}`}>
@@ -681,9 +680,15 @@ function SuggestedBuildsCarousel({
   selectedId: string;
   onSelect: (id: string) => void;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [page, setPage] = useState(0);
   const [pages, setPages] = useState(1);
+  // Horizontal center of the selected card, relative to the carousel's outer
+  // (non-scrolling) container — drives the connector line below it that
+  // points down at the build content it controls.
+  const [pointerLeft, setPointerLeft] = useState<number | null>(null);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -692,6 +697,14 @@ function SuggestedBuildsCarousel({
       const w = el.clientWidth || 1;
       setPage(Math.round(el.scrollLeft / w));
       setPages(Math.max(1, Math.ceil(el.scrollWidth / w)));
+
+      const container = containerRef.current;
+      const card = cardRefs.current[selectedId];
+      if (container && card) {
+        const containerRect = container.getBoundingClientRect();
+        const cardRect = card.getBoundingClientRect();
+        setPointerLeft(cardRect.left - containerRect.left + cardRect.width / 2);
+      }
     };
     update();
     el.addEventListener("scroll", update, { passive: true });
@@ -701,7 +714,7 @@ function SuggestedBuildsCarousel({
       el.removeEventListener("scroll", update);
       ro.disconnect();
     };
-  }, [builds]);
+  }, [builds, selectedId]);
 
   const scrollByPage = (dir: 1 | -1) => {
     const el = scrollRef.current;
@@ -711,10 +724,16 @@ function SuggestedBuildsCarousel({
   const cardStyle = useBuildCardStyle();
 
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       <div ref={scrollRef} className="scrollbar-hide -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 py-1">
         {builds.map((b, i) => (
-          <div key={b.id} className="w-[75%] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/3)]">
+          <div
+            key={b.id}
+            ref={(el) => {
+              cardRefs.current[b.id] = el;
+            }}
+            className="w-[75%] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/3)]"
+          >
             <BuildOptionCard
               title={b.buildTitle}
               description={b.description}
@@ -730,6 +749,18 @@ function SuggestedBuildsCarousel({
           </div>
         ))}
       </div>
+      {pointerLeft !== null ? (
+        // Spans the full gap-8 down to the horizontal rule above the build
+        // content, so the dot lands right on that rule instead of floating
+        // in the empty space between it and the card.
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-full h-8 w-px bg-leland-gray-dark"
+          style={{ left: pointerLeft, transform: "translateX(-50%)" }}
+        >
+          <div className="absolute bottom-0 left-1/2 size-1.5 -translate-x-1/2 translate-y-1/2 rounded-full bg-leland-gray-dark" />
+        </div>
+      ) : null}
       <button
         type="button"
         onClick={() => scrollByPage(-1)}
@@ -758,7 +789,11 @@ function SuggestedBuildsCarousel({
 // Falls back to the generic build (no toggle) when no role is known or
 // matched — there's nothing to switch between.
 export function RoleBuildPicker({ block }: { block: RoleBuildPickerBlockType }) {
-  const knownRole = loadPersonalizationData()?.role ?? null;
+  // The shared selected category (Prototype options, carried over from
+  // Program Hub) takes priority over the raw onboarding role, when it maps
+  // to one — it's the more direct, overarching "who is this learner" signal.
+  const { selectedCategory } = useSelectedCategory();
+  const knownRole = (selectedCategory && CATEGORY_TO_ROLE[selectedCategory]) || loadPersonalizationData()?.role || null;
   const matched = knownRole ? block.options.filter((opt) => opt.matchesRoles?.includes(knownRole)) : [];
   // Sales is this prototype's default persona — fall back to it (rather than
   // the generic single build) whenever no role is on file or it doesn't
@@ -820,7 +855,7 @@ export function RoleBuildPicker({ block }: { block: RoleBuildPickerBlockType }) 
         ) : null}
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 border-t border-leland-gray-stroke pt-8">
         <h2 className="leland-heading-3xl font-semibold! text-leland-gray-dark">{selected.buildTitle}</h2>
         <BlockList blocks={selected.tutorial} allowH1={false} />
       </div>
