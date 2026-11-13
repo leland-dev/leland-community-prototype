@@ -9,7 +9,7 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "../components/Button";
-import { SectionItems, MediumCard, type CardManage } from "../components/StorefrontCards";
+import { SectionItems, type CardManage } from "../components/StorefrontCards";
 import {
   loadSections,
   saveSections,
@@ -538,14 +538,17 @@ export default function CategorySectionBuilder({ category }: { category?: string
           <p className="mb-5 text-[14px] text-gray-light">
             Offerings that aren't listed on your public storefront — share them by direct link or invitation.
           </p>
-          <div className="flex flex-col gap-4">
-            {PRIVATE_ITEMS.map((item) => (
+          <SectionItems
+            items={PRIVATE_ITEMS}
+            size="large"
+            manage={privateManage}
+            wrapItem={(item, node) => (
               <div key={item.id} className="relative">
-                <MediumCard item={item} manage={privateManage} />
+                {node}
                 <PrivateBadge />
               </div>
-            ))}
-          </div>
+            )}
+          />
         </div>
       ) : (
       <>
