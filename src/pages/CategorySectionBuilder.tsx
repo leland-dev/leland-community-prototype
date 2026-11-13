@@ -6,7 +6,7 @@
 // profile Offerings tab reflects it live.
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "../components/Button";
 import { SectionItems, type CardManage } from "../components/StorefrontCards";
@@ -20,6 +20,11 @@ import {
   CATCH_ALL_SIZE,
   KIND_LABELS,
   CARD_SIZES,
+  FREE_LIVESTREAMS,
+  FREE_LIVESTREAMS_SECTION_ID,
+  FREE_LIVESTREAMS_TITLE,
+  loadLivestreamsPos,
+  saveLivestreamsPos,
   type SectionConfig,
   type CardSize,
   type StorefrontItem,
@@ -181,7 +186,7 @@ function SizeToggle({ value, onChange }: { value: CardSize; onChange: (s: CardSi
 }
 
 // Per-section overflow menu — move up/down, remove.
-function SectionMenu({ onMoveUp, onMoveDown, onRemove, canMoveUp, canMoveDown }: { onMoveUp: () => void; onMoveDown: () => void; onRemove: () => void; canMoveUp: boolean; canMoveDown: boolean }) {
+function SectionMenu({ onMoveUp, onMoveDown, onRemove, canMoveUp, canMoveDown }: { onMoveUp: () => void; onMoveDown: () => void; onRemove?: () => void; canMoveUp: boolean; canMoveDown: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -200,10 +205,12 @@ function SectionMenu({ onMoveUp, onMoveDown, onRemove, canMoveUp, canMoveDown }:
         <div className="absolute right-0 top-full z-30 mt-2 w-[180px] rounded-xl border border-gray-stroke bg-white p-1.5 shadow-lg">
           <button disabled={!canMoveUp} onClick={() => { onMoveUp(); setOpen(false); }} className={`${item} text-gray-dark hover:bg-gray-hover`}>Move up</button>
           <button disabled={!canMoveDown} onClick={() => { onMoveDown(); setOpen(false); }} className={`${item} text-gray-dark hover:bg-gray-hover`}>Move down</button>
-          <button onClick={() => { onRemove(); setOpen(false); }} className={`${item} text-[#DC2B23] hover:bg-[#DC2B23]/[0.06]`}>
-            <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
-            Remove section
-          </button>
+          {onRemove && (
+            <button onClick={() => { onRemove(); setOpen(false); }} className={`${item} text-[#DC2B23] hover:bg-[#DC2B23]/[0.06]`}>
+              <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
+              Remove section
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -325,6 +332,10 @@ export default function CategorySectionBuilder({ category }: { category?: string
   const [moveFor, setMoveFor] = useState<string | null>(null);
   const [tab, setTab] = useState<"storefront" | "private">("storefront");
   const [draftsOpen, setDraftsOpen] = useState(false);
+  // Slot of the locked "Free livestreams" section among the real sections (index
+  // into `sections`; 0 = top). It's not a real SectionConfig, so its position
+  // lives on its own and persists separately. See storefrontSections.
+  const [lsPos, setLsPos] = useState<number>(() => loadLivestreamsPos(category));
 
   // Private offerings open their editor on click/edit (they aren't on the public
   // storefront, so there's no public page to preview).
@@ -344,6 +355,13 @@ export default function CategorySectionBuilder({ category }: { category?: string
     return { onEdit: open, onPreview: open };
   }, [navigate, category]);
 
+  // Free livestreams are the expert's own scheduled events — open the livestream
+  // editor on manage/preview.
+  const livestreamManage: CardManage = useMemo(() => {
+    const open = () => navigate(`/my-leland/manage/${category}/new-product/livestream`);
+    return { onEdit: open, onPreview: open };
+  }, [navigate, category]);
+
   const commit = (next: SectionConfig[]) => {
     setSections(next);
     saveSections(next, category);
@@ -358,6 +376,16 @@ export default function CategorySectionBuilder({ category }: { category?: string
     if (j < 0 || j >= next.length) return;
     [next[index], next[j]] = [next[j], next[index]];
     commit(next);
+  };
+
+  // Reorder the locked Free livestreams section (move its slot up/down among the
+  // real sections). Clamped to [0, sections.length] so it stays above the
+  // trailing catch-all.
+  const moveLs = (dir: -1 | 1) => {
+    const pos = Math.min(lsPos, sections.length) + dir;
+    const clamped = Math.max(0, Math.min(pos, sections.length));
+    setLsPos(clamped);
+    saveLivestreamsPos(clamped, category);
   };
 
   const remove = (id: string) => commit(sections.filter((s) => s.id !== id));
@@ -508,6 +536,59 @@ export default function CategorySectionBuilder({ category }: { category?: string
 
   const unassigned = getUnassignedItems(sections);
 
+  // Where the locked Free livestreams section renders, clamped to the current
+  // section count (so removing sections can't strand it below the catch-all).
+  const lsSlot = Math.min(lsPos, sections.length);
+
+  // The locked "Free livestreams" section: reorderable like any section, but its
+  // items are pulled from the expert's scheduled livestreams — so it's not a drop
+  // target, and its bottom CTA schedules a new livestream instead of adding one.
+  const livestreamsBlock = (
+    <motion.section
+      key={FREE_LIVESTREAMS_SECTION_ID}
+      layout
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.18 }}
+      className="rounded-2xl border border-gray-stroke bg-white p-5"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3 px-2">
+        <h3 className="min-w-0 text-[20px] font-semibold text-gray-dark">{FREE_LIVESTREAMS_TITLE}</h3>
+        <div className="flex shrink-0 items-center gap-2">
+          <SectionMenu
+            onMoveUp={() => moveLs(-1)}
+            onMoveDown={() => moveLs(1)}
+            canMoveUp={lsSlot > 0}
+            canMoveDown={lsSlot < sections.length}
+          />
+        </div>
+      </div>
+      <p className="mb-4 px-2 text-[15px] text-gray-light">
+        Pulled from your scheduled free livestreams, promoted on Leland's{" "}
+        <Link
+          to="/browse"
+          className="font-medium text-gray-dark underline decoration-dotted underline-offset-[3px] transition-opacity hover:opacity-70"
+        >
+          Free Livestreams
+        </Link>{" "}
+        page.
+      </p>
+      <SectionItems items={FREE_LIVESTREAMS} size="small" manage={livestreamManage} />
+      <div className="mt-4 flex">
+        <Button
+          size="md"
+          variant="secondary"
+          className="font-semibold"
+          onClick={() => navigate(`/my-leland/manage/${category}/new-product/livestream`)}
+        >
+          <MaskIcon src={addPlusIcon} className="h-4 w-4" />
+          New livestream
+        </Button>
+      </div>
+    </motion.section>
+  );
+
   return (
     <div className="min-w-0">
       <div className="mb-6 flex items-center justify-between gap-3">
@@ -567,9 +648,9 @@ export default function CategorySectionBuilder({ category }: { category?: string
 
       <div className="flex flex-col gap-5">
         <AnimatePresence initial={false}>
-          {sections.map((section, i) => {
+          {sections.flatMap((section, i) => {
             const { list, placeholderIndex } = displayFor(section.id, resolveItems(section.itemIds));
-            return (
+            const node = (
             <motion.section
               key={section.id}
               layout
@@ -618,7 +699,9 @@ export default function CategorySectionBuilder({ category }: { category?: string
               </div>
             </motion.section>
             );
+            return i === lsSlot ? [livestreamsBlock, node] : [node];
           })}
+          {lsSlot >= sections.length && livestreamsBlock}
         </AnimatePresence>
 
         {/* Catch-all — everything not placed in a section. Drop a card here to
@@ -644,6 +727,13 @@ export default function CategorySectionBuilder({ category }: { category?: string
                 placeholderIndex={placeholderIndex}
                 emptyHint="Everything's been placed in a section."
               />
+
+              <div className="mt-4 flex">
+                <AddOfferingsButton
+                  onChooseExisting={() => setMoveFor(CATCH_ALL_DROP_ID)}
+                  onCreateNew={() => navigate(`/my-leland/manage/${category}/new`)}
+                />
+              </div>
             </section>
           );
         })()}

@@ -92,6 +92,8 @@ import bootcampImg1 from "../assets/placeholder images/bootcamp-1.webp";
 import aiBuilderCourseImg from "../assets/placeholder images/ai-builder-course.avif";
 import { OFFERINGS, AB_COLLAPSED_COUNT, type Offering } from "../lib/offerings";
 import OfferingSections from "../components/OfferingSections";
+import { SectionItems } from "../components/StorefrontCards";
+import { FREE_LIVESTREAMS } from "../lib/storefrontSections";
 import lelandPlusImg1 from "../assets/placeholder images/leland-plus-images/3cf6e985-7397-4e50-8e06-ef9a8f40491c.webp";
 import lelandPlusImg2 from "../assets/placeholder images/leland-plus-images/b9669ad2-4b6f-4c32-83e1-d1370dbf9484.webp";
 import lelandPlusImg3 from "../assets/placeholder images/leland-plus-images/db2eb673-d212-41d5-8df9-6fa6de57bc23.webp";
@@ -2496,6 +2498,17 @@ export default function ProfileV2({ coach = false, coachId = "samantha", unified
                         </div>
                         <svg className="h-5 w-5 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
                       </button>
+
+                      {/* Featured free livestreams — a fixed section (not part of
+                          the expert-arranged storefront), shown above the storefront. */}
+                      {FREE_LIVESTREAMS.length > 0 && (
+                        <section className="mb-[52px]">
+                          <div className="mb-4 flex items-center justify-between gap-3">
+                            <h3 className="text-[20px] font-semibold text-gray-dark">Free livestreams</h3>
+                          </div>
+                          <SectionItems items={FREE_LIVESTREAMS} size="small" />
+                        </section>
+                      )}
 
                       <OfferingSections slug={slug} category={category} variant="full" />
 

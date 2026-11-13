@@ -264,7 +264,7 @@ export function SmallRow({ item, manage }: { item: StorefrontItem; manage?: Card
         </span>
       ) : (
         <span className="hidden shrink-0 items-center justify-center rounded-full border border-gray-stroke bg-white px-5 py-2.5 text-[14px] font-semibold text-gray-dark transition-colors group-hover:bg-gray-hover sm:inline-flex">
-          Details
+          {item.ctaLabel ?? "Details"}
         </span>
       )}
     </Wrap>

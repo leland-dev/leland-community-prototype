@@ -32,6 +32,9 @@ export type StorefrontItem = {
   // Scheduled items (group sessions, workshops) carry a calendar chip.
   calendarDay?: string;
   calendarMonth?: string;
+  // Overrides the customer-facing CTA label on the small (row) card, e.g.
+  // "Register" for a free livestream instead of the default "Details".
+  ctaLabel?: string;
 };
 
 export type SectionConfig = {
@@ -67,6 +70,18 @@ const SESSION_ITEMS: StorefrontItem[] = [
   { id: "gs3", kind: "group-session", title: "Mock Interview Group Session", image: sessionImg3, meta: "Mon, Nov 24 · 3:00 PM PT · 1 hr", price: "$75", priceSub: "18 going", calendarDay: "24", calendarMonth: "Nov" },
   { id: "gs4", kind: "group-session", title: "GMAT Quant Office Hours", image: sessionImg4, meta: "Wed, Nov 26 · 6:00 PM PT · 45 min", price: "$35", priceSub: "22 going", calendarDay: "26", calendarMonth: "Nov" },
   { id: "gs5", kind: "group-session", title: "Free Livestream: Inside an M7 Admit Decision", image: sessionImg2, meta: "Mon, Dec 1 · 6:00 PM PT · 1 hr", price: "Free", priceSub: "312 registered", calendarDay: "1", calendarMonth: "Dec" },
+];
+
+// Featured free livestreams — surfaced in a dedicated, locked section (not part
+// of the expert-arranged sections). It pulls from the expert's scheduled
+// livestreams, so the builder can reorder it but can't drop other offerings in.
+// Always priced "Free" with a "Register" CTA.
+export const FREE_LIVESTREAMS_SECTION_ID = "__free_livestreams__";
+export const FREE_LIVESTREAMS_TITLE = "Free livestreams";
+export const FREE_LIVESTREAMS: StorefrontItem[] = [
+  { id: "ls1", kind: "group-session", title: "Inside an M7 Admit Decision", image: sessionImg2, meta: "Mon, Dec 1 · 6:00 PM PT · 1 hr", price: "Free", priceSub: "312 registered", ctaLabel: "Register", calendarDay: "1", calendarMonth: "Dec" },
+  { id: "ls2", kind: "group-session", title: "Round 2 Essay Strategy, Live Q&A", image: sessionImg1, meta: "Thu, Dec 4 · 5:00 PM PT · 45 min", price: "Free", priceSub: "148 registered", ctaLabel: "Register", calendarDay: "4", calendarMonth: "Dec" },
+  { id: "ls3", kind: "group-session", title: "Ask Me Anything: MBA Interviews", image: sessionImg3, meta: "Tue, Dec 9 · 4:00 PM PT · 1 hr", price: "Free", priceSub: "97 registered", ctaLabel: "Register", calendarDay: "9", calendarMonth: "Dec" },
 ];
 
 const MEMBERSHIP_ITEMS: StorefrontItem[] = SUBSCRIPTIONS.map((p) => ({
@@ -211,5 +226,33 @@ export function resetSections(category?: string): void {
     localStorage.removeItem(storageKey(category));
   } catch {
     // ignore
+  }
+}
+
+// The locked "Free livestreams" section isn't a real SectionConfig (its items
+// aren't expert-arranged), so its slot among the sections is tracked on its own:
+// an index into the sections list (0 = above the first section). Persisted per
+// category like the sections themselves so a reordered demo survives a reload.
+const LIVESTREAMS_POS_KEY = "storefrontLivestreamsPos";
+const livestreamsPosKey = (category?: string) => (category ? `${LIVESTREAMS_POS_KEY}:${category}` : LIVESTREAMS_POS_KEY);
+
+export function loadLivestreamsPos(category?: string): number {
+  try {
+    const raw = localStorage.getItem(livestreamsPosKey(category));
+    if (raw != null) {
+      const n = Number.parseInt(raw, 10);
+      if (Number.isFinite(n) && n >= 0) return n;
+    }
+  } catch {
+    // fall through to default
+  }
+  return 0; // default: top of the storefront
+}
+
+export function saveLivestreamsPos(pos: number, category?: string): void {
+  try {
+    localStorage.setItem(livestreamsPosKey(category), String(pos));
+  } catch {
+    // ignore (private mode / quota)
   }
 }
