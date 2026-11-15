@@ -8,6 +8,7 @@ import {
   type ButtonHTMLAttributes,
   type FC,
   forwardRef,
+  type MouseEventHandler,
   type SVGProps,
 } from 'react';
 import { Link } from 'react-router-dom';
@@ -39,6 +40,7 @@ export enum ButtonColor {
   SECONDARY_NEUTRAL = 'SECONDARY_NEUTRAL',
   SECONDARY_NEUTRAL_SOLID = 'SECONDARY_NEUTRAL_SOLID',
   TERTIARY = 'TERTIARY',
+  TERTIARY_WHITE = 'TERTIARY_WHITE',
   DESTRUCTIVE = 'DESTRUCTIVE',
   DESTRUCTIVE_REVEAL = 'DESTRUCTIVE_REVEAL',
   DESTRUCTIVE_ON_HOVER = 'DESTRUCTIVE_ON_HOVER',
@@ -194,6 +196,10 @@ const ButtonColorToStyles: Record<ButtonColor, (selected?: boolean) => string> =
       selected
         ? 'text-leland-gray-dark bg-transparent border-transparent shadow-transparent underline decoration-dotted decoration-[1.5px] underline-offset-4'
         : 'text-leland-gray-dark bg-transparent disabled:text-leland-gray-light disabled:bg-transparent border-transparent shadow-transparent underline decoration-dotted decoration-[1.5px] underline-offset-4',
+    [ButtonColor.TERTIARY_WHITE]: (selected) =>
+      selected
+        ? 'text-leland-white bg-transparent border-transparent shadow-transparent underline decoration-dotted decoration-[1.5px] underline-offset-4'
+        : 'text-leland-white/80 bg-transparent disabled:text-leland-white/50 disabled:bg-transparent hover:text-leland-white border-transparent shadow-transparent underline decoration-dotted decoration-[1.5px] underline-offset-4',
     [ButtonColor.DESTRUCTIVE]: (selected) =>
       selected
         ? 'text-leland-red bg-white border-leland-red shadow-leland-red'
@@ -352,8 +358,15 @@ export const getButtonStyles = ({
 export interface ButtonProps
   extends Omit<
     ButtonHTMLAttributes<HTMLButtonElement>,
-    'className' | 'style' | 'color' | 'disabled' | 'aria-label' | 'children'
+    | 'className'
+    | 'style'
+    | 'color'
+    | 'disabled'
+    | 'aria-label'
+    | 'children'
+    | 'onClick'
   > {
+  onClick?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
   buttonColor?: ButtonColor;
   disabled?: boolean;
   fontWeight?: ButtonFontWeight;
@@ -399,10 +412,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       href,
       openInNew,
       useSolidHover,
+      onClick,
       ...props
     },
     ref,
   ) => {
+    const clickHandler = { onClick };
     const labelVisibilityClass = getLabelVisibilityClass({
       hideLabelBelow,
       truncateLabel,
@@ -488,6 +503,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             : {})}
           id={id}
           to={href}
+          {...clickHandler}
           className={buttonClassName}
           aria-label={ariaLabel || label || undefined}
         >
@@ -500,6 +516,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         type="button"
         {...props}
+        {...clickHandler}
         className={buttonClassName}
         aria-label={ariaLabel || label || undefined}
         disabled={disabled}
