@@ -593,18 +593,22 @@ export function SectionCompleteAction({
   }
 
   if (style === "row") {
+    // A page-bg fill instead of white (plus the border) — reads as its own
+    // section breaking from the page's flow, rather than another bordered
+    // card like the banners above/below it (e.g. "Having trouble with
+    // setup?", "Get help").
     return (
-      <div className="flex w-full flex-col items-start gap-4 rounded-2xl border border-leland-gray-stroke bg-white p-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex w-full flex-col items-start gap-5 rounded-2xl border border-leland-gray-stroke bg-leland-page-bg p-8 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1">
           <span className="leland-paragraph-sm font-semibold uppercase tracking-wide text-leland-gray-extra-light">
             Up next
           </span>
-          <span className="truncate leland-heading-xl font-semibold text-leland-gray-dark">{nextTitle}</span>
+          <span className="leland-heading-xl font-semibold text-leland-gray-dark">{nextTitle}</span>
         </div>
         <Button
           label={label}
           buttonColor={ButtonColor.PRIMARY}
-          size={ButtonSize.MEDIUM}
+          size={ButtonSize.LARGE}
           rounded
           disabled={celebrating}
           onClick={handleClick}

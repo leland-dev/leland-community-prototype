@@ -40,6 +40,7 @@ import {
   IconModules,
   IconExperiences,
   IconLightning,
+  IconMenuBurger,
   IconOnboarding,
   IconGift,
   IconQuestion,
@@ -723,14 +724,14 @@ function LessonAccordion({
               onClick={() => toggle(l.id)}
               className="flex flex-col gap-1.5 rounded px-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
             >
-              <span className="leland-heading-lg font-semibold text-leland-gray-dark">
+              <span className="leland-paragraph-sm text-leland-gray-light">
                 {isStartHere ? "Before you begin" : `Lesson ${l.number}`}
                 {l.durationMin ? (
-                  <span className="leland-paragraph-sm font-normal normal-case tracking-normal text-leland-gray-extra-light"><span className="mx-1.5">·</span>{l.durationMin}m</span>
+                  <span className="text-leland-gray-extra-light"><span className="mx-1.5">·</span>{l.durationMin}m</span>
                 ) : null}
               </span>
               <span className="flex items-center gap-3">
-                <span className="flex-1 leland-paragraph-base text-leland-gray-light">
+                <span className="leland-heading-lg flex-1 font-semibold text-leland-gray-dark">
                   {l.title}
                 </span>
                 <span role="img" aria-label={`${completedCount}/${totalCount} complete`}>
@@ -2550,7 +2551,10 @@ export default function ContentViewer() {
           aria-label="Open course menu"
           className="flex size-9 shrink-0 items-center justify-center rounded-lg text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
         >
-          <IconLeftSidebarOpen className="size-5" aria-hidden />
+          {/* A plain menu icon here, not IconLeftSidebarOpen — on mobile
+              this opens a bottom sheet, not a side panel, so the "side
+              panel" icon was misleading about which direction it opens. */}
+          <IconMenuBurger className="size-5" aria-hidden />
         </button>
       </header>
       {/* Body */}
