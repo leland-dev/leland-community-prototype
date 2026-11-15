@@ -13,6 +13,7 @@ import {
 } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
+import { CircularProgress } from "../components/CircularProgress";
 import { ReviewModal } from "../components/ReviewModal";
 import { WrittenReviewModal } from "../components/WrittenReviewModal";
 import { SectionFeedbackModal } from "../components/SectionFeedbackModal";
@@ -53,7 +54,6 @@ import {
   IconDownload,
   IconHelp,
   IconShare,
-  IconMenuBurger,
   IconRefresh,
   IconStar,
   IconUser,
@@ -95,6 +95,8 @@ import {
   LessonPageProvider,
   LiveElapsedTime,
   LiveSessionCallout,
+  SectionCompleteAction,
+  type SectionCompleteStyle,
   setBuildCardStyle,
   useBuildCardStyle,
 } from "../components/lesson-blocks";
@@ -108,7 +110,6 @@ import {
   PERSONALIZATION_KEY,
   loadPersonalizationData,
   summarizePersonalizationParts,
-  ROLE_OPTIONS_BY_STATUS,
   type PersonalizationData,
 } from "../components/PersonalizationModal";
 import { AboutMeEditModal } from "../components/AboutMeEditModal";
@@ -188,7 +189,7 @@ const COURSE_TITLE_FULL = "Level 1: Use AI to 10x your impact";
 const COURSE_DESCRIPTION =
   "Learn to build AI-powered applications using Claude — from foundational prompting to deploying production-ready tools.";
 const COURSE_HOME = "/course/ai-builder-l1";
-const DASHBOARD = "/dashboard";
+const PROGRAM_HUB = "/program/ai-builder";
 
 // The community page opens externally (new tab) — it's the existing group page.
 const COMMUNITY_GROUP_ID = "ai-bp-apr-26";
@@ -243,7 +244,22 @@ function useCompletion() {
       return next;
     });
   };
-  return { completed, markComplete };
+  // Lets the "banner" Mark-complete-style checkbox be toggled on its own,
+  // independent of navigating to the next section.
+  const toggleComplete = (lessonId: string, sectionId: string) => {
+    setCompleted((prev) => {
+      const next = new Set(prev);
+      const key = `${lessonId}/${sectionId}`;
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      localStorage.setItem(COMPLETION_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  };
+  return { completed, markComplete, toggleComplete };
 }
 
 // Tracks the learner's star rating (0 = not yet rated), across both the
@@ -409,45 +425,6 @@ const SIDEBAR_TABS: { id: SidebarTab; label: string }[] = [
 // Circular completion indicator. A filled check at 100%; otherwise a ring
 // whose arc tracks percent — inline SVG because strokeDashoffset must vary at
 // runtime (per the frontend-common-patterns icon rule).
-function CircularProgress({ percent }: { percent: number }) {
-  if (percent >= 100) {
-    return (
-      <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-leland-gray-dark">
-        <IconCheck className="size-3 text-white" />
-      </span>
-    );
-  }
-  const radius = 10;
-  const circumference = 2 * Math.PI * radius;
-  const clamped = Math.max(0, Math.min(100, percent));
-  const offset = circumference * (1 - clamped / 100);
-  return (
-    <svg viewBox="0 0 24 24" className="size-6 shrink-0 -rotate-90" aria-hidden>
-      <circle
-        cx="12"
-        cy="12"
-        r={radius}
-        fill="none"
-        strokeWidth="2"
-        stroke="currentColor"
-        className="text-leland-gray-stroke"
-      />
-      <circle
-        cx="12"
-        cy="12"
-        r={radius}
-        fill="none"
-        strokeWidth="2"
-        strokeLinecap="round"
-        stroke="currentColor"
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        className="text-leland-gray-dark"
-      />
-    </svg>
-  );
-}
-
 function filterSectionsByTrack(sections: Section[], selectedTrack: CourseTrack | null): Section[] {
   return sections.filter(s => s.kind !== "blocks" || !s.track || s.track === selectedTrack);
 }
@@ -784,8 +761,10 @@ function LessonAccordion({
                       key={s.id}
                       id={`sidebar-section-${s.id}`}
                       to={`/content-viewer/${l.id}/${s.id}`}
-                      className={`scroll-mt-6 flex items-center gap-2.5 rounded-lg p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
-                        active ? "bg-leland-gray-hover" : "hover:bg-leland-gray-hover"
+                      className={`scroll-mt-6 flex items-center gap-2.5 rounded-lg border p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
+                        active
+                          ? "border-leland-gray-dark bg-leland-gray-hover"
+                          : "border-transparent hover:bg-leland-gray-hover"
                       }`}
                     >
                       <span className="relative shrink-0">
@@ -793,11 +772,9 @@ function LessonAccordion({
                           className={`flex size-8 items-center justify-center rounded-full ${
                             sectionDone
                               ? "bg-leland-gray-dark"
-                              : active
-                                ? "border-[1.5px] border-leland-gray-extra-light bg-white"
-                                : badge === "required"
-                                  ? "border border-leland-blue-light-hover bg-leland-blue-light"
-                                  : "border border-leland-gray-stroke bg-white"
+                              : badge === "required"
+                                ? "border border-leland-blue-light-hover bg-leland-blue-light"
+                                : "border border-leland-gray-stroke bg-white"
                           }`}
                         >
                           {sectionDone ? (
@@ -1334,6 +1311,7 @@ type PrototypeOptions = {
   liveProgram: boolean;
   showNoAccess: boolean;
   liveSessionVariant: LiveSessionVariant;
+  markCompleteStyle: SectionCompleteStyle;
 };
 
 // Keys whose value is a boolean (rendered as toggles).
@@ -1347,6 +1325,7 @@ const DEFAULT_PROTOTYPE_OPTIONS: PrototypeOptions = {
   liveProgram: true,
   showNoAccess: false,
   liveSessionVariant: "addToCalendar",
+  markCompleteStyle: "row",
 };
 
 const BOOLEAN_OPTIONS: { key: BooleanOptionKey; label: string }[] = [
@@ -1363,6 +1342,17 @@ const LIVE_SESSION_VARIANT_OPTIONS: {
   { value: "addedToCalendar", label: "Added — countdown" },
   { value: "watchRecording", label: "Recording available" },
   { value: "joinNow", label: "Live now — join" },
+];
+
+// "Mark complete" treatments being tried at the end of each section — see
+// SectionCompleteAction in ProductBlocks.tsx.
+const MARK_COMPLETE_STYLE_OPTIONS: {
+  value: SectionCompleteStyle;
+  label: string;
+}[] = [
+  { value: "pill", label: "Pill button + checkbox" },
+  { value: "banner", label: "Banner card + checkbox" },
+  { value: "row", label: "Up next row" },
 ];
 
 function usePrototypeOptions() {
@@ -1390,14 +1380,11 @@ function usePrototypeOptions() {
 }
 
 
-const DEMO_ROLE_OPTIONS = ROLE_OPTIONS_BY_STATUS.working;
-
 const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   options,
   onToggle,
   onSetVariant,
-  role,
-  onSetRole,
+  onSetMarkCompleteStyle,
   selectedTrack,
   onSetSelectedTrack,
   selectedCategory,
@@ -1415,8 +1402,7 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
   options: PrototypeOptions;
   onToggle: (key: BooleanOptionKey) => void;
   onSetVariant: (variant: LiveSessionVariant) => void;
-  role: string | null;
-  onSetRole: (role: string | null) => void;
+  onSetMarkCompleteStyle: (style: SectionCompleteStyle) => void;
   selectedTrack: CourseTrack | null;
   onSetSelectedTrack: (track: CourseTrack) => void;
   selectedCategory: string | null;
@@ -1459,6 +1445,27 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
             </div>
           )}
           <div className="flex flex-col gap-1.5 rounded-lg p-3">
+            <span className="leland-paragraph-base font-medium text-leland-gray-dark">Mark complete style</span>
+            <span className="text-[12px] text-leland-gray-light">The action at the end of each section's content.</span>
+            <div className="flex flex-wrap gap-1.5">
+              {MARK_COMPLETE_STYLE_OPTIONS.map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => onSetMarkCompleteStyle(o.value)}
+                  className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+                >
+                  <Tag
+                    text={o.label}
+                    tagColor={TagColor.GRAY}
+                    size={TagSize.SMALL}
+                    selected={options.markCompleteStyle === o.value}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5 rounded-lg p-3">
             <span className="leland-paragraph-base font-medium text-leland-gray-dark">AI tool</span>
             <span className="text-[12px] text-leland-gray-light">Drives the "Set up your tools" content and tool mentions throughout the course.</span>
             <div className="flex flex-wrap gap-1.5">
@@ -1476,7 +1483,7 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
           </div>
           <div className="flex flex-col gap-1.5 rounded-lg p-3">
             <span className="leland-paragraph-base font-medium text-leland-gray-dark">Selected category</span>
-            <span className="text-[12px] text-leland-gray-light">Carries over to Program Hub too — drives Recommended for you, Browse by use case, and the lesson build picker below.</span>
+            <span className="text-[12px] text-leland-gray-light">Carries over to Program Hub too — drives Recommended for you, Browse by use case, the "Set your role" header control, and the lesson build picker.</span>
             <CategoryPicker
               value={selectedCategory}
               onChange={onSetSelectedCategory}
@@ -1494,30 +1501,6 @@ const PrototypeOptionsModal = withModal(function PrototypeOptionsModal({
                 </button>
               )}
             />
-          </div>
-          <div className="flex flex-col gap-1.5 rounded-lg p-3">
-            <span className="leland-paragraph-base font-medium text-leland-gray-dark">
-              Role (for the Lesson 1 build picker)
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              <button
-                type="button"
-                onClick={() => onSetRole(null)}
-                className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-              >
-                <Tag text="Not set" tagColor={TagColor.GRAY} size={TagSize.SMALL} selected={role === null} />
-              </button>
-              {DEMO_ROLE_OPTIONS.map((o) => (
-                <button
-                  key={o.value}
-                  type="button"
-                  onClick={() => onSetRole(o.value)}
-                  className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-                >
-                  <Tag text={o.label} tagColor={TagColor.GRAY} size={TagSize.SMALL} selected={role === o.value} />
-                </button>
-              ))}
-            </div>
           </div>
           <div className="flex flex-col gap-1.5 rounded-lg p-3">
             <span className="leland-paragraph-base font-medium text-leland-gray-dark">
@@ -2217,83 +2200,21 @@ function SessionDetailView({
   );
 }
 
-// ─── Section nav (mirrors CourseViewerSectionNav.client.tsx) ─────────────────
-
-// Matches production ButtonSize.LARGE (p-4, 14px) at semibold weight
-const navButtonBase =
-  "flex shrink-0 items-center gap-2 rounded-full p-4 text-[0.875rem] font-semibold leading-tight";
-
-function CourseViewerSectionNav({
-  prevSectionLink,
-  nextSectionLink,
-  onNext,
-  onNavigate,
-  completedCount,
-  totalSections,
-}: {
-  prevSectionLink: string | null;
-  nextSectionLink: string | null;
-  onNext: () => void;
-  onNavigate: () => void;
-  completedCount: number;
-  totalSections: number;
-}) {
-  return (
-    <div className="relative bg-[#F9F8F3] px-4 pb-[calc(1rem_+_env(safe-area-inset-bottom))] md:px-6 md:pb-8">
-      <div className="pointer-events-none absolute inset-x-0 bottom-full h-16 bg-gradient-to-b from-transparent to-[#F9F8F3]" />
-      <div className="relative mx-auto flex w-full max-w-[1280px] items-center justify-between gap-3">
-      {/* Below md, Back is hidden entirely when there's no previous section
-          (see the disabled span below), so Next fills the full width. The
-          200px cap only kicks in on mobile/tablet once both buttons are
-          actually shown together — it always applies at md+ since the
-          disabled Back placeholder keeps both slots visible there. */}
-      {prevSectionLink ? (
-        <Link
-          to={prevSectionLink}
-          onClick={onNavigate}
-          className={`${navButtonBase} flex-1 justify-center max-w-[200px] border border-leland-gray-stroke bg-white text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
-        >
-          <IconChevronLeft className="size-5" />
-          Back
-        </Link>
-      ) : (
-        <span
-          className={`${navButtonBase} hidden flex-1 justify-center md:flex md:max-w-[200px] cursor-not-allowed border border-leland-gray-stroke bg-white text-leland-gray-dark opacity-40`}
-          aria-hidden
-        >
-          <IconChevronLeft className="size-5" />
-          Back
-        </span>
-      )}
-      {nextSectionLink ? (
-        <Link
-          to={nextSectionLink}
-          onClick={() => { onNext(); onNavigate(); }}
-          className={`${navButtonBase} flex-1 justify-center md:max-w-[200px] ${prevSectionLink ? "max-w-[200px]" : ""} border border-leland-primary bg-leland-primary text-leland-on-primary-text hover:bg-leland-primary-hover hover:border-leland-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary`}
-        >
-          Next
-          <IconChevronRight className="size-5" />
-        </Link>
-      ) : (
-        <span
-          className={`${navButtonBase} flex-1 justify-center md:max-w-[200px] ${prevSectionLink ? "max-w-[200px]" : ""} cursor-not-allowed border border-leland-primary bg-leland-primary text-leland-on-primary-text opacity-40`}
-          aria-hidden
-        >
-          Next
-          <IconChevronRight className="size-5" />
-        </span>
-      )}
-      </div>
-    </div>
-  );
-}
-
 // ─── Page (mirrors CourseViewerShell.client.tsx) ─────────────────────────────
 
 function scrollParentOf(el: HTMLElement): HTMLElement | null {
   for (let node = el.parentElement; node; node = node.parentElement) {
     const { overflowY } = getComputedStyle(node);
-    if (overflowY === "auto" || overflowY === "scroll") return node;
+    // Some ancestors are marked overflow-auto but sit inside a non-flex
+    // wrapper, so they never actually get height-constrained and never
+    // overflow — scrolling them is a no-op. Skip to the next ancestor that
+    // actually clips its content.
+    if (
+      (overflowY === "auto" || overflowY === "scroll") &&
+      node.scrollHeight > node.clientHeight
+    ) {
+      return node;
+    }
   }
   return null;
 }
@@ -2373,17 +2294,13 @@ export default function ContentViewer() {
   const aboutMeParts = aboutMe ? summarizePersonalizationParts(aboutMe) : null;
   const [aboutMeModalOpen, setAboutMeModalOpen] = useState(false);
   const [roleModalOpen, setRoleModalOpen] = useState(false);
-  const roleLabel = aboutMe?.role
-    ? (ROLE_OPTIONS_BY_STATUS[aboutMe.status === "not_working" ? "working" : aboutMe.status].find(
-        (o) => o.value === aboutMe.role,
-      )?.label ?? aboutMe.role)
-    : null;
+  const roleLabel = selectedCategory;
   const [noAccessModalOpen, setNoAccessModalOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<CourseTrack | null>(
     () => localStorage.getItem(TRACK_STORAGE_KEY) as CourseTrack | null,
   );
   const { options, toggleOption, setOption } = usePrototypeOptions();
-  const { completed, markComplete } = useCompletion();
+  const { completed, markComplete, toggleComplete } = useCompletion();
 
   const selectedSession =
     LIVE_SESSIONS.find((s) => s.number === selectedSessionNumber) ?? null;
@@ -2420,13 +2337,10 @@ export default function ContentViewer() {
     })),
   ];
 
-  const prevSection = visibleSections[sectionIdx - 1] ?? null;
   const nextSection = visibleSections[sectionIdx + 1] ?? null;
 
-  // At a lesson's first/last section, "Back"/"Next" should carry across into
-  // the adjacent lesson rather than dead-ending — otherwise finishing e.g.
-  // "Before you begin" leaves Next permanently disabled instead of moving
-  // into Lesson 1.
+  // At a lesson's last section, "Mark complete" should carry across into the
+  // next lesson rather than dead-ending.
   const adjacentLessonSection = (direction: 1 | -1): { lesson: Lesson; section: Section } | null => {
     for (let i = lessonIdx + direction; i >= 0 && i < ALL_LESSONS.length; i += direction) {
       const secs = filterSectionsByTrack(ALL_LESSONS[i].sections, selectedTrack);
@@ -2435,15 +2349,22 @@ export default function ContentViewer() {
     }
     return null;
   };
-  const prevNavTarget = prevSection ? { lesson, section: prevSection } : adjacentLessonSection(-1);
   const nextNavTarget = nextSection ? { lesson, section: nextSection } : adjacentLessonSection(1);
 
-  const exitDestination = DASHBOARD;
+  const sectionCompleteLabel =
+    nextNavTarget?.section.kind === "completion" ? "Complete course" : "Continue";
+  const sectionNextTitle = nextNavTarget?.section.title ?? "";
+  const isSectionComplete = completed.has(`${lesson.id}/${section.id}`);
+  const handleSectionComplete = () => {
+    markComplete(lesson.id, section.id);
+    navigatedViaButtons.current = true;
+    if (nextNavTarget) {
+      navigate(sectionUrl(nextNavTarget.lesson, nextNavTarget.section));
+    }
+  };
+  const handleToggleSectionComplete = () => toggleComplete(lesson.id, section.id);
 
-  const isCompleted = useMemo(
-    () => (sectionId: string) => completed.has(`${lesson.id}/${sectionId}`),
-    [completed, lesson.id],
-  );
+  const exitDestination = PROGRAM_HUB;
 
   // Auto-open the track picker on first load if no track has been chosen yet.
   useEffect(() => {
@@ -2612,10 +2533,10 @@ export default function ContentViewer() {
         <button
           type="button"
           onClick={() => setSidebarOpen(true)}
-          aria-label="Open menu"
+          aria-label="Open course menu"
           className="flex size-9 shrink-0 items-center justify-center rounded-lg text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
         >
-          <IconMenuBurger className="size-5" aria-hidden />
+          <IconLeftSidebarOpen className="size-5" aria-hidden />
         </button>
       </header>
       {/* Body */}
@@ -2761,6 +2682,12 @@ export default function ContentViewer() {
                       liveSessionVariant: options.liveSessionVariant,
                       liveProgram: options.liveProgram,
                       onViewRecording: () => setLessonShowRecording(true),
+                      sectionCompleteLabel,
+                      sectionCompleteStyle: options.markCompleteStyle,
+                      sectionNextTitle,
+                      isSectionComplete,
+                      onSectionComplete: handleSectionComplete,
+                      onToggleSectionComplete: handleToggleSectionComplete,
                       meetingUrl: (LIVE_SESSIONS[lessonIdx] ?? LIVE_SESSIONS[0]).meetingUrl,
                       calendarItems: (() => {
                         const s = LIVE_SESSIONS[lessonIdx] ?? LIVE_SESSIONS[0];
@@ -2854,7 +2781,7 @@ export default function ContentViewer() {
                         ) : null}
                         <BlockList blocks={section.blocks} />
                       </div>
-                      <LessonFooterActions />
+                      <LessonFooterActions key={`${lesson.id}/${section.id}`} />
                     </div>
                   </LessonPageProvider>
                 </div>
@@ -2869,7 +2796,16 @@ export default function ContentViewer() {
                       />
                     </div>
                   </div>
-                  <div className="mx-auto max-w-[720px] pb-10">
+                  <div className="mx-auto flex max-w-[720px] flex-col gap-4 pb-10">
+                    <SectionCompleteAction
+                      key={`${lesson.id}/${section.id}`}
+                      label={sectionCompleteLabel}
+                      style={options.markCompleteStyle}
+                      nextTitle={sectionNextTitle}
+                      completed={isSectionComplete}
+                      onComplete={handleSectionComplete}
+                      onToggleComplete={handleToggleSectionComplete}
+                    />
                     <button
                       onClick={() => setFeedbackModalOpen(true)}
                       className="flex w-full items-center gap-4 rounded-xl border border-leland-gray-stroke bg-white px-5 py-4 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
@@ -2914,7 +2850,7 @@ export default function ContentViewer() {
                     />
                   </div>
                   <div className="bg-white">
-                    <div className="mx-auto max-w-[720px] pb-10 pt-4">
+                    <div className="mx-auto flex max-w-[720px] flex-col gap-4 pb-10 pt-4">
                       <button
                         onClick={() => setFeedbackModalOpen(true)}
                         className="flex w-full items-center gap-4 rounded-xl border border-leland-gray-stroke bg-white px-5 py-4 text-left hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
@@ -2923,6 +2859,15 @@ export default function ContentViewer() {
                         <span className="flex-1 leland-heading-base font-semibold text-leland-gray-dark">Share feedback</span>
                         <IconChevronRight className="size-5 shrink-0 text-leland-gray-light" />
                       </button>
+                      <SectionCompleteAction
+                      key={`${lesson.id}/${section.id}`}
+                      label={sectionCompleteLabel}
+                      style={options.markCompleteStyle}
+                      nextTitle={sectionNextTitle}
+                      completed={isSectionComplete}
+                      onComplete={handleSectionComplete}
+                      onToggleComplete={handleToggleSectionComplete}
+                    />
                     </div>
                   </div>
                 </>
@@ -2965,22 +2910,6 @@ export default function ContentViewer() {
                 open={supportModalOpen}
                 onOpenChange={setSupportModalOpen}
               />
-              {(lesson.id !== "start-here" || section.kind === "blocks" || section.kind === "interactive") && section.kind !== "completion" && (
-                <CourseViewerSectionNav
-                  prevSectionLink={
-                    prevNavTarget ? sectionUrl(prevNavTarget.lesson, prevNavTarget.section) : null
-                  }
-                  nextSectionLink={
-                    nextNavTarget ? sectionUrl(nextNavTarget.lesson, nextNavTarget.section) : null
-                  }
-                  onNext={() => markComplete(lesson.id, section.id)}
-                  onNavigate={() => { navigatedViaButtons.current = true; }}
-                  completedCount={
-                    visibleSections.filter((s) => isCompleted(s.id)).length
-                  }
-                  totalSections={visibleSections.length}
-                />
-              )}
             </>
           )}
         </div>
@@ -3000,6 +2929,7 @@ export default function ContentViewer() {
         options={options}
         onToggle={toggleOption}
         onSetVariant={(variant) => setOption("liveSessionVariant", variant)}
+        onSetMarkCompleteStyle={(style) => setOption("markCompleteStyle", style)}
         selectedTrack={selectedTrack}
         onSetSelectedTrack={(track) => {
           localStorage.setItem(TRACK_STORAGE_KEY, track);
@@ -3007,20 +2937,6 @@ export default function ContentViewer() {
         }}
         selectedCategory={selectedCategory}
         onSetSelectedCategory={setSelectedCategory}
-        role={aboutMe?.role ?? null}
-        onSetRole={(role) => {
-          const current = loadPersonalizationData();
-          const next: PersonalizationData = {
-            status: current?.status ?? "working",
-            role,
-            roleTense: current?.roleTense ?? "current",
-            industry: current?.industry ?? null,
-            industryTense: current?.industryTense ?? "current",
-            aiGoalText: current?.aiGoalText ?? "",
-          };
-          localStorage.setItem(PERSONALIZATION_KEY, JSON.stringify(next));
-          window.location.reload();
-        }}
         cardStyle={cardStyle}
         onSetCardStyle={setBuildCardStyle}
         onOpenFeedback={() => { setPrototypeOptionsOpen(false); setFeedbackModalOpen(true); }}
@@ -3058,8 +2974,8 @@ export default function ContentViewer() {
       <RoleModal
         open={roleModalOpen}
         onOpenChange={setRoleModalOpen}
-        roleData={aboutMe}
-        onSaveRole={setAboutMe}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
       />
       <NoAccessModal
         open={noAccessModalOpen}

@@ -4,7 +4,9 @@ import {
   Button,
   ButtonColor,
   ButtonSize,
+  ButtonWidth,
   IconArrowUpRight,
+  IconCheck,
   IconChevronDown,
   IconChevronRight,
   IconDotsVertical,
@@ -19,7 +21,7 @@ import {
   IconX,
 } from "../leland";
 
-import { useLessonPage } from "./LessonPageContext";
+import { useLessonPage, type SectionCompleteStyle } from "./LessonPageContext";
 
 import type { LiveSessionBannerBlock as LiveSessionBannerBlockType } from "../../data/lessonBlocks";
 
@@ -511,70 +513,207 @@ export function LiveSessionBanner({ block }: { block: LiveSessionBannerBlockType
   }
 }
 
-// Bottom-of-page action row: a top divider with 32px vertical padding.
-// Get help / Share sit on the left; "Was this section helpful?" with Yes/No
-// buttons is right-aligned on desktop and stacks below on mobile.
+// Navigating section-to-section happens through the sidebar (or the mobile
+// drawer) only — this is the "I'm done here" action instead of a Back/Next
+// pair. Its label is variable: the section right before the
+// course-completion page reads "Complete course" instead of "Continue".
+// Three treatments are live behind the prototype options menu ("pill",
+// "banner", "row") while we settle on one — see SectionCompleteStyle.
+export function SectionCompleteAction({
+  label,
+  style,
+  nextTitle,
+  completed,
+  onComplete,
+  onToggleComplete,
+}: {
+  label: string;
+  style: SectionCompleteStyle;
+  nextTitle: string;
+  completed: boolean;
+  onComplete: () => void;
+  onToggleComplete: () => void;
+}) {
+  const [celebrating, setCelebrating] = useState(false);
+
+  const handleClick = () => {
+    if (celebrating) return;
+    setCelebrating(true);
+    // Let the checkbox fill register before jumping to the next section.
+    setTimeout(onComplete, 550);
+  };
+
+  // Shared trailing icon for the Button-based styles ("pill" and "row"):
+  // a chevron that swaps briefly to a filled checkmark — matching the course
+  // nav's own completed-section indicator — right before navigating on.
+  const continueIcon = ({ iconClassName }: { iconClassName?: string }) =>
+    celebrating ? (
+      <span
+        className={`${iconClassName} flex shrink-0 items-center justify-center rounded-full bg-leland-on-primary-text animate-[icon-pop_400ms_ease-out]`}
+      >
+        <IconCheck className="size-3 text-leland-primary" />
+      </span>
+    ) : (
+      <IconChevronRight className={iconClassName} />
+    );
+
+  if (style === "banner") {
+    // Here the checkbox is its own persistent toggle — separate from
+    // "Continue," which always moves on regardless of whether the learner
+    // checked it first.
+    return (
+      <div className="flex w-full items-center gap-3 rounded-xl border border-leland-gray-stroke bg-white p-6">
+        <button
+          type="button"
+          onClick={onToggleComplete}
+          className="flex min-w-0 flex-1 items-center gap-3 rounded-lg text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+        >
+          <span
+            className={`flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${
+              completed ? "border-leland-gray-dark bg-leland-gray-dark" : "border-leland-gray-extra-light"
+            }`}
+          >
+            {completed ? (
+              <IconCheck className="size-3 text-white animate-[icon-pop_400ms_ease-out]" />
+            ) : null}
+          </span>
+          <span className="truncate text-[1.125rem] font-semibold leading-tight text-leland-gray-dark">
+            {completed ? "Section complete" : "Mark complete"}
+          </span>
+        </button>
+        <Button
+          label={label}
+          buttonColor={ButtonColor.PRIMARY}
+          size={ButtonSize.LARGE}
+          rounded
+          onClick={onComplete}
+        />
+      </div>
+    );
+  }
+
+  if (style === "row") {
+    return (
+      <div className="flex w-full flex-col items-start gap-4 rounded-2xl border border-leland-gray-stroke bg-white p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-1">
+          <span className="leland-paragraph-sm font-semibold uppercase tracking-wide text-leland-gray-extra-light">
+            Up next
+          </span>
+          <span className="truncate leland-heading-xl font-semibold text-leland-gray-dark">{nextTitle}</span>
+        </div>
+        <Button
+          label={label}
+          buttonColor={ButtonColor.PRIMARY}
+          size={ButtonSize.MEDIUM}
+          rounded
+          disabled={celebrating}
+          onClick={handleClick}
+          CustomRightIcon={continueIcon}
+        />
+      </div>
+    );
+  }
+
+  // "pill": a large, full-width version of the same Continue button used in
+  // the "banner" and "row" styles above.
+  return (
+    <Button
+      label={label}
+      buttonColor={ButtonColor.PRIMARY}
+      size={ButtonSize.LARGE}
+      width={ButtonWidth.FULL}
+      rounded
+      disabled={celebrating}
+      onClick={handleClick}
+      CustomRightIcon={continueIcon}
+    />
+  );
+}
+
+// Bottom-of-page action row: the "Mark complete" action, then (below a top
+// divider with 32px vertical padding) Get help / Share on the left, and
+// "Was this section helpful?" with Yes/No buttons right-aligned on desktop
+// and stacked below on mobile.
 export function LessonFooterActions() {
-  const { onShareFeedback, onOpenSupport } = useLessonPage();
+  const {
+    onShareFeedback,
+    onOpenSupport,
+    sectionCompleteLabel,
+    sectionCompleteStyle,
+    sectionNextTitle,
+    isSectionComplete,
+    onSectionComplete,
+    onToggleSectionComplete,
+  } = useLessonPage();
   const [selectedThumb, setSelectedThumb] = useState<"yes" | "no" | null>(null);
   const [yesPopKey, setYesPopKey] = useState(0);
   const [noPopKey, setNoPopKey] = useState(0);
   return (
-    <div className="flex flex-col gap-6 border-t border-leland-gray-stroke pt-8 pb-8 md:pb-16 md:flex-row md:items-center md:justify-between">
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          label="Get help"
-          buttonColor={ButtonColor.SECONDARY_NEUTRAL}
-          size={ButtonSize.MEDIUM}
-          LeftIcon={IconQuestion}
-          onClick={onOpenSupport}
-        />
-        <Button
-          label="Share"
-          hideLabel
-          buttonColor={ButtonColor.SECONDARY_NEUTRAL}
-          size={ButtonSize.MEDIUM}
-          LeftIcon={IconShare}
-        />
-      </div>
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-        <span className="leland-paragraph-base text-leland-gray-dark">
-          Was this section helpful?
-        </span>
-        <div className="flex items-center gap-6">
-          <button
-            type="button"
-            aria-label="Not helpful"
-            onClick={() => {
-              setSelectedThumb("no");
-              setNoPopKey((k) => k + 1);
-              onShareFeedback();
-            }}
-            className="flex items-center gap-2 text-[0.875rem] font-semibold text-leland-gray-dark hover:text-leland-gray-light focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-          >
-            {selectedThumb === "no" ? (
-              <IconThumbsDownFilled key={noPopKey} className="size-5 animate-[icon-pop_400ms_ease-out]" />
-            ) : (
-              <IconThumbsDown className="size-5" />
-            )}
-            No
-          </button>
-          <button
-            type="button"
-            aria-label="Helpful"
-            onClick={() => {
-              setSelectedThumb("yes");
-              setYesPopKey((k) => k + 1);
-            }}
-            className="flex items-center gap-2 text-[0.875rem] font-semibold text-leland-gray-dark hover:text-leland-gray-light focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
-          >
-            {selectedThumb === "yes" ? (
-              <IconThumbsUpPlainFilled key={yesPopKey} className="size-5 animate-[icon-pop_400ms_ease-out]" />
-            ) : (
-              <IconThumbsUpPlain className="size-5" />
-            )}
-            Yes
-          </button>
+    <div className="flex flex-col gap-8">
+      <SectionCompleteAction
+        label={sectionCompleteLabel}
+        style={sectionCompleteStyle}
+        nextTitle={sectionNextTitle}
+        completed={isSectionComplete}
+        onComplete={onSectionComplete}
+        onToggleComplete={onToggleSectionComplete}
+      />
+      <div className="flex flex-col gap-6 border-t border-leland-gray-stroke pt-8 pb-8 md:pb-16 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            label="Get help"
+            buttonColor={ButtonColor.SECONDARY_NEUTRAL}
+            size={ButtonSize.MEDIUM}
+            LeftIcon={IconQuestion}
+            onClick={onOpenSupport}
+          />
+          <Button
+            label="Share"
+            hideLabel
+            buttonColor={ButtonColor.SECONDARY_NEUTRAL}
+            size={ButtonSize.MEDIUM}
+            LeftIcon={IconShare}
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <span className="leland-paragraph-base text-leland-gray-dark">
+            Was this section helpful?
+          </span>
+          <div className="flex items-center gap-6">
+            <button
+              type="button"
+              aria-label="Not helpful"
+              onClick={() => {
+                setSelectedThumb("no");
+                setNoPopKey((k) => k + 1);
+                onShareFeedback();
+              }}
+              className="flex items-center gap-2 text-[0.875rem] font-semibold text-leland-gray-dark hover:text-leland-gray-light focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+            >
+              {selectedThumb === "no" ? (
+                <IconThumbsDownFilled key={noPopKey} className="size-5 animate-[icon-pop_400ms_ease-out]" />
+              ) : (
+                <IconThumbsDown className="size-5" />
+              )}
+              No
+            </button>
+            <button
+              type="button"
+              aria-label="Helpful"
+              onClick={() => {
+                setSelectedThumb("yes");
+                setYesPopKey((k) => k + 1);
+              }}
+              className="flex items-center gap-2 text-[0.875rem] font-semibold text-leland-gray-dark hover:text-leland-gray-light focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary"
+            >
+              {selectedThumb === "yes" ? (
+                <IconThumbsUpPlainFilled key={yesPopKey} className="size-5 animate-[icon-pop_400ms_ease-out]" />
+              ) : (
+                <IconThumbsUpPlain className="size-5" />
+              )}
+              Yes
+            </button>
+          </div>
         </div>
       </div>
     </div>

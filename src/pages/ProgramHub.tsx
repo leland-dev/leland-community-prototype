@@ -12,7 +12,8 @@ import { type BuildCardStyle, setBuildCardStyle, useBuildCardStyle } from "../co
 import { useTopNavStyle } from "../contexts/TopNavStyleContext";
 import { useSelectedCategory } from "../contexts/SelectedCategoryContext";
 import { useDisplayName } from "../contexts/DisplayNameContext";
-import { CATEGORIES, CATEGORY_TO_USE_CASES, ROLE_TO_CATEGORY } from "../lib/categories";
+import { CATEGORIES, CATEGORY_TO_USE_CASES, CATEGORY_TO_ROLE, ROLE_TO_CATEGORY } from "../lib/categories";
+import { pickLesson1Build } from "../data/sampleLesson";
 import homeIcon from "../assets/img/program-hub/hdr-e8a6d.svg";
 import calendarArrowIcon from "../assets/img/program-hub/hdr-03896.svg";
 import slackIcon from "../assets/icons/slack-black.svg";
@@ -105,11 +106,13 @@ function AllLevelsModal({
   onOpenChange,
   onOpenLevel,
   onSelectCohort,
+  cohortSelectedLevels,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onOpenLevel: (level: Level) => void;
-  onSelectCohort: () => void;
+  onSelectCohort: (levelNumber: number) => void;
+  cohortSelectedLevels: Set<number>;
 }) {
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
@@ -117,7 +120,7 @@ function AllLevelsModal({
         size={ModalSize.MEDIUM}
         header={<h2 className="text-[20px] font-semibold leading-[1.3] text-gray-dark">All levels</h2>}
       >
-        <ul className="flex flex-col divide-y divide-gray-stroke px-6 pb-6">
+        <ul className="flex flex-col divide-y divide-gray-stroke px-6 py-2 sm:px-8 sm:py-4">
           {LEVELS.map((lvl) => (
             <li key={lvl.number} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:gap-4">
               <button
@@ -133,16 +136,21 @@ function AllLevelsModal({
                   ) : (
                     <ProgressBar pct={lvl.progressPct ?? 0} label={`${lvl.progressPct}% complete`} className="max-w-[180px]" />
                   )}
+                  <span className="text-[12px] leading-[1.5] text-gray-light">{lvl.liveSessions ?? "Self-paced"}</span>
                 </div>
               </button>
-              <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
-                <span className="text-[12px] leading-[1.5] text-gray-light sm:text-right">{lvl.liveSessions ?? "Self-paced"}</span>
-                {lvl.liveSessions ? (
-                  <Button size="sm" variant="outline" onClick={onSelectCohort} className="w-full font-semibold sm:w-auto">
-                    Select cohort
+              {lvl.liveSessions ? (
+                <div className="flex shrink-0 flex-col items-stretch sm:items-end">
+                  <Button
+                    size="md"
+                    variant="secondary"
+                    onClick={() => onSelectCohort(lvl.number)}
+                    className="w-full font-semibold sm:w-auto"
+                  >
+                    {cohortSelectedLevels.has(lvl.number) ? "Switch cohort" : "Select cohort"}
                   </Button>
-                ) : null}
-              </div>
+                </div>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -252,6 +260,7 @@ const ITEMS: Item[] = [
 // its own role-based build picker like Session 1's.
 const UPCOMING_BUILDS = [
   {
+    level: 1,
     lessonNumber: 1,
     sessionTitle: "Build a real product with world-class design",
     buildTitle: "Build a one-page account brief for any prospect",
@@ -260,6 +269,7 @@ const UPCOMING_BUILDS = [
     image: imgLeadBrief,
   },
   {
+    level: 1,
     lessonNumber: 2,
     sessionTitle: "Automate Communication in Your Voice",
     buildTitle: "Build a scheduled email manager",
@@ -268,6 +278,7 @@ const UPCOMING_BUILDS = [
     image: imgTriage,
   },
   {
+    level: 1,
     lessonNumber: 3,
     sessionTitle: "Analyze data and design presentations",
     buildTitle: "Build and design a presentation on your own topic",
@@ -279,19 +290,51 @@ const UPCOMING_BUILDS = [
 
 const PROGRAM_HUB_OPTIONS_KEY = "program-hub-prototype-options";
 
+function loadProgramHubOptions(): { showUseCaseSection: boolean; includeFeaturedBuilds: boolean } {
+  try {
+    const stored = JSON.parse(localStorage.getItem(PROGRAM_HUB_OPTIONS_KEY) ?? "{}");
+    return {
+      showUseCaseSection: stored.showUseCaseSection ?? false,
+      includeFeaturedBuilds: stored.includeFeaturedBuilds ?? true,
+    };
+  } catch {
+    return { showUseCaseSection: false, includeFeaturedBuilds: true };
+  }
+}
+
 function useProgramHubOptions() {
-  const [showUseCaseSection, setShowUseCaseSectionState] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(PROGRAM_HUB_OPTIONS_KEY) ?? "{}").showUseCaseSection ?? false;
-    } catch {
-      return false;
-    }
-  });
+  const [showUseCaseSection, setShowUseCaseSectionState] = useState(() => loadProgramHubOptions().showUseCaseSection);
+  const [includeFeaturedBuilds, setIncludeFeaturedBuildsState] = useState(() => loadProgramHubOptions().includeFeaturedBuilds);
   const setShowUseCaseSection = (value: boolean) => {
     setShowUseCaseSectionState(value);
-    localStorage.setItem(PROGRAM_HUB_OPTIONS_KEY, JSON.stringify({ showUseCaseSection: value }));
+    localStorage.setItem(PROGRAM_HUB_OPTIONS_KEY, JSON.stringify({ ...loadProgramHubOptions(), showUseCaseSection: value }));
   };
-  return { showUseCaseSection, setShowUseCaseSection };
+  const setIncludeFeaturedBuilds = (value: boolean) => {
+    setIncludeFeaturedBuildsState(value);
+    localStorage.setItem(PROGRAM_HUB_OPTIONS_KEY, JSON.stringify({ ...loadProgramHubOptions(), includeFeaturedBuilds: value }));
+  };
+  return { showUseCaseSection, setShowUseCaseSection, includeFeaturedBuilds, setIncludeFeaturedBuilds };
+}
+
+const COHORT_SELECTED_LEVELS_KEY = "program-hub-cohort-selected-levels";
+
+function useCohortSelectedLevels() {
+  const [levels, setLevels] = useState<Set<number>>(() => {
+    try {
+      const raw = JSON.parse(localStorage.getItem(COHORT_SELECTED_LEVELS_KEY) ?? "[]");
+      return new Set(raw);
+    } catch {
+      return new Set();
+    }
+  });
+  const markSelected = (levelNumber: number) => {
+    setLevels((prev) => {
+      const next = new Set(prev).add(levelNumber);
+      localStorage.setItem(COHORT_SELECTED_LEVELS_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  };
+  return { levels, markSelected };
 }
 
 // Curated Sales examples — Tutorials and Skills only (no community builds),
@@ -555,6 +598,13 @@ function useCardCarousel<T>(items: T[]) {
 // (plain text, border, no leading icon), in a horizontal scroll-snap row.
 // Nav arrows live in the card header (see ProgramHub), driven by the same
 // scroll state via `carousel`.
+// Purely a visual distinguisher between the Up Next cards (not tied to any
+// real status) — cycles through a small on-brand palette by lesson number.
+const LEVEL_DOT_COLORS = ["bg-leland-primary", "bg-[#80ACED]", "bg-gray-stroke", "bg-[#F2A399]", "bg-[#9BCBA7]"];
+function levelDotColor(level: number) {
+  return LEVEL_DOT_COLORS[(level - 1) % LEVEL_DOT_COLORS.length];
+}
+
 function UpcomingBuildsCarousel({
   builds,
   carousel,
@@ -600,19 +650,19 @@ function UpcomingBuildsCarousel({
             >
               <div className="relative w-full shrink-0 overflow-hidden rounded-md border border-leland-gray-hover">
                 <img src={b.image} alt="" className="block h-auto w-full" />
-                <span className="absolute left-2 top-2 rounded-[4px] bg-leland-black/[87%] px-1 pt-[3px] pb-[4px] text-[0.75rem] font-semibold leading-none text-leland-white shadow-[0_1px_3px_rgba(0,0,0,0.25)]">
+                <span className="absolute left-2 top-2 flex items-center gap-1.5 rounded-[4px] bg-leland-black/[87%] px-1 pt-[3px] pb-[4px] text-[0.75rem] font-semibold leading-none text-leland-white shadow-[0_1px_3px_rgba(0,0,0,0.25)]">
+                  <span className={`size-1.5 shrink-0 rounded-full ${levelDotColor(b.level)}`} aria-hidden />
                   Level 1
                 </span>
               </div>
               <div className="flex flex-1 flex-col items-start">
                 <p className="line-clamp-2 text-[16px] font-semibold leading-[1.3] text-gray-dark">{b.buildTitle}.</p>
-                <p className="mt-0.5 line-clamp-2 text-[14px] text-gray-light">
-                  Lesson {b.lessonNumber} · {b.sessionTitle}
+                <p className="mt-1 line-clamp-2 text-[14px] text-gray-light">
+                  Featured build{b.otherOptionsCount ? ` · ${b.otherOptionsCount} more options` : ""}
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center">
                 <Tag text={completed ? "Complete" : "Not started"} tagColor={completed ? TagColor.BLACK : TagColor.WHITE} size={TagSize.XS} fontWeight={FontWeight.SEMIBOLD} />
-                {b.otherOptionsCount ? <span className="text-[12px] font-medium text-gray-light">{b.otherOptionsCount} more options</span> : null}
               </div>
             </Link>
           );
@@ -649,13 +699,27 @@ export default function ProgramHub() {
   // redefined on every render (a new function identity each time), which
   // would reset any state defined inside it on every keystroke.
   const [groupSearch, setGroupSearch] = useState<Record<string, string>>({});
-  const { showUseCaseSection, setShowUseCaseSection } = useProgramHubOptions();
+  const { showUseCaseSection, setShowUseCaseSection, includeFeaturedBuilds, setIncludeFeaturedBuilds } = useProgramHubOptions();
   const cardStyle = useBuildCardStyle();
   const { hideNavSelections, setHideNavSelections } = useTopNavStyle();
   const [prototypeOptionsOpen, setPrototypeOptionsOpen] = useState(false);
   const [allLevelsOpen, setAllLevelsOpen] = useState(false);
   const [selectCohortOpen, setSelectCohortOpen] = useState(false);
-  const upcomingBuildsCarousel = useCardCarousel(UPCOMING_BUILDS);
+  const { levels: cohortSelectedLevels, markSelected: markCohortSelected } = useCohortSelectedLevels();
+  const [cohortLevelNumber, setCohortLevelNumber] = useState<number | null>(null);
+  // Lesson 1's card mirrors whichever build the learner would actually land
+  // on in the course viewer's role-scoped build picker — same selectedCategory
+  // signal, mapped to a role code the same way RoleBuildPicker does.
+  const upcomingBuilds = useMemo(() => {
+    const knownRole = selectedCategory ? (CATEGORY_TO_ROLE[selectedCategory] ?? null) : null;
+    const lesson1Build = pickLesson1Build(knownRole);
+    return UPCOMING_BUILDS.map((b) =>
+      b.lessonNumber === 1
+        ? { ...b, buildTitle: lesson1Build.buildTitle, image: lesson1Build.image ?? b.image, otherOptionsCount: lesson1Build.otherOptionsCount }
+        : b,
+    );
+  }, [selectedCategory]);
+  const upcomingBuildsCarousel = useCardCarousel(upcomingBuilds);
 
   const toggleChip = (group: keyof typeof filters, value: string) =>
     setFilters((f) => ({ ...f, [group]: f[group].includes(value) ? f[group].filter((v) => v !== value) : [...f[group], value] }));
@@ -874,6 +938,57 @@ export default function ProgramHub() {
     );
   };
 
+  // Featured level card's progress — drives both the circular indicator and
+  // the Resume/Start button label.
+  const featuredLevelPct = 50;
+
+  // Shared content so "Live sessions" can sit next to the course card (no
+  // featured builds) or as its own full-width section below (with featured
+  // builds) without duplicating the session list markup.
+  const liveSessionsBody = (
+    <>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+        <div className="flex min-w-px flex-1 flex-col gap-2">
+          <p className="text-[22px] font-semibold leading-[1.2] text-gray-dark">Live sessions</p>
+          <p className="text-[16px] leading-[1.5] text-gray-light">Level 1: Use AI to 10x your impact</p>
+        </div>
+        <Button size="sm" variant="secondary" rounded="rounded-full" className="self-start !gap-1.5 !bg-black/5 font-semibold">
+          May 24 cohort
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11V9a3 3 0 013-3h15" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v2a3 3 0 01-3 3H3" /></svg>
+        </Button>
+      </div>
+      <div className="flex flex-col gap-1">
+        <div className="flex h-16 items-center gap-3 py-2.5">
+          <div className="flex size-11 shrink-0 flex-col overflow-hidden rounded-lg border border-gray-stroke bg-white shadow-[0_1px_3px_rgba(16,24,40,0.1),0_1px_2px_rgba(16,24,40,0.06)]">
+            <div className="h-3 w-full bg-[#80aced]" />
+            <div className="flex flex-1 items-center justify-center pb-1 pt-0.5 text-[16px] font-semibold leading-[1.3] text-gray-dark">18</div>
+          </div>
+          <div className="flex min-w-px flex-1 flex-col gap-0.5">
+            <p className="truncate text-[16px] font-semibold leading-[1.3] text-gray-dark">
+              Today at 6:00 PM <span className="text-[14px] font-normal text-gray-extra-light">· 60 min</span>
+            </p>
+            <p className="truncate text-[14px] text-gray-light">Build your Agentic Operating System</p>
+          </div>
+          <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" className="shrink-0 text-gray-dark" aria-hidden><circle cx="8" cy="3.5" r="1" /><circle cx="8" cy="8" r="1" /><circle cx="8" cy="12.5" r="1" /></svg>
+        </div>
+        <div className="flex h-16 items-center gap-3 py-2.5">
+          <div className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-light">
+            <img src={sessionThumb} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-black/30" />
+            <img src={playIcon} alt="" className="relative h-3 w-[11px]" />
+          </div>
+          <div className="flex min-w-px flex-1 flex-col gap-0.5">
+            <p className="truncate text-[16px] font-semibold leading-[1.3] text-gray-dark">Analyze data and design presentations</p>
+            <p className="truncate text-[14px] text-gray-light">Sept 31, 8am · Session Title Goes Here</p>
+          </div>
+        </div>
+      </div>
+      <Button size="md" variant="secondary" className="self-start !bg-black/5 font-semibold lg:mt-auto">
+        See all sessions
+      </Button>
+    </>
+  );
+
   return (
     <div className="relative min-h-screen bg-[#F9F8F3] pb-24">
 
@@ -883,18 +998,18 @@ export default function ProgramHub() {
           <div className="flex flex-col gap-3">
             <h1 className="font-serif text-[36px] font-medium leading-[1.1] text-gray-dark sm:text-[46px]">Welcome, {displayName}</h1>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 !bg-black/5 font-semibold">
+          <div className="scrollbar-hide flex items-center gap-2 overflow-x-auto sm:flex-wrap">
+            <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 shrink-0 !bg-black/5 font-semibold">
               <IconImg src={calendarArrowIcon} />Office hours
             </Button>
-            <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 !bg-black/5 font-semibold">
+            <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 shrink-0 !bg-black/5 font-semibold">
               <IconImg src={slackIcon} />Community
             </Button>
             <Button
               size="md"
               variant="secondary"
               rounded="rounded-full"
-              className="!gap-2 !bg-black/5 font-semibold"
+              className="!gap-2 shrink-0 !bg-black/5 font-semibold"
               onClick={() => document.getElementById("recommended-for-you")?.scrollIntoView({ behavior: "smooth" })}
             >
               Resource library
@@ -905,85 +1020,104 @@ export default function ProgramHub() {
 
         {/* Current course + live sessions */}
         <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-stretch">
-          <div className="flex flex-col gap-2.5 rounded-2xl border border-gray-stroke bg-white p-6 shadow-[0_1px_1px_rgba(16,24,40,0.05)] lg:max-w-[400px] lg:flex-1 lg:justify-between">
-            <img
-              src={levelOne}
-              alt="AI Builder Program Level 1"
-              className="max-h-[120px] w-auto max-w-full self-start rounded-lg border border-black/5 object-cover lg:h-full lg:max-h-none lg:w-auto lg:flex-1 lg:self-start"
-            />
-            <div className="flex flex-col gap-2.5 py-2.5">
-              <p className="truncate text-[16px] font-semibold leading-[1.3] text-gray-dark">Level 1: Use AI to 10x your impact</p>
-              <ProgressBar pct={50} label="50% complete" className="max-w-[300px]" />
-              <p className="truncate text-[14px] leading-[1.35] text-gray-light">Lesson 2/3: Automate communication in your voice</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button size="md" variant="dark" onClick={() => navigate(COURSE_PATH)} className="!gap-2 font-semibold">
-                Resume<IconImg src={chevronOverWhiteIcon} />
-              </Button>
-              <Button size="md" variant="secondary" onClick={() => setAllLevelsOpen(true)} className="!bg-black/5 font-semibold">
-                See all levels
-              </Button>
+          <div className="flex flex-col gap-2.5 rounded-2xl border border-gray-stroke bg-white p-6 shadow-[0_1px_1px_rgba(16,24,40,0.05)] lg:max-w-[400px] lg:flex-1">
+            {/* Side by side with "Up Next"/Live sessions (lg+), this stays
+                stacked (image over text) to fit a narrow ~400px column.
+                Once that row itself stacks (below lg) this card has the
+                full page width to work with, so it switches to a
+                horizontal image-left/text-right arrangement instead of
+                wasting that width on a tall, narrow stack — matching
+                production's own behavior at that width. True mobile
+                (below sm) drops back to stacked since there's no width to
+                spare there either. */}
+            {/* sm–lg: image sits to the left of a single content column
+                (title/progress, subtext, buttons all stacked together)
+                instead of the image's row wrapping the buttons onto a
+                separate full-width line below. */}
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-4 lg:flex-col lg:items-start lg:gap-2.5 lg:min-h-0 lg:flex-1">
+              {/* Border/radius/clip live on this wrapper (not the img)
+                  so a sub-pixel mismatch between the img's own rounded
+                  corners and its computed size can't leave a hairline gap
+                  at the corners. */}
+              {/* sm: a fixed height with width auto-derived via the
+                  aspect-ratio below — not a fraction of the row's width —
+                  so the box can never end up a different ratio than the
+                  image itself (which a width-driven + min-height floor
+                  could do, forcing a letterboxed gap). */}
+              <div className="relative aspect-[1200/628] w-full shrink-0 self-start sm:h-[140px] sm:w-auto sm:shrink-0 sm:max-h-none sm:max-w-none sm:self-center lg:h-auto lg:w-auto lg:max-h-[180px] lg:max-w-full lg:min-h-0 lg:shrink lg:self-start">
+                <div className="h-full w-full overflow-hidden rounded-lg border border-black/5">
+                  {/* A hair of overscale (clipped by overflow-hidden) —
+                      sub-pixel rounding between the box's aspect-ratio-
+                      derived height and the img's own exact aspect ratio
+                      can otherwise leave a hairline gap along one edge. */}
+                  <img
+                    src={levelOne}
+                    alt="AI Builder Program Level 1"
+                    className="block h-full w-full scale-[1.02] object-contain"
+                  />
+                </div>
+              </div>
+              {/* At lg, `contents` dissolves this wrapper so the text block
+                  and the buttons go back to being independent items of the
+                  outer column — that's what lets the text block center
+                  itself (lg:my-auto, below) while the buttons stay a
+                  separate, bottom-anchored item. At sm (not lg) it's a real
+                  flex column so text+buttons stack together next to the
+                  image instead of each being its own row. */}
+              <div className="flex min-w-0 flex-col gap-4 sm:flex-1 sm:gap-3 lg:contents">
+                {/* my-auto (lg only): when the image is capped short of the
+                    available space, this row centers in whatever's left
+                    instead of sitting flush under the image. */}
+                <div className="flex min-w-0 flex-col gap-3 py-2.5 lg:my-auto">
+                  <p className="line-clamp-2 text-[16px] font-semibold leading-[1.3] text-gray-dark">Level 1: Use AI to 10x your impact</p>
+                  <div className="h-1.5 w-full max-w-[160px] overflow-hidden rounded-full bg-leland-gray-stroke">
+                    <div className="h-full rounded-full bg-leland-gray-dark" style={{ width: `${Math.max(0, Math.min(100, featuredLevelPct))}%` }} />
+                  </div>
+                  {/* Only where there's room to spare — hidden in the lg+
+                      tier's narrow column next to Up Next. */}
+                  <p className="truncate text-[14px] leading-[1.35] text-gray-light lg:hidden">
+                    Lesson 2/3: Automate communication in your voice
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button size="md" variant="dark" onClick={() => navigate(COURSE_PATH)} className="!gap-2 font-semibold">
+                    {featuredLevelPct > 0 ? "Resume" : "Start"}<IconImg src={chevronOverWhiteIcon} />
+                  </Button>
+                  <Button size="md" variant="ghost" onClick={() => setAllLevelsOpen(true)} className="font-semibold">
+                    See all levels
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="flex min-w-[280px] flex-1 flex-col gap-5 rounded-2xl border border-gray-stroke bg-white p-6">
-            <div className="flex items-center gap-4">
-              <div className="flex min-w-px flex-1 flex-col gap-2">
-                <p className="text-[22px] font-semibold leading-[1.2] text-gray-dark">Up Next</p>
+          {includeFeaturedBuilds ? (
+            <div className="flex min-w-[280px] flex-1 flex-col gap-5 rounded-2xl border border-gray-stroke bg-white p-6">
+              <div className="flex items-center gap-4">
+                <div className="flex min-w-px flex-1 flex-col gap-2">
+                  <p className="text-[22px] font-semibold leading-[1.2] text-gray-dark">Up Next</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RoundArrow dir="left" disabled={upcomingBuildsCarousel.page <= 0} onClick={() => upcomingBuildsCarousel.scrollByPage(-1)} />
+                  <RoundArrow dir="right" disabled={upcomingBuildsCarousel.page >= upcomingBuildsCarousel.pages - 1} onClick={() => upcomingBuildsCarousel.scrollByPage(1)} />
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <RoundArrow dir="left" disabled={upcomingBuildsCarousel.page <= 0} onClick={() => upcomingBuildsCarousel.scrollByPage(-1)} />
-                <RoundArrow dir="right" disabled={upcomingBuildsCarousel.page >= upcomingBuildsCarousel.pages - 1} onClick={() => upcomingBuildsCarousel.scrollByPage(1)} />
-              </div>
+              <UpcomingBuildsCarousel builds={upcomingBuilds} carousel={upcomingBuildsCarousel} cardStyle={cardStyle} />
             </div>
-            <UpcomingBuildsCarousel builds={UPCOMING_BUILDS} carousel={upcomingBuildsCarousel} cardStyle={cardStyle} />
-          </div>
+          ) : (
+            <div className="flex min-w-[280px] flex-1 flex-col gap-5 rounded-2xl border border-gray-stroke bg-white p-6">
+              {liveSessionsBody}
+            </div>
+          )}
         </div>
 
-        {/* Live sessions */}
-        <section className="mt-10">
-          <div className="flex flex-col gap-4 rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-              <div className="flex min-w-px flex-1 flex-col gap-2">
-                <p className={sectionTitle}>Live sessions</p>
-                <p className="text-[16px] leading-[1.5] text-gray-light">Level 1: Use AI to 10x your impact</p>
-              </div>
-              <Button size="sm" variant="secondary" rounded="rounded-full" className="self-start !gap-1.5 !bg-black/5 font-semibold">
-                May 24 cohort
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11V9a3 3 0 013-3h15" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v2a3 3 0 01-3 3H3" /></svg>
-              </Button>
+        {includeFeaturedBuilds && (
+          <section className="mt-10">
+            <div className="flex flex-col gap-4 rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
+              {liveSessionsBody}
             </div>
-            <div className="flex flex-col gap-1">
-              <div className="flex h-16 items-center gap-3 py-2.5">
-                <div className="flex size-11 shrink-0 flex-col overflow-hidden rounded-lg border border-gray-stroke bg-white shadow-[0_1px_3px_rgba(16,24,40,0.1),0_1px_2px_rgba(16,24,40,0.06)]">
-                  <div className="h-3 w-full bg-[#80aced]" />
-                  <div className="flex flex-1 items-center justify-center pb-1 pt-0.5 text-[16px] font-semibold leading-[1.3] text-gray-dark">18</div>
-                </div>
-                <div className="flex min-w-px flex-1 flex-col gap-0.5">
-                  <p className="truncate text-[16px] font-semibold leading-[1.3] text-gray-dark">
-                    Today at 6:00 PM <span className="text-[14px] font-normal text-gray-extra-light">· 60 min</span>
-                  </p>
-                  <p className="truncate text-[14px] text-gray-light">Build your Agentic Operating System</p>
-                </div>
-                <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" className="shrink-0 text-gray-dark" aria-hidden><circle cx="8" cy="3.5" r="1" /><circle cx="8" cy="8" r="1" /><circle cx="8" cy="12.5" r="1" /></svg>
-              </div>
-              <div className="flex h-16 items-center gap-3 py-2.5">
-                <div className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-light">
-                  <img src={sessionThumb} alt="" className="absolute inset-0 h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-black/30" />
-                  <img src={playIcon} alt="" className="relative h-3 w-[11px]" />
-                </div>
-                <div className="flex min-w-px flex-1 flex-col gap-0.5">
-                  <p className="truncate text-[16px] font-semibold leading-[1.3] text-gray-dark">Analyze data and design presentations</p>
-                  <p className="truncate text-[14px] text-gray-light">Sept 31, 8am · Session Title Goes Here</p>
-                </div>
-              </div>
-            </div>
-            <Button size="md" variant="secondary" className="self-start !bg-black/5 font-semibold">
-              See all sessions
-            </Button>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Program resources */}
         <section className="mt-10 flex flex-col gap-8">
@@ -1204,15 +1338,22 @@ export default function ProgramHub() {
         open={allLevelsOpen}
         onOpenChange={setAllLevelsOpen}
         onOpenLevel={(lvl) => navigate(lvl.to)}
-        onSelectCohort={() => {
+        onSelectCohort={(levelNumber) => {
+          setCohortLevelNumber(levelNumber);
           setAllLevelsOpen(false);
           setSelectCohortOpen(true);
         }}
+        cohortSelectedLevels={cohortSelectedLevels}
       />
       <SelectCohortModal
         open={selectCohortOpen}
         onClose={() => setSelectCohortOpen(false)}
-        onSelect={() => setSelectCohortOpen(false)}
+        onSelect={() => {
+          setSelectCohortOpen(false);
+          if (cohortLevelNumber != null) {
+            markCohortSelected(cohortLevelNumber);
+          }
+        }}
       />
       <Modal open={prototypeOptionsOpen} onOpenChange={setPrototypeOptionsOpen}>
         <ModalContent size={ModalSize.SMALL}>
@@ -1250,6 +1391,11 @@ export default function ProgramHub() {
                 )}
               />
             </div>
+            <SwitchInput
+              label="Include featured builds"
+              isChecked={includeFeaturedBuilds}
+              onToggle={setIncludeFeaturedBuilds}
+            />
             <SwitchInput
               label="Show 'Browse by use case' section"
               isChecked={showUseCaseSection}

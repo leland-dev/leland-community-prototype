@@ -16,19 +16,40 @@ export const CATEGORIES = [
 ];
 
 // Maps the role saved in onboarding (PersonalizationModal's role codes) to
-// one of the categories above.
+// one of the categories above. "founder" has no dedicated category, so it
+// folds into Executive; "other" has no mapping.
 export const ROLE_TO_CATEGORY: Record<string, string> = {
   sales: "Sales",
   marketing: "Marketing",
   hr: "Human Resources",
   finance: "Finance & Accounting",
+  data: "Business Analytics & Intelligence",
+  design: "Design",
+  swe: "Engineering",
+  pm: "Product",
+  ops: "Operations",
+  exec: "Executive",
+  founder: "Executive",
+  legal: "Legal",
 };
 
 // The inverse — used so the shared selected category can drive role-keyed
-// behavior, like the lesson build picker's suggested-role matching.
-export const CATEGORY_TO_ROLE: Record<string, string> = Object.fromEntries(
-  Object.entries(ROLE_TO_CATEGORY).map(([role, category]) => [category, role]),
-);
+// behavior, like the lesson build picker's suggested-role matching. Written
+// out explicitly (rather than derived from ROLE_TO_CATEGORY) since two roles
+// — exec and founder — share the Executive category.
+export const CATEGORY_TO_ROLE: Record<string, string> = {
+  Sales: "sales",
+  Marketing: "marketing",
+  "Human Resources": "hr",
+  "Finance & Accounting": "finance",
+  "Business Analytics & Intelligence": "data",
+  Design: "design",
+  Engineering: "swe",
+  Product: "pm",
+  Operations: "ops",
+  Executive: "exec",
+  Legal: "legal",
+};
 
 // The Use Case filter's default chip set per category, derived from
 // onboarding-focus-area-rollout.numbers (Tutorial Tags sheet): each role's

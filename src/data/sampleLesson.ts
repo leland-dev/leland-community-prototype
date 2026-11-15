@@ -1,7 +1,7 @@
 // Hand-authored sample content for Lesson 1, rendered natively via the
 // lesson-blocks renderer (demo of the block/CMS model). Text is adapted from the
 // real Session 1 guide. Lessons 2–4 still use the legacy HTML iframe manifest.
-import type { Block, BlockSection } from "./lessonBlocks";
+import type { Block, BlockSection, RoleBuildPickerBlock } from "./lessonBlocks";
 import {
   TOOL_SETUP_CLAUDE,
   TOOL_SETUP_CODEX,
@@ -46,6 +46,159 @@ export const LESSON_1_TOP_BLOCKS: Block[] = [
       "https://tannerthelin.github.io/courses-prototype/assets/8814086-hd_1920_1080_25fps-Bbf7RRvH.mp4",
   },
 ];
+
+// Pulled out (rather than inlined in the featured-build section below) so
+// Program Hub's "Up Next" card can derive the same role-scoped default build
+// without duplicating this data — see pickLesson1Build.
+export const LESSON_1_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
+  kind: "roleBuildPicker",
+  fallback: {
+    value: "generic",
+    label: "Generic",
+    builds: [
+      {
+        id: "generic",
+        buildTitle: "Build a one-page summary of a real piece of your work",
+        tutorial: GENERIC_TUTORIAL,
+      },
+    ],
+  },
+  options: [
+    {
+      value: "sales",
+      label: "Sales",
+      matchesRoles: ["sales"],
+      builds: [
+        {
+          id: "sales-account-brief",
+          buildTitle: "Build a one-page account brief for any prospect",
+          description: "A company snapshot, likely pains, and talking points for your next call.",
+          tutorial: SALES_TUTORIAL,
+          image: imgLeadBrief,
+        },
+        {
+          id: "sales-demo-deck",
+          buildTitle: "Build a demo deck for a prospect",
+          description: "Turn your talking points into a short, on-brand deck scoped to one prospect.",
+          tutorial: SALES_DEMO_DECK_TUTORIAL,
+          image: imgDemoDeck,
+        },
+        {
+          id: "sales-branded-proposal",
+          buildTitle: "Build a branded one-page proposal",
+          description: "Turn a rough draft into a polished proposal in your company's colors and fonts.",
+          tutorial: SALES_PROPOSAL_TUTORIAL,
+          image: imgBrandedProposal,
+        },
+        {
+          id: "sales-branded-recap",
+          buildTitle: "Build a branded deal recap page",
+          description: "Turn your call notes into a client-ready recap, styled with your brand.",
+          tutorial: SALES_RECAP_TUTORIAL,
+          image: imgBrandedRecap,
+        },
+        {
+          id: "sales-battlecard",
+          buildTitle: "Build a branded objection-handling page",
+          description: "Turn scattered objection answers into a page you can reference live on calls.",
+          tutorial: LOREM_STUB_TUTORIAL,
+          image: imgBattlecard,
+        },
+        {
+          id: "sales-customer-welcome",
+          buildTitle: "Build a branded welcome page for a new customer",
+          description: "Turn a signed deal's details into a kickoff page for their first week.",
+          tutorial: LOREM_STUB_TUTORIAL,
+          image: imgCustomerWelcome,
+        },
+        {
+          id: "sales-win-loss",
+          buildTitle: "Build a win/loss summary page",
+          description: "Turn notes from a closed deal into a page the team can learn from.",
+          tutorial: LOREM_STUB_TUTORIAL,
+          image: imgWinLoss,
+        },
+      ],
+    },
+    {
+      value: "marketing",
+      label: "Marketing",
+      matchesRoles: ["marketing"],
+      builds: [
+        {
+          id: "marketing-company-story",
+          buildTitle: "Build a one-page story of your company",
+          tutorial: MARKETING_TUTORIAL,
+        },
+      ],
+    },
+    {
+      value: "people",
+      label: "Human Resources",
+      matchesRoles: ["hr"],
+      builds: [
+        {
+          id: "people-welcome-page",
+          buildTitle: "Build a personal welcome page for each new hire",
+          tutorial: PEOPLE_TUTORIAL,
+        },
+      ],
+    },
+    {
+      value: "finance",
+      label: "Finance",
+      matchesRoles: ["finance"],
+      builds: [
+        {
+          id: "finance-budget-summary",
+          buildTitle: "Build a one-page budget summary for your team",
+          tutorial: FINANCE_TUTORIAL,
+        },
+      ],
+    },
+    {
+      value: "product",
+      label: "Product",
+      matchesRoles: ["pm"],
+      builds: [
+        {
+          id: "product-launch-page",
+          buildTitle: "Build a one-page launch page for a new feature",
+          tutorial: PRODUCT_TUTORIAL,
+        },
+      ],
+    },
+    {
+      value: "operations",
+      label: "Operations",
+      matchesRoles: ["ops"],
+      builds: [
+        {
+          id: "operations-checklist",
+          buildTitle: "Build an interactive checklist for a process you run again and again",
+          tutorial: OPERATIONS_TUTORIAL,
+        },
+      ],
+    },
+  ],
+};
+
+// Same role → default-build logic as ContentBlocks' RoleBuildPicker (matched
+// role, else the Sales default, else the first option) — kept in sync so
+// Program Hub's "Up Next" card always shows the build the learner would
+// actually land on in the course viewer.
+export function pickLesson1Build(knownRole: string | null): {
+  buildTitle: string;
+  image?: string;
+  otherOptionsCount: number;
+} {
+  const { fallback, options } = LESSON_1_ROLE_BUILD_PICKER;
+  const matched = knownRole ? options.filter((opt) => opt.matchesRoles?.includes(knownRole)) : [];
+  const option = matched.length === 1 ? matched[0] : (options.find((o) => o.value === "sales") ?? options[0] ?? null);
+  const builds = option?.builds ?? fallback.builds;
+  const [first, ...rest] = builds;
+  return { buildTitle: first.buildTitle, image: first.image, otherOptionsCount: rest.length };
+}
 
 export const LESSON_1_SECTIONS: BlockSection[] = [
   TOOL_SETUP_CLAUDE,
@@ -537,138 +690,7 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
     label: { text: "Apply", color: "black" },
     blocks: [
-      {
-        kind: "roleBuildPicker",
-        fallback: {
-          value: "generic",
-          label: "Generic",
-          builds: [
-            {
-              id: "generic",
-              buildTitle: "Build a one-page summary of a real piece of your work",
-              tutorial: GENERIC_TUTORIAL,
-            },
-          ],
-        },
-        options: [
-          {
-            value: "sales",
-            label: "Sales",
-            matchesRoles: ["sales"],
-            builds: [
-              {
-                id: "sales-account-brief",
-                buildTitle: "Build a one-page account brief for any prospect",
-                description: "A company snapshot, likely pains, and talking points for your next call.",
-                tutorial: SALES_TUTORIAL,
-                image: imgLeadBrief,
-              },
-              {
-                id: "sales-demo-deck",
-                buildTitle: "Build a demo deck for a prospect",
-                description: "Turn your talking points into a short, on-brand deck scoped to one prospect.",
-                tutorial: SALES_DEMO_DECK_TUTORIAL,
-                image: imgDemoDeck,
-              },
-              {
-                id: "sales-branded-proposal",
-                buildTitle: "Build a branded one-page proposal",
-                description: "Turn a rough draft into a polished proposal in your company's colors and fonts.",
-                tutorial: SALES_PROPOSAL_TUTORIAL,
-                image: imgBrandedProposal,
-              },
-              {
-                id: "sales-branded-recap",
-                buildTitle: "Build a branded deal recap page",
-                description: "Turn your call notes into a client-ready recap, styled with your brand.",
-                tutorial: SALES_RECAP_TUTORIAL,
-                image: imgBrandedRecap,
-              },
-              {
-                id: "sales-battlecard",
-                buildTitle: "Build a branded objection-handling page",
-                description: "Turn scattered objection answers into a page you can reference live on calls.",
-                tutorial: LOREM_STUB_TUTORIAL,
-                image: imgBattlecard,
-              },
-              {
-                id: "sales-customer-welcome",
-                buildTitle: "Build a branded welcome page for a new customer",
-                description: "Turn a signed deal's details into a kickoff page for their first week.",
-                tutorial: LOREM_STUB_TUTORIAL,
-                image: imgCustomerWelcome,
-              },
-              {
-                id: "sales-win-loss",
-                buildTitle: "Build a win/loss summary page",
-                description: "Turn notes from a closed deal into a page the team can learn from.",
-                tutorial: LOREM_STUB_TUTORIAL,
-                image: imgWinLoss,
-              },
-            ],
-          },
-          {
-            value: "marketing",
-            label: "Marketing",
-            matchesRoles: ["marketing"],
-            builds: [
-              {
-                id: "marketing-company-story",
-                buildTitle: "Build a one-page story of your company",
-                tutorial: MARKETING_TUTORIAL,
-              },
-            ],
-          },
-          {
-            value: "people",
-            label: "Human Resources",
-            matchesRoles: ["hr"],
-            builds: [
-              {
-                id: "people-welcome-page",
-                buildTitle: "Build a personal welcome page for each new hire",
-                tutorial: PEOPLE_TUTORIAL,
-              },
-            ],
-          },
-          {
-            value: "finance",
-            label: "Finance",
-            matchesRoles: ["finance"],
-            builds: [
-              {
-                id: "finance-budget-summary",
-                buildTitle: "Build a one-page budget summary for your team",
-                tutorial: FINANCE_TUTORIAL,
-              },
-            ],
-          },
-          {
-            value: "product",
-            label: "Product",
-            matchesRoles: ["pm"],
-            builds: [
-              {
-                id: "product-launch-page",
-                buildTitle: "Build a one-page launch page for a new feature",
-                tutorial: PRODUCT_TUTORIAL,
-              },
-            ],
-          },
-          {
-            value: "operations",
-            label: "Operations",
-            matchesRoles: ["ops"],
-            builds: [
-              {
-                id: "operations-checklist",
-                buildTitle: "Build an interactive checklist for a process you run again and again",
-                tutorial: OPERATIONS_TUTORIAL,
-              },
-            ],
-          },
-        ],
-      },
+      LESSON_1_ROLE_BUILD_PICKER,
       {
         kind: "callout",
         tone: "tan",

@@ -5,6 +5,10 @@ import { createContext, useContext, type ReactNode } from "react";
 
 import type { LiveSessionVariant } from "../../data/lessonBlocks";
 
+// The "Mark complete" treatments being tried in the prototype options menu —
+// see SectionCompleteAction in ProductBlocks.tsx.
+export type SectionCompleteStyle = "pill" | "banner" | "row";
+
 type LessonPageActions = {
   onShareFeedback: () => void;
   onOpenSupport: () => void;
@@ -14,6 +18,12 @@ type LessonPageActions = {
   liveProgram: boolean;
   calendarItems?: { label: string; href: string; download?: string }[];
   meetingUrl?: string;
+  sectionCompleteLabel: string;
+  sectionCompleteStyle: SectionCompleteStyle;
+  sectionNextTitle: string;
+  isSectionComplete: boolean;
+  onSectionComplete: () => void;
+  onToggleSectionComplete: () => void;
 };
 
 const LessonPageContext = createContext<LessonPageActions | null>(null);

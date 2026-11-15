@@ -4,44 +4,26 @@ import {
   ModalSize,
   type ModalProps,
 } from "./leland";
-import {
-  ChipGroup,
-  OtherTextField,
-  PERSONALIZATION_KEY,
-  ROLE_OPTIONS_BY_STATUS,
-  useChipGroupWithOther,
-  type PersonalizationData,
-} from "./PersonalizationModal";
+import { ChipGroup } from "./PersonalizationModal";
+import { CATEGORIES } from "../lib/categories";
 
-// Header "role" chip's modal — just the role question, for switching which
-// role-specific build a learner sees. Separate from AboutMeEditModal, which
-// covers the fuller status/role/industry profile elsewhere in the course.
+// Header "role" chip's modal — sets the same shared selected category used
+// on Program Hub (Recommended for you, Browse by use case) and the lesson
+// build picker, so picking a role here carries over everywhere else, and
+// vice versa.
 const RoleModalImpl = ({
   open,
   onOpenChange,
-  roleData,
-  onSaveRole,
+  selectedCategory,
+  onSelectCategory,
 }: ModalProps & {
-  roleData: PersonalizationData | null;
-  onSaveRole: (data: PersonalizationData) => void;
+  selectedCategory: string | null;
+  onSelectCategory: (category: string) => void;
 }) => {
-  const status = roleData?.status ?? "working";
-  const roleOptions = status === "not_working" ? [] : ROLE_OPTIONS_BY_STATUS[status];
-
-  const handleSelectRole = (nextRole: string) => {
-    const data: PersonalizationData = {
-      status: roleData?.status ?? "working",
-      role: nextRole,
-      roleTense: roleData?.roleTense ?? "current",
-      industry: roleData?.industry ?? null,
-      industryTense: roleData?.industryTense ?? "current",
-      aiGoalText: roleData?.aiGoalText ?? "",
-    };
-    localStorage.setItem(PERSONALIZATION_KEY, JSON.stringify(data));
-    onSaveRole(data);
+  const handleSelect = (category: string) => {
+    onSelectCategory(category);
+    onOpenChange?.(false);
   };
-
-  const roleChip = useChipGroupWithOther(roleOptions, roleData?.role ?? null, handleSelectRole);
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
@@ -54,17 +36,11 @@ const RoleModalImpl = ({
             </p>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <ChipGroup options={roleOptions} selected={roleChip.selected} onSelect={roleChip.handleSelect} />
-            {roleChip.isOther ? (
-              <OtherTextField
-                value={roleChip.otherText}
-                onChange={roleChip.setOtherText}
-                placeholder="e.g. Software Engineer"
-                onSubmit={roleChip.submitOther}
-              />
-            ) : null}
-          </div>
+          <ChipGroup
+            options={CATEGORIES.map((c) => ({ value: c, label: c }))}
+            selected={selectedCategory}
+            onSelect={handleSelect}
+          />
         </div>
       </ModalContent>
     </Modal>

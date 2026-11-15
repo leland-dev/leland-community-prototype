@@ -198,6 +198,12 @@ const LESSON_PAGE_STUB_ACTIONS = {
   onViewRecording: () => {},
   liveSessionVariant: "addToCalendar" as const,
   liveProgram: true,
+  sectionCompleteLabel: "Continue",
+  sectionCompleteStyle: "pill" as const,
+  sectionNextTitle: "Next section",
+  isSectionComplete: false,
+  onSectionComplete: () => {},
+  onToggleSectionComplete: () => {},
 };
 
 function GallerySection({ title, blocks }: { title: string; blocks: Block[] }) {
