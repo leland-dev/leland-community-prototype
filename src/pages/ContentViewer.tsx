@@ -669,6 +669,7 @@ function LessonAccordion({
   currentLessonId,
   currentSectionId,
   completed,
+  onToggleSection,
   liveProgram = false,
   showSessionBanners = true,
   selectedTrack = null,
@@ -676,6 +677,7 @@ function LessonAccordion({
   currentLessonId: string;
   currentSectionId: string;
   completed: Set<string>;
+  onToggleSection?: (lessonId: string, sectionId: string) => void;
   liveProgram?: boolean;
   showSessionBanners?: boolean;
   selectedTrack?: CourseTrack | null;
@@ -768,8 +770,17 @@ function LessonAccordion({
                       }`}
                     >
                       <span className="relative shrink-0">
-                        <span
-                          className={`flex size-8 items-center justify-center rounded-full ${
+                        <button
+                          type="button"
+                          aria-label={sectionDone ? "Mark section incomplete" : "Mark section complete"}
+                          title={sectionDone ? "Mark incomplete" : "Mark complete"}
+                          onClick={(e) => {
+                            if (!onToggleSection) return;
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onToggleSection(l.id, s.id);
+                          }}
+                          className={`flex size-8 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-leland-primary ${
                             sectionDone
                               ? "bg-leland-gray-dark"
                               : badge === "required"
@@ -784,7 +795,7 @@ function LessonAccordion({
                               {sIdx + 1}
                             </span>
                           )}
-                        </span>
+                        </button>
                       </span>
                       <span className="flex min-w-0 flex-1 items-center justify-between gap-2.5">
                         <span className="min-w-0 line-clamp-2 leland-paragraph-base font-medium text-leland-gray-dark">
@@ -1026,6 +1037,7 @@ function CombinedSidebar({
   currentSectionId,
   completed,
   onToggle,
+  onToggleSection,
   onSwitchCohort,
   tab,
   onTabChange,
@@ -1042,6 +1054,7 @@ function CombinedSidebar({
   currentSectionId: string;
   completed: Set<string>;
   onToggle: () => void;
+  onToggleSection?: (lessonId: string, sectionId: string) => void;
   onSwitchCohort: () => void;
   tab: SidebarTab;
   onTabChange: (tab: SidebarTab) => void;
@@ -1160,6 +1173,7 @@ function CombinedSidebar({
             currentLessonId={currentLessonId}
             currentSectionId={currentSectionId}
             completed={completed}
+            onToggleSection={onToggleSection}
             liveProgram={liveProgram}
             showSessionBanners={showSessionBanners}
             selectedTrack={selectedTrack}
@@ -2558,6 +2572,7 @@ export default function ContentViewer() {
                 currentSectionId={section.id}
                 completed={completed}
                 onToggle={() => setSidebarOpen(false)}
+                onToggleSection={toggleComplete}
                 onSwitchCohort={() => setCohortModalOpen(true)}
                 tab={sidebarTab}
                 onTabChange={(tab) => {
