@@ -624,11 +624,17 @@ function UpcomingBuildsCarousel({
 }) {
   return (
     <div className="relative min-h-0 flex-1">
-      {/* -mx-6/px-6 (mobile only) bleeds the scroll viewport out to the
-          card's own edge, so a partially-scrolled card gets cut off right at
-          the card border — not clipped early by the card's own padding,
-          leaving an awkward gap of card background before the real edge. */}
-      <div ref={carousel.scrollRef} className="-mx-6 flex h-full snap-x snap-mandatory gap-3 overflow-x-auto px-6 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+      {/* -mx-6 (mobile only) bleeds the scroll viewport out to the card's
+          own edge, so a partially-scrolled card gets cut off right at the
+          card border — not clipped early by the card's own padding, leaving
+          an awkward gap of card background before the real edge. The 24px
+          inset that keeps the first/last card aligned with the heading text
+          above has to come from real spacer elements, not padding on this
+          container — padding on a snap-mandatory scroll container becomes a
+          snap point, and the browser auto-scrolls past it on load, which is
+          what made the first card ignore the inset entirely. */}
+      <div ref={carousel.scrollRef} className="-mx-6 flex h-full snap-x snap-mandatory gap-3 overflow-x-auto [scrollbar-width:none] sm:mx-0 [&::-webkit-scrollbar]:hidden">
+        <div className="w-3 shrink-0 snap-start sm:hidden" aria-hidden />
         {builds.map((b) => {
           if (cardStyle !== "dots") {
             return (
@@ -673,6 +679,7 @@ function UpcomingBuildsCarousel({
             </Link>
           );
         })}
+        <div className="w-3 shrink-0 snap-start sm:hidden" aria-hidden />
       </div>
     </div>
   );
