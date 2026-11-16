@@ -129,35 +129,35 @@ function AllLevelsModal({
               >
                 <img src={lvl.image} alt="" className="aspect-[1200/628] w-full object-cover" />
               </button>
-              <div className="flex flex-col gap-1.5">
-                <p className="text-[16px] font-semibold leading-[1.35] text-gray-dark">{lvl.title}</p>
+              <p className="text-[16px] font-semibold leading-[1.35] text-gray-dark">{lvl.title}</p>
+              <div className="mt-auto flex flex-col gap-3">
                 {lvl.status === "not-started" ? (
                   <span className="text-[12px] leading-[1.5] text-gray-extra-light">Not started</span>
                 ) : (
                   <ProgressBar pct={lvl.progressPct ?? 0} label={`${lvl.progressPct}% complete`} />
                 )}
-              </div>
-              <div className="mt-auto flex items-center gap-3">
-                <Button
-                  size="sm"
-                  variant={lvl.status === "in-progress" ? "dark" : "secondary"}
-                  onClick={() => onOpenLevel(lvl)}
-                  className={`shrink-0 !gap-1.5 font-semibold ${lvl.status === "in-progress" ? "" : "!bg-black/5"}`}
-                >
-                  {lvl.status === "in-progress" ? "Resume" : "Start"}
-                  <IconImg src={lvl.status === "in-progress" ? chevronOverWhiteIcon : chevronOverIcon} size={16} />
-                </Button>
-                {lvl.liveSessions ? (
+                <div className="flex items-center gap-3">
                   <Button
                     size="sm"
-                    variant="ghost"
-                    onClick={() => onSelectCohort(lvl.number)}
-                    className="!gap-1 shrink-0 !px-0 font-semibold"
+                    variant={lvl.status === "in-progress" ? "dark" : "secondary"}
+                    onClick={() => onOpenLevel(lvl)}
+                    className={`shrink-0 !gap-1.5 font-semibold ${lvl.status === "in-progress" ? "" : "!bg-black/5"}`}
                   >
-                    {cohortSelectedLevels.has(lvl.number) ? "Switch cohort" : "Select cohort"}
-                    <IconImg src={chevronOverIcon} size={16} />
+                    {lvl.status === "in-progress" ? "Resume" : "Start"}
+                    <IconImg src={lvl.status === "in-progress" ? chevronOverWhiteIcon : chevronOverIcon} size={16} />
                   </Button>
-                ) : null}
+                  {lvl.liveSessions ? (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onSelectCohort(lvl.number)}
+                      className="!gap-1 shrink-0 !px-0 font-semibold"
+                    >
+                      {cohortSelectedLevels.has(lvl.number) ? "Switch cohort" : "Select cohort"}
+                      <IconImg src={chevronOverIcon} size={16} />
+                    </Button>
+                  ) : null}
+                </div>
               </div>
             </div>
           ))}
@@ -446,10 +446,10 @@ function IconImg({ src, size = 20 }: { src: string; size?: number }) {
 function ProgressBar({ pct, label, className = "" }: { pct: number; label?: string; className?: string }) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {label && <span className="whitespace-nowrap text-[12px] text-gray-extra-light">{label}</span>}
-      <div className="flex h-1 min-w-px flex-1 rounded bg-gray-stroke">
+      <div className="flex h-2 min-w-px max-w-[100px] flex-1 rounded bg-gray-stroke">
         <div className="h-full rounded bg-gray-dark" style={{ width: `${Math.max(pct, 1)}%` }} />
       </div>
+      {label && <span className="whitespace-nowrap text-[12px] text-gray-extra-light">{label}</span>}
     </div>
   );
 }
