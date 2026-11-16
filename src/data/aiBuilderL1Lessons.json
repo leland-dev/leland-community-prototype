@@ -218,5 +218,83 @@
         "src": "/lessons/lesson-3/wrap.html?v=2"
       }
     ]
+  },
+  {
+    "id": "lesson-4",
+    "number": 4,
+    "title": "Launch your custom AI system + Demo Day",
+    "subtitle": "Craft a persistent context file, build a library of skills, organize your AI folder, then reflect on everything you built and submit for your certificate.",
+    "durationMin": 90,
+    "sections": [
+      {
+        "id": "welcome",
+        "title": "Welcome",
+        "kind": "html",
+        "src": "/lessons/lesson-4/welcome.html?v=2"
+      },
+      {
+        "id": "intro",
+        "title": "Session intro",
+        "durationMin": 5,
+        "kind": "html",
+        "src": "/lessons/lesson-4/intro.html?v=2"
+      },
+      {
+        "id": "build-1",
+        "title": "Craft an AI context file",
+        "durationMin": 20,
+        "kind": "html",
+        "src": "/lessons/lesson-4/build-1.html?v=2"
+      },
+      {
+        "id": "build-2",
+        "title": "Build your skills library",
+        "durationMin": 20,
+        "kind": "html",
+        "src": "/lessons/lesson-4/build-2.html?v=2"
+      },
+      {
+        "id": "build-3",
+        "title": "Organize your AI folder",
+        "durationMin": 15,
+        "kind": "html",
+        "src": "/lessons/lesson-4/build-3.html?v=2"
+      },
+      {
+        "id": "demo-day",
+        "title": "Demo Day",
+        "durationMin": 10,
+        "kind": "html",
+        "src": "/lessons/lesson-4/demo-day.html?v=2"
+      },
+      {
+        "id": "build-4",
+        "title": "Write your \"How I've Used AI\" evaluation",
+        "durationMin": 25,
+        "kind": "html",
+        "src": "/lessons/lesson-4/build-4.html?v=2"
+      },
+      {
+        "id": "build-5",
+        "title": "Get your certificate and share what you built",
+        "durationMin": 15,
+        "kind": "html",
+        "src": "/lessons/lesson-4/build-5.html?v=2"
+      },
+      {
+        "id": "share",
+        "title": "Share what you built",
+        "durationMin": 3,
+        "kind": "html",
+        "src": "/lessons/lesson-4/share.html?v=2"
+      },
+      {
+        "id": "wrap",
+        "title": "Summary & next steps",
+        "durationMin": 5,
+        "kind": "html",
+        "src": "/lessons/lesson-4/wrap.html?v=2"
+      }
+    ]
   }
 ]

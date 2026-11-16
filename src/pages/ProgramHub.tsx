@@ -11,7 +11,6 @@ import { IconUserProfileGroup } from "../components/icons/IconUserProfileGroup";
 import { type BuildCardStyle, setBuildCardStyle, useBuildCardStyle } from "../components/lesson-blocks";
 import { useTopNavStyle } from "../contexts/TopNavStyleContext";
 import { useSelectedCategory } from "../contexts/SelectedCategoryContext";
-import { useDisplayName } from "../contexts/DisplayNameContext";
 import { CATEGORIES, CATEGORY_TO_USE_CASES, CATEGORY_TO_ROLE, ROLE_TO_CATEGORY } from "../lib/categories";
 import { pickLesson1Build } from "../data/sampleLesson";
 import homeIcon from "../assets/img/program-hub/hdr-e8a6d.svg";
@@ -285,6 +284,15 @@ const UPCOMING_BUILDS = [
     otherOptionsCount: 0,
     to: `${COURSE_PATH}/lesson-3/build-4`,
     image: imgMetrics,
+  },
+  {
+    level: 1,
+    lessonNumber: 4,
+    sessionTitle: "Launch your custom AI system + Demo Day",
+    buildTitle: "Craft an AI context file",
+    otherOptionsCount: 0,
+    to: `${COURSE_PATH}/lesson-4/build-1`,
+    image: imgInteractiveSopChecklist,
   },
 ];
 
@@ -616,8 +624,12 @@ function UpcomingBuildsCarousel({
 }) {
   return (
     <div className="relative min-h-0 flex-1">
-      <div ref={carousel.scrollRef} className="flex h-full snap-x snap-mandatory gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {builds.map((b, i) => {
+      {/* -mx-6/px-6 (mobile only) bleeds the scroll viewport out to the
+          card's own edge, so a partially-scrolled card gets cut off right at
+          the card border — not clipped early by the card's own padding,
+          leaving an awkward gap of card background before the real edge. */}
+      <div ref={carousel.scrollRef} className="-mx-6 flex h-full snap-x snap-mandatory gap-3 overflow-x-auto px-6 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+        {builds.map((b) => {
           if (cardStyle !== "dots") {
             return (
               <Link
@@ -639,9 +651,6 @@ function UpcomingBuildsCarousel({
             );
           }
 
-          // Demo stand-in for real progress data — just shows the first card
-          // as "complete" so both states are visible side by side.
-          const completed = i === 0;
           return (
             <Link
               key={b.sessionTitle}
@@ -658,17 +667,56 @@ function UpcomingBuildsCarousel({
               <div className="flex flex-1 flex-col items-start">
                 <p className="line-clamp-2 text-[16px] font-semibold leading-[1.3] text-gray-dark">{b.buildTitle}.</p>
                 <p className="mt-1 line-clamp-2 text-[14px] text-gray-light">
-                  Featured build{b.otherOptionsCount ? ` · ${b.otherOptionsCount} more options` : ""}
+                  Picked for you{b.otherOptionsCount ? ` · ${b.otherOptionsCount} more options` : ""}
                 </p>
-              </div>
-              <div className="flex items-center">
-                <Tag text={completed ? "Complete" : "Not started"} tagColor={completed ? TagColor.BLACK : TagColor.WHITE} size={TagSize.XS} fontWeight={FontWeight.SEMIBOLD} />
               </div>
             </Link>
           );
         })}
       </div>
     </div>
+  );
+}
+
+function CompletedBuildsModal({
+  open,
+  onOpenChange,
+  builds,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  builds: typeof UPCOMING_BUILDS;
+}) {
+  return (
+    <Modal open={open} onOpenChange={onOpenChange}>
+      <ModalContent
+        size={ModalSize.MEDIUM}
+        header={<h2 className="text-[20px] font-semibold leading-[1.3] text-gray-dark">Completed builds</h2>}
+      >
+        {builds.length === 0 ? (
+          <p className="px-6 py-8 text-[14px] text-gray-light sm:px-8">Nothing finished yet — it'll show up here once you complete a build.</p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-gray-stroke px-6 py-2 sm:px-8 sm:py-4">
+            {builds.map((b) => (
+              <li key={b.sessionTitle} className="flex items-center gap-4 py-4">
+                <Link
+                  to={b.to}
+                  onClick={() => onOpenChange(false)}
+                  className="flex min-w-px flex-1 items-center gap-4 rounded-lg text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                >
+                  <img src={b.image} alt="" className="aspect-[1200/628] w-[136px] shrink-0 rounded-lg border border-black/5 object-cover sm:w-[160px]" />
+                  <div className="flex min-w-px flex-1 flex-col gap-1.5">
+                    <p className="text-[14px] font-semibold leading-[1.35] text-gray-dark">{b.buildTitle}.</p>
+                    <p className="text-[12px] leading-[1.5] text-gray-light">Lesson {b.lessonNumber} · {b.sessionTitle}</p>
+                  </div>
+                </Link>
+                <Tag text="Complete" tagColor={TagColor.BLACK} size={TagSize.XS} fontWeight={FontWeight.SEMIBOLD} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -682,7 +730,6 @@ export default function ProgramHub() {
   const learnerRole = aboutMe?.role ?? null;
   const roleCategory = learnerRole ? ROLE_TO_CATEGORY[learnerRole] : null;
   const { selectedCategory, setSelectedCategory } = useSelectedCategory();
-  const { displayName, setDisplayName } = useDisplayName();
   // One-time hydration: if nothing has been explicitly selected yet (on
   // either page — this is shared, localStorage-backed state), default to
   // the learner's own category from onboarding rather than "All".
@@ -719,7 +766,13 @@ export default function ProgramHub() {
         : b,
     );
   }, [selectedCategory]);
-  const upcomingBuildsCarousel = useCardCarousel(upcomingBuilds);
+  // Demo stand-in for real progress data — just the first build counts as
+  // "complete" so both states exist to look at. Your Roadmap only ever
+  // shows what's not started; completed builds live in their own modal.
+  const notStartedBuilds = useMemo(() => upcomingBuilds.slice(1), [upcomingBuilds]);
+  const completedBuilds = useMemo(() => upcomingBuilds.slice(0, 1), [upcomingBuilds]);
+  const upcomingBuildsCarousel = useCardCarousel(notStartedBuilds);
+  const [completedBuildsOpen, setCompletedBuildsOpen] = useState(false);
 
   const toggleChip = (group: keyof typeof filters, value: string) =>
     setFilters((f) => ({ ...f, [group]: f[group].includes(value) ? f[group].filter((v) => v !== value) : [...f[group], value] }));
@@ -996,7 +1049,7 @@ export default function ProgramHub() {
         {/* Header */}
         <div className="flex flex-col gap-6 pt-16">
           <div className="flex flex-col gap-3">
-            <h1 className="font-serif text-[36px] font-medium leading-[1.1] text-gray-dark sm:text-[46px]">Welcome, {displayName}</h1>
+            <h1 className="font-serif text-[36px] font-medium leading-[1.1] text-gray-dark sm:text-[46px]">Level Up with AI</h1>
           </div>
           <div className="scrollbar-hide flex items-center gap-2 overflow-x-auto sm:flex-wrap">
             <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 shrink-0 !bg-black/5 font-semibold">
@@ -1021,7 +1074,7 @@ export default function ProgramHub() {
         {/* Current course + live sessions */}
         <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-stretch">
           <div className="flex flex-col gap-2.5 rounded-2xl border border-gray-stroke bg-white p-6 shadow-[0_1px_1px_rgba(16,24,40,0.05)] lg:max-w-[400px] lg:flex-1">
-            {/* Side by side with "Up Next"/Live sessions (lg+), this stays
+            {/* Side by side with "Your Roadmap"/Live sessions (lg+), this stays
                 stacked (image over text) to fit a narrow ~400px column.
                 Once that row itself stacks (below lg) this card has the
                 full page width to work with, so it switches to a
@@ -1074,7 +1127,7 @@ export default function ProgramHub() {
                     <div className="h-full rounded-full bg-leland-gray-dark" style={{ width: `${Math.max(0, Math.min(100, featuredLevelPct))}%` }} />
                   </div>
                   {/* Only where there's room to spare — hidden in the lg+
-                      tier's narrow column next to Up Next. */}
+                      tier's narrow column next to Your Roadmap. */}
                   <p className="truncate text-[14px] leading-[1.35] text-gray-light lg:hidden">
                     Lesson 2/3: Automate communication in your voice
                   </p>
@@ -1095,14 +1148,17 @@ export default function ProgramHub() {
             <div className="flex min-w-[280px] flex-1 flex-col gap-5 rounded-2xl border border-gray-stroke bg-white p-6">
               <div className="flex items-center gap-4">
                 <div className="flex min-w-px flex-1 flex-col gap-2">
-                  <p className="text-[22px] font-semibold leading-[1.2] text-gray-dark">Up Next</p>
+                  <p className="text-[22px] font-semibold leading-[1.2] text-gray-dark">Your Roadmap</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 !bg-black/5 font-semibold" onClick={() => setCompletedBuildsOpen(true)}>
+                  Completed builds
+                </Button>
+                <div className="hidden items-center gap-2 sm:flex">
                   <RoundArrow dir="left" disabled={upcomingBuildsCarousel.page <= 0} onClick={() => upcomingBuildsCarousel.scrollByPage(-1)} />
                   <RoundArrow dir="right" disabled={upcomingBuildsCarousel.page >= upcomingBuildsCarousel.pages - 1} onClick={() => upcomingBuildsCarousel.scrollByPage(1)} />
                 </div>
               </div>
-              <UpcomingBuildsCarousel builds={upcomingBuilds} carousel={upcomingBuildsCarousel} cardStyle={cardStyle} />
+              <UpcomingBuildsCarousel builds={notStartedBuilds} carousel={upcomingBuildsCarousel} cardStyle={cardStyle} />
             </div>
           ) : (
             <div className="flex min-w-[280px] flex-1 flex-col gap-5 rounded-2xl border border-gray-stroke bg-white p-6">
@@ -1345,6 +1401,11 @@ export default function ProgramHub() {
         }}
         cohortSelectedLevels={cohortSelectedLevels}
       />
+      <CompletedBuildsModal
+        open={completedBuildsOpen}
+        onOpenChange={setCompletedBuildsOpen}
+        builds={completedBuilds}
+      />
       <SelectCohortModal
         open={selectCohortOpen}
         onClose={() => setSelectCohortOpen(false)}
@@ -1359,17 +1420,6 @@ export default function ProgramHub() {
         <ModalContent size={ModalSize.SMALL}>
           <div className="flex flex-col gap-4 p-6">
             <h2 className="text-[18px] font-semibold text-gray-dark">Prototype options</h2>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[14px] font-medium text-gray-dark">First name</span>
-              <span className="text-[12px] text-gray-light">Shown in the "Welcome, ___" header — handy for demos, so you can preset the prospect's name.</span>
-              <input
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Maddy"
-                className="w-full rounded-lg border border-gray-stroke bg-white px-4 py-3 text-[14px] text-gray-dark outline-none placeholder:text-gray-extra-light focus:border-gray-dark"
-              />
-            </div>
             <div className="flex flex-col gap-1.5">
               <span className="text-[14px] font-medium text-gray-dark">Selected category</span>
               <span className="text-[12px] text-gray-light">Carries over to the course viewer too — drives Recommended for you, Browse by use case, and the lesson build picker.</span>

@@ -87,6 +87,7 @@ import type {
 import { LESSON_1_SECTIONS, LESSON_1_TOP_BLOCKS } from "../data/sampleLesson";
 import { LESSON_2_SECTIONS, LESSON_2_TOP_BLOCKS } from "../data/sampleLesson2";
 import { LESSON_3_SECTIONS, LESSON_3_TOP_BLOCKS } from "../data/sampleLesson3";
+import { LESSON_4_SECTIONS, LESSON_4_TOP_BLOCKS } from "../data/sampleLesson4";
 import CourseComplete from "../components/course-complete/CourseComplete";
 import {
   BlockList,
@@ -201,16 +202,19 @@ const COURSE_COMPLETION_SECTION: CompletionSection = {
   blocks: [{ kind: "inviteTeam" }],
 };
 
-// Lessons 3–4 come from the generated manifest (legacy HTML iframe sections).
-// Lessons 1 and 2 are the block/CMS demo: hand-authored native block sections.
+// All four lessons are the block/CMS demo: hand-authored native block
+// sections (see sampleLesson.ts / sampleLesson2.ts / sampleLesson3.ts /
+// sampleLesson4.ts). The course-completion page attaches to whichever lesson
+// is currently last — Lesson 4.
 const LESSONS: Lesson[] = (lessonData as Lesson[]).map((lesson) => {
   if (lesson.number === 1) return { ...lesson, topBlocks: LESSON_1_TOP_BLOCKS, sections: LESSON_1_SECTIONS };
   if (lesson.number === 2) return { ...lesson, topBlocks: LESSON_2_TOP_BLOCKS, sections: LESSON_2_SECTIONS };
-  if (lesson.number === 3) {
+  if (lesson.number === 3) return { ...lesson, topBlocks: LESSON_3_TOP_BLOCKS, sections: LESSON_3_SECTIONS };
+  if (lesson.number === 4) {
     return {
       ...lesson,
-      topBlocks: LESSON_3_TOP_BLOCKS,
-      sections: [...LESSON_3_SECTIONS, COURSE_COMPLETION_SECTION],
+      topBlocks: LESSON_4_TOP_BLOCKS,
+      sections: [...LESSON_4_SECTIONS, COURSE_COMPLETION_SECTION],
     };
   }
   return lesson;
