@@ -138,7 +138,7 @@ export const LESSON_4_SECTIONS: BlockSection[] = [
     description: "Write a reusable context file so Claude starts every session already knowing you.",
     durationMin: 20,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    label: { text: "Practice", color: "gray" },
+    label: { text: "Apply", color: "black" },
     blocks: [
       {
         kind: "toggle",
@@ -204,7 +204,7 @@ export const LESSON_4_SECTIONS: BlockSection[] = [
     description: "Turn your repeat tasks into a library of skills you can call by name.",
     durationMin: 20,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    label: { text: "Practice", color: "gray" },
+    label: { text: "Apply", color: "black" },
     blocks: [
       {
         kind: "markdown",
@@ -263,7 +263,7 @@ export const LESSON_4_SECTIONS: BlockSection[] = [
     description: "Clean up your ai-builder folder so Claude — and you — can find things fast.",
     durationMin: 15,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    label: { text: "Practice", color: "gray" },
+    label: { text: "Practice", color: "blue" },
     blocks: [
       {
         kind: "toggle",
@@ -356,7 +356,6 @@ export const LESSON_4_SECTIONS: BlockSection[] = [
     description: "Finish your portfolio's last three cards, then reflect on all four sessions.",
     durationMin: 25,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    label: { text: "Apply", color: "black" },
     blocks: [
       {
         kind: "callout",
@@ -417,7 +416,6 @@ export const LESSON_4_SECTIONS: BlockSection[] = [
     description: "Submit your portfolio for review, then tell someone what you built.",
     durationMin: 15,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    label: { text: "Apply", color: "black" },
     blocks: [
       {
         kind: "callout",

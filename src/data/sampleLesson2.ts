@@ -157,7 +157,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
     description: "Link Google Workspace to Claude Cowork so it can read and draft emails.",
     durationMin: 15,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    label: { text: "Practice", color: "gray" },
+    label: { text: "Practice", color: "blue" },
     blocks: [
       {
         kind: "markdown",
@@ -207,7 +207,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
     description: "Teach Claude how you write so every draft sounds like you.",
     durationMin: 20,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    label: { text: "Practice", color: "gray" },
+    label: { text: "Practice", color: "blue" },
     blocks: [
       {
         kind: "markdown",
@@ -268,7 +268,7 @@ export const LESSON_2_SECTIONS: BlockSection[] = [
     description: "Create an automation that drafts email replies on a timer.",
     durationMin: 20,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    label: { text: "Practice", color: "gray" },
+    label: { text: "Practice", color: "blue" },
     blocks: [
       {
         kind: "markdown",

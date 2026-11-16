@@ -537,7 +537,7 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
     description: "Design a portfolio website with AI in one focused build.",
     durationMin: 13,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    label: { text: "Practice", color: "gray" },
+    label: { text: "Practice", color: "blue" },
     blocks: [
       {
         kind: "markdown",
@@ -570,7 +570,7 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
     description: "Pull the visual rules from a site you love and give them to Claude.",
     durationMin: 13,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    label: { text: "Practice", color: "gray" },
+    label: { text: "Practice", color: "blue" },
     blocks: [
       {
         kind: "markdown",
@@ -604,7 +604,7 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
     description: "Turn your extracted design rules into a reusable AI skill.",
     durationMin: 13,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    label: { text: "Practice", color: "gray" },
+    label: { text: "Practice", color: "blue" },
     blocks: [
       {
         kind: "markdown",
@@ -644,7 +644,7 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
     description: "Apply your design system skill to style the portfolio you scaffolded.",
     durationMin: 20,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
-    label: { text: "Practice", color: "gray" },
+    label: { text: "Practice", color: "blue" },
     blocks: [
       {
         kind: "markdown",

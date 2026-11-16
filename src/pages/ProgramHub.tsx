@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { QuickPreferencesModal } from "../components/QuickPreferencesModal";
 import { SelectCohortModal } from "../components/LiveCourseCard";
 import { loadPersonalizationData, type PersonalizationData } from "../components/PersonalizationModal";
-import { FontWeight, IconChevronDown, IconCode, IconDotsHorizontal, IconLightBulb, IconPencil, IconSearch, IconSparkle, Modal, ModalContent, ModalSize, SwitchInput, Tag, TagColor, TagSize } from "../components/leland";
+import { IconChevronDown, IconCode, IconDotsHorizontal, IconLightBulb, IconPencil, IconSearch, IconSparkle, Modal, ModalContent, ModalSize, SwitchInput, Tag, TagColor } from "../components/leland";
 import { CategoryPicker } from "../components/CategoryPicker";
 import { MultiSelectDropdown } from "../components/MultiSelectDropdown";
 import { IconUserProfileGroup } from "../components/icons/IconUserProfileGroup";
@@ -95,8 +95,8 @@ type Level = {
 
 const LEVELS: Level[] = [
   { number: 1, title: "Level 1: Use AI to 10x your impact", image: levelOne, status: "in-progress", progressPct: 50, to: COURSE_PATH, liveSessions: "May 24 cohort · 4 live sessions" },
-  { number: 2, title: "Level 2: Build Complex Agentic Workflows", image: levelTwo, status: "not-started", to: "/course/1", liveSessions: "Next cohort starts Jun 21" },
-  { number: 3, title: "Level 3: Create Autonomous Agents", image: levelThree, status: "not-started", to: "/course/1", liveSessions: "Next cohort starts Jul 19" },
+  { number: 2, title: "Level 2: Build Complex Agentic Workflows", image: levelTwo, status: "not-started", to: "/course/1", liveSessions: null },
+  { number: 3, title: "Level 3: Create Autonomous Agents", image: levelThree, status: "not-started", to: "/course/1", liveSessions: null },
   { number: 4, title: "Level 4: Build Your Agent Workforce", image: levelFour, status: "not-started", to: "/course/1", liveSessions: null },
 ];
 
@@ -119,40 +119,49 @@ function AllLevelsModal({
         size={ModalSize.MEDIUM}
         header={<h2 className="text-[20px] font-semibold leading-[1.3] text-gray-dark">All levels</h2>}
       >
-        <ul className="flex flex-col divide-y divide-gray-stroke px-6 py-2 sm:px-8 sm:py-4">
+        <div className="grid grid-cols-1 gap-4 px-6 py-6 sm:grid-cols-2 sm:px-8">
           {LEVELS.map((lvl) => (
-            <li key={lvl.number} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:gap-4">
+            <div key={lvl.number} className="flex h-full flex-col gap-3 rounded-[12px] border border-gray-stroke p-4">
               <button
                 type="button"
                 onClick={() => onOpenLevel(lvl)}
-                className="flex min-w-px flex-1 items-center gap-4 rounded-lg text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
+                className="block overflow-hidden rounded-lg border border-black/5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
               >
-                <img src={lvl.image} alt="" className="aspect-[115.25/60.5] w-[136px] shrink-0 rounded-lg border border-black/5 object-cover sm:w-[160px]" />
-                <div className="flex min-w-px flex-1 flex-col gap-1.5">
-                  <p className="text-[14px] font-semibold leading-[1.35] text-gray-dark">{lvl.title}</p>
-                  {lvl.status === "not-started" ? (
-                    <span className="text-[12px] leading-[1.5] text-gray-extra-light">Not started</span>
-                  ) : (
-                    <ProgressBar pct={lvl.progressPct ?? 0} label={`${lvl.progressPct}% complete`} className="max-w-[180px]" />
-                  )}
-                  <span className="text-[12px] leading-[1.5] text-gray-light">{lvl.liveSessions ?? "Self-paced"}</span>
-                </div>
+                <img src={lvl.image} alt="" className="aspect-[1200/628] w-full object-cover" />
               </button>
-              {lvl.liveSessions ? (
-                <div className="flex shrink-0 flex-col items-stretch sm:items-end">
+              <div className="flex flex-col gap-1.5">
+                <p className="text-[16px] font-semibold leading-[1.35] text-gray-dark">{lvl.title}</p>
+                {lvl.status === "not-started" ? (
+                  <span className="text-[12px] leading-[1.5] text-gray-extra-light">Not started</span>
+                ) : (
+                  <ProgressBar pct={lvl.progressPct ?? 0} label={`${lvl.progressPct}% complete`} />
+                )}
+              </div>
+              <div className="mt-auto flex items-center gap-3">
+                <Button
+                  size="sm"
+                  variant={lvl.status === "in-progress" ? "dark" : "secondary"}
+                  onClick={() => onOpenLevel(lvl)}
+                  className={`shrink-0 !gap-1.5 font-semibold ${lvl.status === "in-progress" ? "" : "!bg-black/5"}`}
+                >
+                  {lvl.status === "in-progress" ? "Resume" : "Start"}
+                  <IconImg src={lvl.status === "in-progress" ? chevronOverWhiteIcon : chevronOverIcon} size={16} />
+                </Button>
+                {lvl.liveSessions ? (
                   <Button
-                    size="md"
-                    variant="secondary"
+                    size="sm"
+                    variant="ghost"
                     onClick={() => onSelectCohort(lvl.number)}
-                    className="w-full font-semibold sm:w-auto"
+                    className="!gap-1 shrink-0 !px-0 font-semibold"
                   >
                     {cohortSelectedLevels.has(lvl.number) ? "Switch cohort" : "Select cohort"}
+                    <IconImg src={chevronOverIcon} size={16} />
                   </Button>
-                </div>
-              ) : null}
-            </li>
+                ) : null}
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       </ModalContent>
     </Modal>
   );
@@ -329,10 +338,13 @@ const COHORT_SELECTED_LEVELS_KEY = "program-hub-cohort-selected-levels";
 function useCohortSelectedLevels() {
   const [levels, setLevels] = useState<Set<number>>(() => {
     try {
-      const raw = JSON.parse(localStorage.getItem(COHORT_SELECTED_LEVELS_KEY) ?? "[]");
+      // Level 1 always starts with a cohort already selected (sample data
+      // assumes the learner joined with one) — everything else starts
+      // unselected until the learner picks one in the modal.
+      const raw = JSON.parse(localStorage.getItem(COHORT_SELECTED_LEVELS_KEY) ?? "[1]");
       return new Set(raw);
     } catch {
-      return new Set();
+      return new Set([1]);
     }
   });
   const markSelected = (levelNumber: number) => {
@@ -572,12 +584,19 @@ function ContentCardLarge({ item }: { item: Item }) {
 // and the row itself both read/drive this, so the arrows can live in the
 // card header instead of floating below the row.
 function useCardCarousel<T>(items: T[]) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  // A plain useRef's effect only ever sees the node that was mounted the
+  // first time this hook ran — for a carousel inside a modal (unmounted by
+  // Radix while closed), that's `null`, so `pages` would get stuck at 1
+  // forever and the nav arrows would stay disabled even once the modal
+  // opens and the real node exists. A state-backed callback ref re-fires
+  // this effect every time the node actually mounts, open/close included.
+  const [node, setNode] = useState<HTMLDivElement | null>(null);
+  const scrollRef = useCallback((el: HTMLDivElement | null) => setNode(el), []);
   const [page, setPage] = useState(0);
   const [pages, setPages] = useState(1);
 
   useEffect(() => {
-    const el = scrollRef.current;
+    const el = node;
     if (!el) return;
     const update = () => {
       const w = el.clientWidth || 1;
@@ -592,11 +611,10 @@ function useCardCarousel<T>(items: T[]) {
       el.removeEventListener("scroll", update);
       ro.disconnect();
     };
-  }, [items]);
+  }, [node, items]);
 
   const scrollByPage = (dir: 1 | -1) => {
-    const el = scrollRef.current;
-    if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" });
+    if (node) node.scrollBy({ left: dir * node.clientWidth, behavior: "smooth" });
   };
 
   return { scrollRef, page, pages, scrollByPage };
@@ -650,7 +668,7 @@ function UpcomingBuildsCarousel({
                 </div>
                 {b.otherOptionsCount ? (
                   <div className="mt-auto pt-2">
-                    <Tag text={`${b.otherOptionsCount} more options`} tagColor={TagColor.WHITE} />
+                    <Tag text={`Or ${b.otherOptionsCount} more options`} tagColor={TagColor.WHITE} />
                   </div>
                 ) : null}
               </Link>
@@ -663,8 +681,8 @@ function UpcomingBuildsCarousel({
               to={b.to}
               className="group flex h-full w-[75%] shrink-0 snap-start flex-col gap-4 rounded-xl border border-gray-stroke bg-white p-4 text-left transition-shadow hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)] sm:w-[calc((100%-1.5rem)/3)]"
             >
-              <div className="relative w-full shrink-0 overflow-hidden rounded-md border border-leland-gray-hover">
-                <img src={b.image} alt="" className="block h-auto w-full" />
+              <div className="relative aspect-[1.91/1] w-full shrink-0 overflow-hidden rounded-md border border-leland-gray-hover">
+                <img src={b.image} alt="" className="size-full object-cover" />
                 <span className="absolute left-2 top-2 flex items-center gap-1.5 rounded-[4px] bg-leland-black/[87%] px-1 pt-[3px] pb-[4px] text-[0.75rem] font-semibold leading-none text-leland-white shadow-[0_1px_3px_rgba(0,0,0,0.25)]">
                   <span className={`size-1.5 shrink-0 rounded-full ${levelDotColor(b.level)}`} aria-hidden />
                   Level 1
@@ -673,8 +691,13 @@ function UpcomingBuildsCarousel({
               <div className="flex flex-1 flex-col items-start">
                 <p className="line-clamp-2 text-[16px] font-semibold leading-[1.3] text-gray-dark">{b.buildTitle}.</p>
                 <p className="mt-1 line-clamp-2 text-[14px] text-gray-light">
-                  Picked for you{b.otherOptionsCount ? ` · ${b.otherOptionsCount} more options` : ""}
+                  Lesson {b.lessonNumber} · {b.sessionTitle}
                 </p>
+                {b.otherOptionsCount ? (
+                  <div className="mt-auto pt-2">
+                    <Tag text={`Or ${b.otherOptionsCount} more options`} tagColor={TagColor.WHITE} />
+                  </div>
+                ) : null}
               </div>
             </Link>
           );
@@ -682,48 +705,6 @@ function UpcomingBuildsCarousel({
         <div className="w-3 shrink-0 snap-start sm:hidden" aria-hidden />
       </div>
     </div>
-  );
-}
-
-function CompletedBuildsModal({
-  open,
-  onOpenChange,
-  builds,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  builds: typeof UPCOMING_BUILDS;
-}) {
-  return (
-    <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent
-        size={ModalSize.MEDIUM}
-        header={<h2 className="text-[20px] font-semibold leading-[1.3] text-gray-dark">Completed builds</h2>}
-      >
-        {builds.length === 0 ? (
-          <p className="px-6 py-8 text-[14px] text-gray-light sm:px-8">Nothing finished yet — it'll show up here once you complete a build.</p>
-        ) : (
-          <ul className="flex flex-col divide-y divide-gray-stroke px-6 py-2 sm:px-8 sm:py-4">
-            {builds.map((b) => (
-              <li key={b.sessionTitle} className="flex items-center gap-4 py-4">
-                <Link
-                  to={b.to}
-                  onClick={() => onOpenChange(false)}
-                  className="flex min-w-px flex-1 items-center gap-4 rounded-lg text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
-                >
-                  <img src={b.image} alt="" className="aspect-[1200/628] w-[136px] shrink-0 rounded-lg border border-black/5 object-cover sm:w-[160px]" />
-                  <div className="flex min-w-px flex-1 flex-col gap-1.5">
-                    <p className="text-[14px] font-semibold leading-[1.35] text-gray-dark">{b.buildTitle}.</p>
-                    <p className="text-[12px] leading-[1.5] text-gray-light">Lesson {b.lessonNumber} · {b.sessionTitle}</p>
-                  </div>
-                </Link>
-                <Tag text="Complete" tagColor={TagColor.BLACK} size={TagSize.XS} fontWeight={FontWeight.SEMIBOLD} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </ModalContent>
-    </Modal>
   );
 }
 
@@ -773,13 +754,7 @@ export default function ProgramHub() {
         : b,
     );
   }, [selectedCategory]);
-  // Demo stand-in for real progress data — just the first build counts as
-  // "complete" so both states exist to look at. Your Roadmap only ever
-  // shows what's not started; completed builds live in their own modal.
-  const notStartedBuilds = useMemo(() => upcomingBuilds.slice(1), [upcomingBuilds]);
-  const completedBuilds = useMemo(() => upcomingBuilds.slice(0, 1), [upcomingBuilds]);
-  const upcomingBuildsCarousel = useCardCarousel(notStartedBuilds);
-  const [completedBuildsOpen, setCompletedBuildsOpen] = useState(false);
+  const upcomingBuildsCarousel = useCardCarousel(upcomingBuilds);
 
   const toggleChip = (group: keyof typeof filters, value: string) =>
     setFilters((f) => ({ ...f, [group]: f[group].includes(value) ? f[group].filter((v) => v !== value) : [...f[group], value] }));
@@ -1079,7 +1054,7 @@ export default function ProgramHub() {
         </div>
 
         {/* Current course + live sessions */}
-        <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-stretch">
+        <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex flex-col gap-2.5 rounded-2xl border border-gray-stroke bg-white p-6 shadow-[0_1px_1px_rgba(16,24,40,0.05)] lg:max-w-[400px] lg:flex-1">
             {/* Side by side with "Your Roadmap"/Live sessions (lg+), this stays
                 stacked (image over text) to fit a narrow ~400px column.
@@ -1155,17 +1130,14 @@ export default function ProgramHub() {
             <div className="flex min-w-[280px] flex-1 flex-col gap-5 rounded-2xl border border-gray-stroke bg-white p-6">
               <div className="flex items-center gap-4">
                 <div className="flex min-w-px flex-1 flex-col gap-2">
-                  <p className="text-[22px] font-semibold leading-[1.2] text-gray-dark">Your Roadmap</p>
+                  <p className="text-[22px] font-semibold leading-[1.2] text-gray-dark">Core builds, tailored for you</p>
                 </div>
-                <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 !bg-black/5 font-semibold" onClick={() => setCompletedBuildsOpen(true)}>
-                  Completed builds
-                </Button>
                 <div className="hidden items-center gap-2 sm:flex">
                   <RoundArrow dir="left" disabled={upcomingBuildsCarousel.page <= 0} onClick={() => upcomingBuildsCarousel.scrollByPage(-1)} />
                   <RoundArrow dir="right" disabled={upcomingBuildsCarousel.page >= upcomingBuildsCarousel.pages - 1} onClick={() => upcomingBuildsCarousel.scrollByPage(1)} />
                 </div>
               </div>
-              <UpcomingBuildsCarousel builds={notStartedBuilds} carousel={upcomingBuildsCarousel} cardStyle={cardStyle} />
+              <UpcomingBuildsCarousel builds={upcomingBuilds} carousel={upcomingBuildsCarousel} cardStyle={cardStyle} />
             </div>
           ) : (
             <div className="flex min-w-[280px] flex-1 flex-col gap-5 rounded-2xl border border-gray-stroke bg-white p-6">
@@ -1407,11 +1379,6 @@ export default function ProgramHub() {
           setSelectCohortOpen(true);
         }}
         cohortSelectedLevels={cohortSelectedLevels}
-      />
-      <CompletedBuildsModal
-        open={completedBuildsOpen}
-        onOpenChange={setCompletedBuildsOpen}
-        builds={completedBuilds}
       />
       <SelectCohortModal
         open={selectCohortOpen}
