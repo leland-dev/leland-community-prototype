@@ -11,6 +11,7 @@ import {
   HtmlBlock,
   ImageBlock,
   InviteTeamBlock,
+  PromptBuilder,
   PromptQuiz,
   RadioCardGroup,
   RoleBuildPicker,
@@ -47,6 +48,8 @@ export function BlockRenderer({ block, allowH1 = true }: { block: Block; allowH1
       return <ToggleBlock block={block} />;
     case "code":
       return <CodeBlock block={block} />;
+    case "promptBuilder":
+      return <PromptBuilder block={block} />;
     case "table":
       return <TableBlock block={block} />;
     case "download":

@@ -114,6 +114,38 @@ export type CodeBlock = {
   filename?: string;
 };
 
+// One free-text question asked inline above a PromptBuilderBlock's generated
+// prompt. The answer fills in for `{{id}}` wherever buildPrompt uses it.
+export type PromptBuilderField = {
+  id: string;
+  question: string;
+  placeholder?: string;
+  // Doesn't gate revealing the next field or the generated prompt — the
+  // learner can leave it blank and move on. Shown as a "(optional)" label
+  // rather than baked into the question text.
+  optional?: boolean;
+  // Collapsed by default behind `hintLabel` (a click-to-reveal disclosure,
+  // not a permanently-visible callout) — most learners won't need it (e.g.
+  // most answers to "where's the context" are "a Google Doc", not a local
+  // file path), so it shouldn't carry the visual weight of a callout
+  // everyone sees whether or not it's relevant to them.
+  hint?: string;
+  hintLabel?: string; // defaults to "Need help finding this?"
+};
+
+// Same copy-button chrome as CodeBlock, but the prompt itself is assembled
+// live from a question or two (answered inline, no external chat needed)
+// plus anything already known about the learner (currently: their role,
+// from the shared selectedCategory/onboarding signal) — so the generic
+// "build something custom" prompt doesn't have to ask the AI tool to ask
+// the learner things this app already knows.
+export type PromptBuilderBlock = {
+  kind: "promptBuilder";
+  filename?: string; // header label, defaults to "Prompt"
+  fields: PromptBuilderField[];
+  buildPrompt: (answers: Record<string, string>, knownRole: string | null) => string;
+};
+
 // One expandable row in a ToggleBlock (deep dives, FAQs). Each row toggles
 // independently; only the currently open rows show their body.
 export type ToggleRow = {
@@ -326,6 +358,7 @@ export type Block =
   | HtmlBlock
   | ToggleBlock
   | CodeBlock
+  | PromptBuilderBlock
   | TableBlock
   | DownloadBlock
   | BannerBlock

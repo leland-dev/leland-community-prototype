@@ -45,6 +45,8 @@ import type {
   HtmlBlock as HtmlBlockType,
   InviteTeamBlock as InviteTeamBlockType,
   ImageBlock as ImageBlockType,
+  PromptBuilderBlock as PromptBuilderBlockType,
+  PromptBuilderField as PromptBuilderFieldType,
   PromptQuizBlock as PromptQuizBlockType,
   RadioCardGroupBlock as RadioCardGroupBlockType,
   RoleBuild as RoleBuildType,
@@ -281,11 +283,22 @@ export function DownloadBlock({ block }: { block: DownloadBlockType }) {
   );
 }
 
-export function CodeBlock({ block }: { block: CodeBlockType }) {
+// Shared chrome for a copyable block of text: filename/label header with a
+// copy button, plus the text itself. Used by CodeBlock and PromptBuilder so
+// a live-assembled prompt looks identical to a static one.
+function CopyableTextCard({
+  label,
+  text,
+  wrap = false,
+}: {
+  label: string;
+  text: string;
+  wrap?: boolean;
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    if (navigator.clipboard) navigator.clipboard.writeText(block.code);
+    if (navigator.clipboard) navigator.clipboard.writeText(text);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1200);
   };
@@ -293,21 +306,113 @@ export function CodeBlock({ block }: { block: CodeBlockType }) {
   return (
     <div className="overflow-hidden rounded-lg border border-leland-gray-stroke">
       <div className="flex items-center justify-between gap-3 bg-white py-4 pl-6 pr-4">
-        <span className="truncate leland-heading-base text-leland-gray-extra-light">
-          {block.filename ?? block.language}
-        </span>
+        <span className="truncate leland-heading-base text-leland-gray-extra-light">{label}</span>
         <button
           type="button"
           onClick={handleCopy}
-          aria-label="Copy code"
+          aria-label="Copy"
           className="flex shrink-0 items-center justify-center rounded-lg p-2.5 text-leland-gray-light hover:bg-leland-gray-hover hover:text-leland-gray-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
         >
           {copied ? <IconCheck className="size-5" /> : <IconCopy className="size-5" />}
         </button>
       </div>
-      <pre className={`bg-white px-6 pb-6 pt-0 ${block.language === "prompt" ? "whitespace-pre-wrap break-words" : "overflow-x-auto"}`}>
-        <code className="font-mono leland-paragraph-base text-leland-gray-dark">{block.code}</code>
+      <pre className={`bg-white px-6 pb-6 pt-0 ${wrap ? "whitespace-pre-wrap break-words" : "overflow-x-auto"}`}>
+        <code className="font-mono leland-paragraph-base text-leland-gray-dark">{text}</code>
       </pre>
+    </div>
+  );
+}
+
+export function CodeBlock({ block }: { block: CodeBlockType }) {
+  return (
+    <CopyableTextCard
+      label={block.filename ?? block.language}
+      text={block.code}
+      wrap={block.language === "prompt"}
+    />
+  );
+}
+
+// A question or two, answered inline, plus anything already known about the
+// learner (their role) — assembled live into the same copyable prompt card
+// CodeBlock renders, so picking "Custom" isn't just a static generic prompt.
+// Questions reveal one at a time as each is answered (rather than dumping
+// the whole form at once) so it reads more like being asked something than
+// filling out a form, and the prompt itself only appears once every
+// required question has something in it.
+export function PromptBuilder({ block }: { block: PromptBuilderBlockType }) {
+  const { selectedCategory } = useSelectedCategory();
+  const knownRole = selectedCategory;
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  const prompt = block.buildPrompt(answers, knownRole);
+
+  const visibleFields: PromptBuilderFieldType[] = [];
+  for (const field of block.fields) {
+    visibleFields.push(field);
+    if (!(answers[field.id] ?? "").trim()) break;
+  }
+  const allRequiredAnswered = block.fields
+    .filter((f) => !f.optional)
+    .every((f) => (answers[f.id] ?? "").trim());
+
+  return (
+    <div className="flex flex-col gap-8">
+      {visibleFields.map((field, i) => (
+        <div key={field.id} className="flex flex-col gap-4">
+          <label className="flex flex-col gap-3">
+            <span className="leland-heading-xl font-semibold! text-leland-gray-dark">
+              {field.question}
+              {field.optional ? <span className="text-leland-gray-light"> (optional)</span> : null}
+            </span>
+            <input
+              ref={(el) => {
+                inputRefs.current[field.id] = el;
+              }}
+              autoFocus={i === 0}
+              type="text"
+              value={answers[field.id] ?? ""}
+              onChange={(e) => setAnswers((prev) => ({ ...prev, [field.id]: e.target.value }))}
+              onKeyDown={(e) => {
+                // Reveal-on-type already surfaces the next field as soon as
+                // this one has something in it, but autofocusing it on every
+                // keystroke would steal focus mid-word — so moving forward is
+                // a deliberate Enter press instead, not a side effect of typing.
+                if (e.key !== "Enter") return;
+                const next = block.fields[block.fields.findIndex((f) => f.id === field.id) + 1];
+                if (next) inputRefs.current[next.id]?.focus();
+              }}
+              placeholder={field.placeholder}
+              // A text input's focus ring doubles as "this is the active
+              // field" — closer to a selection state than a generic keyboard
+              // focus indicator — so it uses the dark-gray selection color,
+              // never the yellow brand/accent color.
+              className="rounded-lg border border-leland-gray-stroke bg-white px-4 py-3 leland-paragraph-lg text-leland-gray-dark placeholder:text-leland-gray-light focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-gray-dark"
+            />
+          </label>
+          {field.hint ? (
+            <details className="group rounded-2xl border border-leland-gray-stroke bg-white/50 px-6">
+              <summary className="flex cursor-pointer list-none items-center gap-2 py-3 [&::-webkit-details-marker]:hidden">
+                <span className="min-w-0 flex-1 py-2 leland-paragraph-lg font-semibold text-leland-gray-dark">
+                  {field.hintLabel ?? "Need help finding this?"}
+                </span>
+                <span className="flex shrink-0 items-center justify-center rounded-lg bg-black/5 p-2.5">
+                  <IconChevronDown className="size-3.5 text-leland-gray-dark transition-transform group-open:rotate-180" />
+                </span>
+              </summary>
+              <div>
+                <hr className="border-t border-leland-gray-stroke" />
+              </div>
+              <div className="pb-6 pt-4">
+                <span className="leland-paragraph-base text-leland-gray-dark">{field.hint}</span>
+              </div>
+            </details>
+          ) : null}
+        </div>
+      ))}
+
+      {allRequiredAnswered ? <CopyableTextCard label={block.filename ?? "Prompt"} text={prompt} wrap /> : null}
     </div>
   );
 }

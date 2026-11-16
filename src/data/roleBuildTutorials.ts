@@ -2,7 +2,7 @@
 // from the Leland+ library content entries (see each TUTORIAL's `source` for
 // the original urn:contentEntry id) and embedded inline rather than linked
 // out to, so a learner never leaves the lesson page.
-import type { Block } from "./lessonBlocks";
+import type { Block, PromptBuilderField } from "./lessonBlocks";
 
 type TutorialStep = {
   title: string;
@@ -10,30 +10,57 @@ type TutorialStep = {
   tips: string[];
 };
 
+// A tutorial either carries a fixed prompt (most role-specific builds — the
+// prompt already asks the AI tool to interview the learner) or a
+// promptBuilder (the generic/"Custom" build — asked inline instead, so a
+// question we can answer ourselves, like role, doesn't get asked twice).
 type TutorialSource = {
   source?: string; // urn:contentEntry id this was adapted from, when there is one
   about: string[];
-  setupHeaders: string[];
-  setupRows: string[][];
-  niceToHave: string;
-  buildIntro: string;
-  prompt: string;
+  setupHeaders?: string[]; // omit along with setupRows to skip the Setup table
+  setupRows?: string[][];
+  niceToHave?: string; // omit to skip the callout — keeps the lead-up short for the generic/custom build
+  buildIntro?: string; // omit along with the heading to go straight from `about` into the prompt
+  prompt?: string;
+  promptBuilder?: {
+    fields: PromptBuilderField[];
+    buildPrompt: (answers: Record<string, string>, knownRole: string | null) => string;
+  };
   steps: TutorialStep[];
 };
 
 function buildTutorial(src: TutorialSource): Block[] {
+  const promptBlock: Block = src.promptBuilder
+    ? { kind: "promptBuilder", filename: "Prompt", fields: src.promptBuilder.fields, buildPrompt: src.promptBuilder.buildPrompt }
+    : { kind: "code", language: "prompt", filename: "Prompt", code: src.prompt ?? "" };
+
+  const niceToHaveBlock: Block | null = src.niceToHave
+    ? {
+        kind: "callout",
+        tone: "tan",
+        title: "Nice to have",
+        content: [{ kind: "markdown", body: src.niceToHave }],
+      }
+    : null;
+
+  const setupBlocks: Block[] =
+    src.setupHeaders && src.setupRows
+      ? [
+          { kind: "markdown", body: "### Setup" },
+          { kind: "table", headers: src.setupHeaders, firstColumnBold: true, rows: src.setupRows },
+        ]
+      : [];
+
+  const buildIntroBlock: Block | null = src.buildIntro
+    ? { kind: "markdown", body: ["### Build it with this prompt", "", src.buildIntro].join("\n") }
+    : null;
+
   return [
     { kind: "markdown", body: src.about.join("\n\n") },
-    { kind: "markdown", body: "### Setup" },
-    { kind: "table", headers: src.setupHeaders, firstColumnBold: true, rows: src.setupRows },
-    {
-      kind: "callout",
-      tone: "tan",
-      title: "Nice to have",
-      content: [{ kind: "markdown", body: src.niceToHave }],
-    },
-    { kind: "markdown", body: ["### Build it with this prompt", "", src.buildIntro].join("\n") },
-    { kind: "code", language: "prompt", filename: "Prompt", code: src.prompt },
+    ...setupBlocks,
+    ...(niceToHaveBlock ? [niceToHaveBlock] : []),
+    ...(buildIntroBlock ? [buildIntroBlock] : []),
+    promptBlock,
     { kind: "markdown", body: "### Steps" },
     {
       kind: "steps",
@@ -568,28 +595,61 @@ export const OPERATIONS_TUTORIAL: Block[] = buildTutorial({
 // build above — a generic one-page build anyone can do with their own work.
 export const GENERIC_TUTORIAL: Block[] = buildTutorial({
   about: [
-    "Pick one piece of real work you're doing right now — a project, a plan, an update you owe someone — and turn it into a single page you can open in a browser and share. You'll start with whatever you already have on it: notes, a doc, an email thread. Your AI reads what you give it and builds a clean page that lays out the goal, the key details, and what happens next.",
-    "First you'll answer a few questions so it understands what you're building and who it's for. Then it builds the page from your answers, and you run it once on your real material and fix whatever looks off. Plan on about 45 minutes the first time.",
+    "Pick one piece of real work you're doing right now — a project, a plan, an update you owe someone — and turn it into a single page you can open in a browser and share, built from whatever notes or material you already have on it.",
   ],
-  setupHeaders: ["You need", "Why", "How to set it up"],
-  setupRows: [
-    [
-      "One real piece of work",
-      "The page is only useful when it's about something real",
-      "Pick a project, plan, or update you're already working on.",
+  promptBuilder: {
+    fields: [
+      {
+        id: "build",
+        question: "What do you want to build?",
+        placeholder: "e.g. a one-page summary of a project I'm working on",
+      },
+      {
+        id: "context",
+        question: "Where can I find the context for this?",
+        placeholder: "e.g. a Google Doc, email thread, or Slack channel",
+        hintLabel: "Using a local file?",
+        hint: "Right-click it and choose Copy as Pathname (hold Option on Mac) or Copy as path (Windows), then paste it here.",
+      },
+      {
+        id: "designGuidelines",
+        question: "Where can I find your brand colors, fonts, or design guidelines?",
+        placeholder: "e.g. our brand guide in Notion",
+        optional: true,
+      },
     ],
-    [
-      "Whatever notes or material you have on it",
-      "The page is built from your own material, not invented",
-      "Paste the text, or attach a doc, deck, or spreadsheet.",
-    ],
-  ],
-  niceToHave:
-    "Add your team's colors and fonts if you have them, so the page matches your other work. Without them, the page uses a clean default design.",
-  buildIntro:
-    "Paste this into a new chat in your AI tool. It asks about your role and your work first, then builds, then tests what it built with you.",
-  prompt:
-    "I want to build a one-page summary of a real piece of my work, as a single web page I can open in a browser and share, for my work. First, ask me what my role is and what I work on. Then walk me through it in three stages: Scope, Build, and Evaluate. Finish each stage before starting the next, and wait for my answer whenever you ask me something.\n\nStage 1: Scope\nAsk me these questions one at a time. If an answer is vague, ask a follow-up before you move on.\n1. What is this page about, and what should it include and in what order?\n2. What will I give you, and where does it live?\n3. Who is this page for, and what should they do after reading it?\n4. What should the page never do or assume?\n5. What would make the output good? Help me turn my answer into three checks I can answer yes or no.\nThen write a short spec with my answers and the three checks. Ask me to confirm it or change it.\n\nStage 2: Build\nOnce I confirm the spec, build the page using only what I give you. Tell me exactly what to paste or attach, one thing at a time, and wait for it. If you're unsure about something, ask me instead of guessing.\n- Output: one complete, self-contained HTML file in a single code block, with the styles inside the file. If my tool can show it as an artifact or canvas, show it there. Otherwise tell me to save the code as a file ending in .html and open it in my browser.\n\nStage 3: Evaluate\nGrade the page you just made against my three checks. Mark each one yes or no and quote the line that proves it. If any check fails, tell me the one change that would fix the most misses, make it, and run it again. When all three pass, give me the instructions as one block I can paste into a new chat or a project, so I can build a page for my next piece of work.",
+    buildPrompt: (answers, knownRole) => {
+      const build = answers.build?.trim() || "[what you want to build]";
+      const role = knownRole || "[your role]";
+      const context = answers.context?.trim() || "[where the context lives]";
+      const designGuidelines = answers.designGuidelines?.trim();
+      // "I work in {role}" rather than "I'm a {role}" — role is a category
+      // name (Marketing, Operations, Engineering...), not a job-title noun,
+      // so "I'm a Operations" (and the a/an mismatch on "Executive") reads
+      // wrong where "I work in Operations" holds up for all of them.
+      const designSentence = designGuidelines
+        ? ` For colors and fonts, use what's in ${designGuidelines}; otherwise use a clean default design.`
+        : " Use a clean default design.";
+      return [
+        `I want to build ${build}. Even if that's normally a different format, like a slide deck or a PDF, build it as a single, styled web page I can open in a browser and share, for my work. I work in ${role}. The context for this is in ${context}.${designSentence} Walk me through it in three stages: Scope, Build, and Evaluate. Finish each stage before starting the next, and wait for my answer whenever you ask me something.`,
+        "",
+        "Stage 1: Scope",
+        "Ask me these questions one at a time. If an answer is vague, ask a follow-up before you move on.",
+        "1. What should this page include, and in what order?",
+        "2. Who is this page for, and what should they do after reading it?",
+        "3. What should the page never do or assume?",
+        "4. What would make the output good? Help me turn my answer into three checks I can answer yes or no.",
+        "Then write a short spec with my answers and the three checks. Ask me to confirm it or change it.",
+        "",
+        "Stage 2: Build",
+        "Once I confirm the spec, build the page using only what I give you. Tell me exactly what to paste or attach, one thing at a time, and wait for it. If you're unsure about something, ask me instead of guessing.",
+        "- Output: one complete, self-contained HTML file in a single code block, with the styles inside the file. If my tool can show it as an artifact or canvas, show it there. Otherwise tell me to save the code as a file ending in .html and open it in my browser.",
+        "",
+        "Stage 3: Evaluate",
+        "Grade the page you just made against my three checks. Mark each one yes or no and quote the line that proves it. If any check fails, tell me the one change that would fix the most misses, make it, and run it again. When all three pass, give me the instructions as one block I can paste into a new chat or a project, so I can build a page for my next piece of work.",
+      ].join("\n");
+    },
+  },
   steps: [
     {
       title: "Scope",
