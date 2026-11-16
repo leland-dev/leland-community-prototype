@@ -35,7 +35,6 @@ import {
   IconCheck,
   IconClock,
   IconArrowUpRight,
-  IconArrowLeft,
   IconBooks,
   IconModules,
   IconExperiences,
@@ -2525,13 +2524,17 @@ export default function ContentViewer() {
       {/* Mobile page header — stands in for the global nav + desktop header
           below lg: back to My content, course title, and a drawer toggle. */}
       <header className="flex shrink-0 items-center gap-4 border-b border-leland-gray-stroke bg-white px-4 py-3 md:hidden">
-        <Link
-          to={exitDestination}
-          aria-label="Back to My content"
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open course menu"
           className="flex size-9 shrink-0 items-center justify-center rounded-lg text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
         >
-          <IconArrowLeft className="size-5" aria-hidden />
-        </Link>
+          {/* A plain menu icon here, not IconLeftSidebarOpen — on mobile
+              this opens a bottom sheet, not a side panel, so the "side
+              panel" icon was misleading about which direction it opens. */}
+          <IconMenuBurger className="size-5" aria-hidden />
+        </button>
         <button
           type="button"
           onClick={() => setSidebarOpen(true)}
@@ -2545,17 +2548,13 @@ export default function ContentViewer() {
             {breadcrumbLabel}{!isCompletion && ` / ${sectionIdx + 1} of ${visibleSections.length}`}
           </span>
         </button>
-        <button
-          type="button"
-          onClick={() => setSidebarOpen(true)}
-          aria-label="Open course menu"
+        <Link
+          to={exitDestination}
+          aria-label="Exit to My content"
           className="flex size-9 shrink-0 items-center justify-center rounded-lg text-leland-gray-dark hover:bg-leland-gray-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-leland-primary"
         >
-          {/* A plain menu icon here, not IconLeftSidebarOpen — on mobile
-              this opens a bottom sheet, not a side panel, so the "side
-              panel" icon was misleading about which direction it opens. */}
-          <IconMenuBurger className="size-5" aria-hidden />
-        </button>
+          <IconX className="size-5" aria-hidden />
+        </Link>
       </header>
       {/* Body */}
       <div className="relative flex min-h-0 flex-1">

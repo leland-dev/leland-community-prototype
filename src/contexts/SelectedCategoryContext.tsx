@@ -22,14 +22,27 @@ const STORAGE_KEY = "prototype-selected-category";
 
 export function SelectedCategoryProvider({ children }: { children: ReactNode }) {
   const [selectedCategory, setSelectedCategoryState] = useState<string | null>(() => {
-    return localStorage.getItem(STORAGE_KEY) || null;
+    try {
+      return localStorage.getItem(STORAGE_KEY) || null;
+    } catch {
+      return null;
+    }
   });
 
+  // localStorage access can throw (private browsing, blocked third-party
+  // storage, a sandboxed preview iframe) — if it does, fall back to
+  // session-only state rather than letting the throw abort this function
+  // before the selection itself ever updates, which made the picker look
+  // permanently stuck on whatever value was last persisted successfully.
   const setSelectedCategory = (v: string | null) => {
-    if (v) {
-      localStorage.setItem(STORAGE_KEY, v);
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
+    try {
+      if (v) {
+        localStorage.setItem(STORAGE_KEY, v);
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    } catch {
+      // ignore — state still updates below
     }
     setSelectedCategoryState(v);
   };
