@@ -361,7 +361,7 @@ function ExpertCard({ card }: { card: CoachProfileCardData }) {
 function LivestreamCard({ ls }: { ls: LivestreamCardData }) {
   return (
     <div>
-      <img src={ls.image} alt="" className="aspect-[1.91/1] w-full rounded-2xl object-cover" />
+      <img src={ls.image} alt="" className="aspect-[1.91/1] w-full rounded-[6px] object-cover" />
       <div className="mt-3 flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h3 className="truncate text-[18px] font-semibold text-gray-dark">{ls.title}</h3>
