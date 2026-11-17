@@ -107,6 +107,8 @@ import SidebarCardsTest from "./pages/SidebarCardsTest";
 import OfferingCardTest from "./pages/OfferingCardTest";
 import CourseBlockTest from "./pages/CourseBlockTest";
 import PostTest from "./pages/PostTest";
+import TopicsPlayground from "./pages/TopicsPlayground";
+import SearchResults from "./pages/SearchResults";
 import ProfileCardTest from "./pages/ProfileCardTest";
 import GroupCardTest from "./pages/GroupCardTest";
 import Components from "./pages/Components";
@@ -241,6 +243,7 @@ export default function App() {
         <Route path="/agent/:agentSlug/edit" element={<CoachAgentEdit />} />
         <Route path="/groups/:groupId" element={<Group />} />
         <Route path="/site" element={<Site />} />
+        <Route path="/search-results" element={<SearchResults />} />
         <Route path="/settings" element={<AccountSettings />} />
         {/* Standalone team dashboard — separate from the My Leland shell */}
         <Route path="/team" element={<TeamLayout />}>
@@ -332,6 +335,7 @@ export default function App() {
         <Route path="/components/offering-card" element={<OfferingCardTest />} />
         <Route path="/components/course-block" element={<CourseBlockTest />} />
         <Route path="/components/post" element={<PostTest />} />
+        <Route path="/topics-playground" element={<TopicsPlayground />} />
         <Route path="/components/profile-card" element={<ProfileCardTest />} />
         <Route path="/components/group-card" element={<GroupCardTest />} />
         <Route path="/components/storefront-cards" element={<StorefrontCardsTest />} />

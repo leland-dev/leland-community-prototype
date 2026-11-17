@@ -153,6 +153,10 @@ interface PostBase {
   // clickable topic pill at the top of the post and includes it in the topic's
   // filtered feed at /topic/:slug.
   topic?: string;
+  // The communities this post was posted into (slugs into TOPICS). When a post
+  // lives in more than one, the header collapses to "Posted in N communities".
+  // Falls back to `topic` (as a single community) when omitted.
+  communities?: string[];
   // Free-form hashtags shown below the post body as blue "#Tag" links. Each
   // links to its hashtag browse page at /hashtag/<slugified-tag>.
   hashtags?: string[];
@@ -460,6 +464,7 @@ export const posts: Post[] = [
   {
     id: 101,
     topic: "breaking-into-pm",
+    communities: ["breaking-into-pm", "mba-r1-admissions"],
     type: "text",
     author: "Alex Rivera",
     avatar: pic10,
@@ -1656,8 +1661,12 @@ function ImpressionsInfoModal({ open, onClose }: { open: boolean; onClose: () =>
   );
 }
 
-function PostHeaderRow({ author, time, verified, headline, feed, topic, isGroupPost, groupId, groupPoster, companyLogo, onEdit, nameHover, showHeadline, featuredOrg, inlineOrgLogo, subOrgLogos }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; topic?: string; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean }; companyLogo?: string; onEdit?: () => void; nameHover?: HoverProps; showHeadline?: boolean; featuredOrg?: { name: string; logo: string }; inlineOrgLogo?: string; subOrgLogos?: string[] }) {
-  const postTopic = topicBySlug(topic);
+function PostHeaderRow({ author, time, verified, headline, feed, topic, communities, isGroupPost, groupId, groupPoster, companyLogo, onEdit, nameHover, showHeadline, featuredOrg, inlineOrgLogo, subOrgLogos }: { author: string; time: string; verified?: boolean; headline?: string; feed?: string; topic?: string; communities?: string[]; isGroupPost?: boolean; groupId?: string; groupPoster?: { name: string; avatar: string; headline?: string; overlay?: boolean }; companyLogo?: string; onEdit?: () => void; nameHover?: HoverProps; showHeadline?: boolean; featuredOrg?: { name: string; logo: string }; inlineOrgLogo?: string; subOrgLogos?: string[] }) {
+  // Communities this post lives in — the explicit list when set, otherwise the
+  // single `topic`. Rendered as a "Posted in …" line under the author.
+  const postCommunities = ((communities && communities.length ? communities : topic ? [topic] : []))
+    .map(topicBySlug)
+    .filter((t): t is Topic => Boolean(t));
   const [menuOpen, setMenuOpen] = useState(false);
   const [following, setFollowing] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -1752,21 +1761,6 @@ function PostHeaderRow({ author, time, verified, headline, feed, topic, isGroupP
           {verified && !isGroupPost && verifiedBadgePosition === "name" ? (
             <VerifiedBadge className="h-5 w-5 shrink-0" />
           ) : null}
-          {/* Topic — inline between the poster and the timestamp, chevron-separated
-              (mirrors the "poster › topic · time" reference treatment). Hidden
-              unless the Topics admin toggle is on. */}
-          {postTopic && topicsEnabled && (
-            <>
-              <svg className="shrink-0 text-gray-xlight" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
-              <Link
-                to={`/topic/${postTopic.slug}`}
-                onClick={(e) => e.stopPropagation()}
-                className="truncate text-[15px] font-semibold leading-tight text-[#3963D7] hover:underline"
-              >
-                {postTopic.name}
-              </Link>
-            </>
-          )}
           {/* Org logo inline between the name and the timestamp (logo only). */}
           {inlineOrgLogo && (
             <img src={inlineOrgLogo} alt="" className="h-[16px] w-[16px] shrink-0 rounded-[3px] object-cover" />
@@ -1792,9 +1786,25 @@ function PostHeaderRow({ author, time, verified, headline, feed, topic, isGroupP
               <span className="truncate text-[14px] leading-tight text-gray-extra-light">{displayHeadline}</span>
             )}
           </div>
-        ) : (showHeadline || profileBarMode !== 1) && displayHeadline ? (
-          <p className="mt-0.5 truncate text-[14px] leading-tight text-gray-extra-light">{displayHeadline}</p>
+        ) : (showHeadline || profileBarMode !== 1 || topicsEnabled) && displayHeadline ? (
+          <p className="mt-0.5 truncate text-[14px] leading-tight text-[#4c4c4c]">{displayHeadline}</p>
         ) : null}
+        {/* Communities — "Posted in <name>" for one, "Posted in N communities"
+            for several. A blue, tappable metadata line under the author; the
+            trailing chevron signals it opens the community. Gated by the Topics
+            admin toggle. */}
+        {topicsEnabled && postCommunities.length > 0 && (
+          <Link
+            to={`/topic/${postCommunities[0].slug}`}
+            onClick={(e) => e.stopPropagation()}
+            className="group mt-0.5 flex min-w-0 items-center gap-1.5 text-[14px] font-medium leading-tight text-[#3963D7]"
+          >
+            <span className="truncate group-hover:underline">
+              Posted in {postCommunities.length > 1 ? `${postCommunities.length} communities` : postCommunities[0].name}
+            </span>
+            <svg className="-ml-1 shrink-0" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+          </Link>
+        )}
       </div>
       <div className="flex shrink-0 items-start gap-1">
       <div ref={menuRef} className="relative">
@@ -3963,7 +3973,14 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
   // Answer posts embed a question card — mirror the "Answer a question" section
   // version so the embedded card matches the top-of-feed treatment (v2 = asker
   // attribution instead of the "experts have answered" facepile).
-  const { featuredQuestionsVersion } = useFeedAdmin();
+  const { featuredQuestionsVersion, topics: topicsEnabled } = useFeedAdmin();
+  // Number of communities this post resolves to (for the "Posted in …" header
+  // line). When shown, it replaces the bottom hashtag chips so the post carries
+  // one topic treatment, not two.
+  const communityCount = topicsEnabled && !hideTopic
+    ? (post.communities?.length ? post.communities : post.topic ? [post.topic] : []).map(topicBySlug).filter(Boolean).length
+    : 0;
+  const showCommunityLine = communityCount > 0;
   // Avatar + name share one coach hover-card (see useCoachHover).
   const hover = useCoachHover(post);
   // Clicking a post image expands it in a lightbox in place (no navigation), so
@@ -4024,14 +4041,18 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
         </div>
         {/* Right column: content */}
         <div className="min-w-0 flex-1">
-          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} topic={hideTopic ? undefined : post.topic} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} companyLogo={post.companyLogo} onEdit={onUpdate ? () => setEditOpen(true) : undefined} nameHover={hover.enabled ? hover.hoverProps : undefined} showHeadline={showHeadline} featuredOrg={featuredOrg} inlineOrgLogo={inlineOrgLogo} subOrgLogos={subOrgLogos} />
+          <PostHeaderRow author={post.author} time={post.time} verified={post.verified} headline={post.headline} feed={post.feed} topic={hideTopic ? undefined : post.topic} communities={hideTopic ? undefined : post.communities} isGroupPost={post.isGroupPost} groupId={post.groupId} groupPoster={post.groupPoster} companyLogo={post.companyLogo} onEdit={onUpdate ? () => setEditOpen(true) : undefined} nameHover={hover.enabled ? hover.hoverProps : undefined} showHeadline={showHeadline} featuredOrg={featuredOrg} inlineOrgLogo={inlineOrgLogo} subOrgLogos={subOrgLogos} />
           {/* Minimal mode has no title line, so the body tucks up tight to the
               identity row (negative margin trims the line-height leading); a
               sub-line (title mode / headline / featured org) gives it more air. */}
           {/* Articles are represented by their card (title + clamped excerpt) —
               the raw body would dump the whole essay into the feed. */}
           {(() => {
-            const hasSubline = profileBarMode !== 1 || showHeadline || Boolean(featuredOrg) || Boolean(subOrgLogos?.length);
+            // With topics on, the header grows a sub-line (the headline and/or a
+            // "Posted in …" community line), so the body must sit below it with
+            // positive spacing rather than tucking up into it.
+            const headlineText = post.groupPoster?.headline ?? post.headline;
+            const hasSubline = profileBarMode !== 1 || showHeadline || Boolean(featuredOrg) || Boolean(subOrgLogos?.length) || (topicsEnabled && Boolean(headlineText)) || showCommunityLine;
             const bodyMargin = hasSubline ? "mt-1.5" : "-mt-1.5";
             if (post.type !== "article") {
               return <p className={`${bodyMargin} text-[15px] font-medium leading-[1.4] text-gray-dark`}>{post.body}</p>;
@@ -4088,7 +4109,7 @@ export function FeedPost({ post, onUpdate, onRepost, onUndoRepost, onQuote, onOp
               </div>
             )}
           </div>
-          {post.hashtags && post.hashtags.length > 0 && (
+          {!showCommunityLine && post.hashtags && post.hashtags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1" onClick={e => e.stopPropagation()}>
               {post.hashtags.map(tag => (
                 <Link
