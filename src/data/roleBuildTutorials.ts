@@ -284,34 +284,38 @@ export const SALES_DEMO_DECK_TUTORIAL: Block[] = buildTutorial({
 // Placeholder content for builds still being scoped — lorem ipsum stands in
 // for real tutorial content so the picker's layout can be previewed with a
 // realistic number of cards before every build is written.
+// Stand-in step content for a build whose title and description are real
+// (confirmed against the live tutorial library) but whose actual walkthrough
+// hasn't been authored yet. Reads as an honest "not written yet" placeholder
+// rather than lorem ipsum, which could be mistaken for real draft content.
 export const LOREM_STUB_TUTORIAL: Block[] = buildTutorial({
   about: [
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    "This build's full step-by-step tutorial hasn't been authored yet — this is placeholder content standing in for it.",
+    "The title and description above are real, but the setup, prompt, and steps below are not. Check back once this tutorial has been written.",
   ],
   setupHeaders: ["You need", "Why", "How to set it up"],
   setupRows: [
-    ["Lorem ipsum", "Dolor sit amet consectetur", "Adipiscing elit sed do eiusmod tempor incididunt."],
-    ["Ut labore et dolore", "Magna aliqua ut enim ad minim", "Veniam quis nostrud exercitation ullamco laboris."],
+    ["Not yet written", "—", "—"],
+    ["Not yet written", "—", "—"],
   ],
-  niceToHave: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.",
-  buildIntro: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  prompt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+  niceToHave: "Not yet written.",
+  buildIntro: "Not yet written.",
+  prompt: "This build's prompt hasn't been written yet.",
   steps: [
     {
       title: "Scope",
-      body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      tips: ["**Tip:** Lorem ipsum dolor sit amet, consectetur adipiscing elit."],
+      body: "Not yet written.",
+      tips: ["**Tip:** This step hasn't been authored yet."],
     },
     {
       title: "Build",
-      body: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-      tips: ["**Tip:** Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore."],
+      body: "Not yet written.",
+      tips: ["**Tip:** This step hasn't been authored yet."],
     },
     {
       title: "Evaluate",
-      body: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      tips: ["**Tip:** Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium."],
+      body: "Not yet written.",
+      tips: ["**Tip:** This step hasn't been authored yet."],
     },
   ],
 });
@@ -1044,6 +1048,1198 @@ export const GENERIC_WORKFLOW_TUTORIAL: Block[] = buildTutorial({
         "**Tip:** Use your messiest recent example, not your cleanest one — it's the better stress test.",
         "**Tip:** Save the finished brief somewhere you'll actually find it before your next build session.",
       ],
+    },
+  ],
+});
+
+// ─── Real-library tutorials for Lesson 2's "Scope your first custom workflow"
+// alternates — adapted from the actual Leland+ content entries (see each
+// TUTORIAL's `source`), not invented for this prototype.
+
+export const SALES_LEAD_GEN_BOT_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae4958f570ce61bff880",
+  about: [
+    "Most B2B buyers complete their own research long before they ever talk to a salesperson, so outreach that shows up before a real signal of interest mostly gets ignored. This system watches a specific niche you pick — a subreddit, a hiring page, a public complaint thread — for posts that match your buying-signal criteria, then drafts a short outreach message that references the exact signal it found. Sending is still your call.",
+    "Watching for one specific, timely signal turns outreach from a numbers game into a small number of messages worth sending. Every version stays read-only until you approve outreach.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where signals for your niche live — a subreddit, LinkedIn, a job board — before you build the monitor."],
+    ["How much outreach volume you can realistically personalize and follow up on per week."],
+    ["Whether outreach sends after each draft is reviewed or only after a batch review at the end of the day."],
+  ],
+  buildIntro: "Gather access to wherever your signals live (Reddit, LinkedIn, a job board), your outreach or email tool, and your CRM to track who's been contacted. The paste-in version needs none.",
+  prompt: "Goal: Scan [specific source, e.g. a subreddit, a job board, a public complaint feed] for new posts matching my buying-signal criteria, and draft a short personalized outreach for each match.\n\nContext: A real signal looks like [describe specifically, e.g. \"someone asking for a recommendation for a tool that does X\" or \"a company posting a job for a role my product replaces\"]. My typical outreach is short, references something specific about the person, and asks one direct question.\n\nRules:\n- Only flag a post as a signal if it matches the specific criteria, and state why each match qualifies.\n- Draft outreach that quotes or references the actual signal rather than a templated opener with a name swapped in.\n- Keep each draft under 100 words.\n- Flag anything ambiguous for human judgment instead of guessing whether it counts as a signal.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming your signal source, what counts as a real signal, your outreach voice, and how much volume you can follow up on.",
+      tips: ["**Tip:** The interview forces you to define a real signal before you build anything, so the scope document becomes the brief for every build session after."],
+    },
+    {
+      title: "Build",
+      body: "Build the system against your scope document and test it on a fresh scan of your niche. Review the output for criteria met, the actual signal referenced, under 100 words, and ambiguous posts flagged instead of guessed.",
+      tips: ["**Tip:** Naming the specific signal criteria up front keeps the AI tool from treating any keyword mention as a lead."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every scan, and package what works into a reusable skill once it passes a few weeks straight.",
+      tips: ["**Tip:** A keyword match on its own isn't a buying signal — give the criteria enough specificity to tell a real evaluator from a passing mention."],
+    },
+  ],
+});
+
+export const SALES_PRICING_LAB_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae483816d8b8bdbae81d",
+  about: [
+    "Pricing moves profit more than almost any lever a company has, and most founders spend far less time on it than that lever justifies. This system turns what customers have said about value and budget into three price tiers with feature lines, built from real customer language rather than competitor mimicry, so the tiers hold up when a buyer has to defend the purchase to themselves.",
+    "Run it as a paste-in prompt when pricing needs a fresh look, or a saved skill you rerun as new interview evidence comes in.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Whether pricing gets validated through real transactions or through direct conversation with customers."],
+    ["How many interviews are enough to lock a price versus still testing."],
+    ["Whether this runs once at launch or gets rerun on a schedule as the customer base grows."],
+  ],
+  buildIntro: "Gather any access it calls for — your payments or billing platform, your CRM or interview notes home, and your landing page or checkout tool. The paste-in version needs none.",
+  prompt: "Goal: Turn my customer interview notes and competitor pricing into a three-tier pricing table with a recommended launch price for each tier.\n\nContext: My product is [one-line description]. My buyer is [who pays, not just who uses it]. My interview notes are in [location]. Known competitor prices are [list or \"none found yet\"].\n\nRules: Base each tier's feature split on what customers said they valued most, not on what's easiest to build. Name the tiers in plain language a buyer would use, not \"Basic/Pro/Enterprise\" by default. For each tier, state the one sentence that justifies why a customer would upgrade past it. Flag any tier where you don't have enough interview evidence to justify the price, rather than guessing a number.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming what you're selling, who the buyer is, what customers have said about budget, and how often you expect to revisit price.",
+      tips: ["**Tip:** Naming the buyer, evidence, and competitor context up front turns the scope document into the brief every pricing pass builds from."],
+    },
+    {
+      title: "Build",
+      body: "Build against real interview notes and any competitor prices you have. Review for tiers grounded in customer language, plain tier names, an upgrade sentence for each, and low-evidence tiers flagged.",
+      tips: ["**Tip:** Tying every tier boundary to actual customer language keeps the price defensible."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every pricing pass, and package the prompt and your corrected rules into a skill once it holds for a full quarter.",
+      tips: ["**Tip:** A price with no evidence behind it is a guess with better formatting — tie every tier boundary back to something a real customer said."],
+    },
+  ],
+});
+
+export const SALES_PRECALL_BRIEFING_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae3cdbb6bf0b8f44fbae",
+  about: [
+    "Reps walk into calls running on memory, or on whatever they scrolled to find in the ten minutes before. This system pulls CRM history, past notes, and public signals (funding, leadership moves, product news) into a one-page brief before every external meeting, naming what changed since the last touch and a few real conversation openers.",
+    "Run it as a paste-in prompt before a single call, a saved skill triggered by your calendar, or a scheduled agent that builds the brief automatically ahead of every external meeting. Every version stays read-only against your CRM.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where account history lives, and whether it exports cleanly."],
+    ["How far ahead public information typically exists for your accounts."],
+    ["Whether the brief goes to the rep alone or a manager too."],
+  ],
+  buildIntro: "Gather access to your CRM (Salesforce and HubSpot publish official connectors and API docs), your calendar, and enrichment data for public signals. The paste-in version needs none.",
+  prompt: "Goal: Produce a one-page brief for my meeting with [account/contact] before [trigger time, e.g. two hours ahead].\n\nContext: [Paste CRM history: past notes, deal stage, last activity date. Note where account history lives. List what public information matters most for your business, e.g. funding, leadership moves, product launches.]\n\nRules:\n- Pull only from named sources. No unsourced claims.\n- Every \"what changed since we last spoke\" claim needs a dated source.\n- Flag any CRM history older than [30] days as stale rather than treating it as current.\n- Cap the brief at one page.\n- End with exactly three conversation openers tied to this specific account, not generic ones.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming which meetings get a brief, where account history lives, and what counts as a useful opener versus a generic one.",
+      tips: ["**Tip:** Naming which meetings need a brief up front keeps you from building a system that fires on every calendar event, internal syncs included."],
+    },
+    {
+      title: "Build",
+      body: "Build against a real meeting on your calendar. Review for one page, three specific openers, every claim sourced, and stale history flagged.",
+      tips: ["**Tip:** Forcing a source and a date on every claim keeps the brief honest about what changed versus old data restated as news."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every brief, and package the prompt and your corrected rules into a skill once it passes a few weeks straight.",
+      tips: ["**Tip:** A brief built on stale CRM data reads as current when it isn't — keep the staleness flag in every run."],
+    },
+  ],
+});
+
+export const SALES_COLD_OUTREACH_ENGINE_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae3bd8306bee4e72681e",
+  about: [
+    "Most cold email reads like a mail-merge with a name dropped in, and prospects treat it that way. This system takes one target account and one real signal — a funding round, a job posting, a product launch — and drafts an opening line built around it. Copy quality only matters if the email lands, so domain authentication matters as much as the words.",
+    "Run it as a paste-in prompt before each send, a saved skill in your sequencing workflow, or a scheduled agent that drafts against a signal feed. Every version still leaves the send to a person.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where your prospecting signals will come from."],
+    ["Your current sending volume and domain authentication status."],
+    ["How much personalization is worth spending per prospect."],
+  ],
+  buildIntro: "Gather access to enrichment data, your sequencing tool, and your CRM. The paste-in version needs none.",
+  prompt: "Goal: Draft a short cold email to [contact] at [company] using [signal] as the hook.\n\nContext: My offer is [one sentence]; length is [X words]; the signal is [describe it and its source].\n\nRules:\n- No draft without a real, dated signal.\n- Never invent a company fact.\n- One clear ask.\n- Under [X] words.\n- Flag signals older than [30/60] days.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming where you'll get signals, your offer and audience, and what personalized sounds like from you.",
+      tips: ["**Tip:** The interview forces you to define what counts as a real signal before you draft a single email."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real, dated signal you have in hand. Review for the real signal named, no invented facts, one ask, and under your word limit.",
+      tips: ["**Tip:** Requiring a dated signal before any draft keeps the system from falling back on a generic template the moment a good signal isn't handy."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every send, and package the prompt and your corrected rules into a skill once it passes a couple weeks straight.",
+      tips: ["**Tip:** Unreviewed AI outreach at scale is the most common way this backfires and can damage a domain's reputation."],
+    },
+  ],
+});
+
+export const SALES_DEAL_FOLLOWUP_AGENT_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae39368c9c2f3c8d6b81",
+  about: [
+    "Deals rarely die all at once — engagement drop-off, vague next steps, and single-threaded deals are the core signals that predict a stall before it becomes a loss. This system watches for those signals and sends you a daily message naming the deals to touch, with the reason for each. Acting on it is still your call.",
+    "Run it as a weekly paste-in prompt, a saved skill, or a scheduled agent that posts to Slack. Every version stays read-only against your CRM.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Which CRM or spreadsheet holds your pipeline, and how to get a clean export out of it."],
+    ["What \"stalled\" means for your cycle length."],
+    ["Whether your activity logging is clean enough for \"days since last touch\" to mean anything."],
+  ],
+  buildIntro: "Gather access to your CRM and Slack or email for the message. The paste-in version needs none.",
+  prompt: "Goal: Review my pipeline and tell me which deals need a follow-up today, and why.\n\nContext: [Paste your pipeline export: deal name, stage, deal amount, last activity date, expected close date, and number of distinct contacts engaged, if you have it. Also note your normal deal cycle length and the stage names your pipeline uses.]\n\nRules:\n- Flag a deal if any of these are true: no logged activity in more than 14 days, expected close date has already passed, the deal has been in its current stage more than 1.5x the normal time for that stage, or only one contact has ever been engaged.\n- For each flagged deal, state the specific reason(s), not just \"at risk.\"\n- Rank flagged deals by dollar amount, highest first.\n- Do not flag a deal I've noted as intentionally paused.\n- Output as a short daily message: deal name, amount, reason, and one suggested next step per deal.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming your data source, your stall rules, the message contents, and the delivery channel.",
+      tips: ["**Tip:** The interview surfaces decisions you didn't know you needed to make, and the scope document becomes the brief for every build session after it."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real export, every open deal included. Review for specific reasons, ranked by amount, and paused deals skipped.",
+      tips: ["**Tip:** Explicit numeric stall criteria keep the output consistent from day to day instead of a gut-check the AI is guessing at."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every run, and package the prompt and your corrected rules into a skill once it passes a few weeks straight.",
+      tips: ["**Tip:** It can't tell a deal paused on purpose from a neglected one unless you tell it — give it that context every run."],
+    },
+  ],
+});
+
+export const MARKETING_BRAND_VOICE_GUIDE_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae3a8bd361a4751ff11f",
+  about: [
+    "Voice consistency usually lives in one person's head, and it breaks the moment someone else drafts. This system reads content you've already written — blog posts, decks, email campaigns, website copy — and produces a structured guide covering tone, vocabulary to use and avoid, sentence rhythm, and annotated example passages.",
+    "Run it as a paste-in prompt the first time, a saved skill you rerun each quarter, or a scheduled agent that watches your content archive for drift.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["How many samples is enough — too few overfits one piece, too many muddies the signal."],
+    ["What makes your voice distinct from a generic competitor's."],
+    ["Where the canonical guide will live so every other build checks one file."],
+  ],
+  buildIntro: "Gather your content archive and whatever tool holds the finished guide. The paste-in version needs none.",
+  prompt: "Goal: Produce a brand voice guide from the writing samples I provide.\n\nContext: [Paste or link 5 to 10 pieces you consider strong examples of your voice.] We are trying to sound like [2-3 reference points, e.g., a knowledgeable colleague, not a press release].\n\nRules:\n- Base every observation on patterns actually present in the samples. Do not invent stylistic rules I haven't shown you.\n- Call out any samples that seem to contradict each other.\n- Output as a one-page guide with sections for tone, sentence length and rhythm, vocabulary to use, vocabulary to avoid, and three annotated example passages showing the pattern in action.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming your source samples, your voice reference points, the words to avoid, and where the finished guide will live.",
+      tips: ["**Tip:** The interview forces you to name what \"our voice\" means instead of assuming everyone already agrees."],
+    },
+    {
+      title: "Build",
+      body: "Test it on 5 to 10 pieces you'd hold up as your strongest writing. Review against your scope: every claim traceable to a sample, contradictions called out, all four sections present.",
+      tips: ["**Tip:** Restricting it to patterns present in the samples keeps the guide descriptive instead of aspirational."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every run, and package the prompt and rules into a skill once the guide holds up for a full quarter without a rewrite.",
+      tips: ["**Tip:** A guide built from a narrow set of samples misrepresents the brand once applied broadly — pull samples from more than one campaign or era of writing."],
+    },
+  ],
+});
+
+export const MARKETING_BRAND_VOICE_CHECKER_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae3a0daa0c064d447280",
+  about: [
+    "A meaningful share of consumers say they'd think less of a brand whose advertising ran next to poor-quality, spam-like AI-generated content. This system runs before a draft goes anywhere near a reader — it scores the draft against your brand voice guide and flags the specific lines that read generic, off-tone, or unsupported.",
+    "Run it as a paste-in prompt before publish, a saved AI skill your team reuses, or a gate wired into your publishing tool.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where your brand voice guide lives, and whether it's current enough to check against."],
+    ["What counts as a hard violation — banned words or off-brand claims — versus a softer stylistic drift worth flagging but not blocking."],
+    ["Whether this runs as a manual paste-and-check step or a gate wired into your publishing tool."],
+  ],
+  buildIntro: "Gather the brand voice guide file, a connector to your publishing or scheduling tool if you want the check wired in as a gate, and your review channel. The paste-in version needs nothing beyond the guide and the draft.",
+  prompt: "Goal: Score this draft against our brand voice guide and flag specific problems.\n\nContext: Here is our brand voice guide: [paste or link the guide]. Here is the draft to check: [paste it].\n\nRules:\n- Quote the exact phrase you're flagging, don't just describe the problem generally.\n- Distinguish between a hard violation (banned words, off-brand claims) and a softer stylistic drift.\n- Do not rewrite the draft yourself, this is a check, not an edit.\n- Output format: a pass/needs-revision verdict, then a list of flagged lines with the exact quote, the rule it breaks, and a one-line reason.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming where your voice guide lives, what counts as a hard violation versus a softer drift, and who sees the results before something goes out.",
+      tips: ["**Tip:** Naming the difference between a hard violation and a soft drift before you've built anything keeps the check from flagging everything or nothing."],
+    },
+    {
+      title: "Build",
+      body: "Test on a real draft, with the guide attached. Review for exact quotes, hard violations kept separate from soft drift, and no rewrite attempted.",
+      tips: ["**Tip:** Requiring the exact quoted phrase for every flag keeps the check specific enough to act on instead of a vague sense that something's off."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every run, and package the prompt and rules into a skill once it passes a couple weeks straight.",
+      tips: ["**Tip:** Vague rules like \"sound more human\" produce vague flags nobody can act on — keep every rule specific enough to quote an exact violation."],
+    },
+  ],
+});
+
+export const PEOPLE_1ON1_PREP_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae46ec5756f65592aa7e",
+  about: [
+    "Most 1:1 prep is just remembering what happened last time. This system does that assembly work for one recurring meeting — it pulls prior notes, stated goals, and open commitments for the person you're about to sit down with, then hands you a short brief on what changed and what to ask about.",
+    "The system assembles context, it never invents it. No history about a person should appear in the brief unless it came from an actual prior note, and if there isn't enough written down, the brief says so instead of guessing.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where your 1:1 notes live today — a shared doc, Notion, or your own scratch notes."],
+    ["How far back the system should pull from."],
+    ["Whether this tool touches anything beyond your own notes or stays scoped to 1:1 history alone."],
+  ],
+  buildIntro: "Gather any access it calls for. Common connectors are your notes tool and your calendar to trigger prep on schedule. The paste-in version needs none.",
+  prompt: "Goal: Build a short pre-1:1 brief for [person's name] using only what's in their notes history.\n\nContext: Their notes live in [Notion / Google Docs / a spreadsheet]. Their current goals are [list, or \"pull from most recent notes\"]. Last 1:1 was [date].\n\nRules:\n- Only use information that appears in the actual notes provided.\n- Never infer or assume anything about performance, sentiment, or history that isn't written down.\n- Structure the brief as: Open commitments from last time, What's changed since, Suggested topics to raise.\n- Keep it under 150 words.\n- If there's not enough prior context, say so instead of filling gaps.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming where your 1:1 notes live, what the brief should include and exclude, and how far back it should look.",
+      tips: ["**Tip:** The interview forces you to name what counts as real context before you ever see a brief."],
+    },
+    {
+      title: "Build",
+      body: "Test it on the actual notes for the person you're about to meet. Review for only sourced facts, right structure, and under the word limit.",
+      tips: ["**Tip:** Restricting it to only what's in the notes keeps the brief from turning into a guess dressed up as memory."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every run, and package it into a skill once it passes a few weeks straight.",
+      tips: ["**Tip:** It has to say when there isn't enough history, since a brief that fills gaps with a plausible guess is worse than no brief at all."],
+    },
+  ],
+});
+
+export const PEOPLE_ONBOARDING_ASSISTANT_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae44453159773c5ae7dd",
+  about: [
+    "Only a small share of employees strongly agree their company does a great job onboarding new hires, and turnover in the first 18 months can run high. This system runs a first-week checklist itself, one day at a time, for every new hire — it sends that day's tasks only, confirms a task done when the new hire says so, and answers setup questions from your IT and HR documentation.",
+    "At week's end it sends the manager or HR contact a completion summary naming anything still open. None of it replaces the person who should still be checking in.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where the first-week checklist currently lives and who last updated it."],
+    ["Whether new hires get this through Slack, email, or a portal."],
+    ["Whether IT and access provisioning is already automated or still a manual request."],
+  ],
+  buildIntro: "Gather your HRIS, your messaging platform for delivery, and your IT provisioning system if requests route through one. The paste-in version needs none.",
+  prompt: "Goal: Walk [new hire name] through their day-by-day first-week checklist for the [role/department] track and report completion status to [manager/HR contact].\n\nContext: Checklist source: [doc/link]. Start date: [date]. Tools/access the new hire needs set up: [list].\n\nRules:\n- Send one day's tasks at a time, not the whole week at once.\n- Confirm each task as complete only when the new hire says so, never assume.\n- Answer setup questions using the provided IT/HR documentation only, and escalate anything outside it to [contact].\n- Send a completion summary to [manager/HR contact] at the end of week one flagging anything still open.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming your checklist source, who owns each item, the delivery channel, and what should always escalate to a person.",
+      tips: ["**Tip:** The interview forces you to name who owns each checklist item today, which is usually the part nobody has written down."],
+    },
+    {
+      title: "Build",
+      body: "Build and test the system on a real new hire's first week. Review for one day at a time, escalations routed correctly, and a summary sent at week's end.",
+      tips: ["**Tip:** One day's tasks at a time keeps week one from landing as a wall of homework."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every new hire, and package it into a skill once it passes a few new hires straight.",
+      tips: ["**Tip:** Tracking task completion isn't the same as a good onboarding experience — build in at least one moment where a real person checks in."],
+    },
+  ],
+});
+
+export const PEOPLE_INTERVIEW_SCHEDULING_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae44dffbbd4e8a632590",
+  about: [
+    "Coordinating a multi-person interview panel across calendars is one of the most time-consuming, least differentiated tasks in a recruiter's week. This system reads interviewer availability, candidate constraints, and panel requirements, then proposes and locks a set of times across everyone involved. The output is a confirmed schedule with calendar invites attached.",
+    "Run it as a per-candidate paste-in prompt, a saved skill, or a scheduled agent that watches interviewer calendars and confirms rounds without a recruiter kicking each one off by hand. Every version should escalate to a person instead of guessing when no time works.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where interviewer and candidate availability lives today — a shared calendar, a scheduling tool, or manual email threads."],
+    ["Whether candidates schedule themselves through a link or a recruiter proposes times."],
+    ["What counts as an acceptable notice window for a reschedule."],
+  ],
+  buildIntro: "Gather access to your calendar, a scheduling tool if you use one, and your ATS for logging round completion. The paste-in version needs none.",
+  prompt: "Goal: Find and confirm interview times for [candidate name] with [list of interviewers] for a [duration]-minute [round name] within the next [timeframe].\n\nContext: [Interviewer calendars are in: tool. Candidate availability: paste or link. Panel composition rules, e.g. must include a peer and a manager.]\n\nRules:\n- Never double-book an interviewer or schedule outside their working hours.\n- Propose no more than three time options to the candidate at once.\n- Confirm a hold as tentative until every panelist accepts.\n- Send a calendar invite with the job title, round name, and a prep note only after every panelist confirms.\n- Escalate to a human instead of guessing if no overlapping time exists within the timeframe.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming where availability lives, your panel rules, and how confirmations get sent.",
+      tips: ["**Tip:** It surfaces the panel and reschedule rules before you build, so the scope document becomes the brief every run follows."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on the next candidate who advances to a new round. Review for no double-booking and tentative holds confirmed before the invite goes out.",
+      tips: ["**Tip:** Hard rules on working hours and confirmation order keep it from locking a time that quietly falls apart later."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every round, and package it into a skill once it passes a few rounds straight.",
+      tips: ["**Tip:** An agent that schedules aggressively can burn goodwill fast if it ignores a real working hour or time zone — give it hard boundaries."],
+    },
+  ],
+});
+
+export const PEOPLE_INTERVIEW_SCORECARDS_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae44695832290068a37d",
+  about: [
+    "Pairing a general mental ability assessment with a structured interview is among the strongest predictors of job performance ever studied, but the moment interviewers improvise past the standard questions, they reintroduce the inconsistency a scorecard exists to remove. This system takes a finished job description and turns it into a structured set of interview questions with a scoring rubric attached, one question per competency, so a panel rates the same things the same way.",
+    "Run it as a paste-in prompt once per open role, a saved skill your team reuses across every requisition, or a scheduled agent that fires when a job description gets finalized.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Whether an approved scorecard template or question bank already exists to build from."],
+    ["How scores get recorded and compared across a panel today."],
+    ["Whether legal or compliance needs to approve new interview questions before use."],
+  ],
+  buildIntro: "Gather your ATS or scorecard tool, your job-description source, and your interviewer calendar. The paste-in version needs none.",
+  prompt: "Goal: Generate a structured interview scorecard for [role name] from the job description below, ready to hand to a panel of [number] interviewers.\n\nContext: Job description: [paste or link]. Interview format: [one round / panel / sequential]. Existing scorecard template if any: [link].\n\nRules:\n- Generate 5 to 8 questions mapped directly to specific must-have qualifications.\n- Give each question a 1-5 scoring rubric that defines what a 1, 3, and 5 answer looks like.\n- Assign each question to a single competency so scores can be compared across candidates.\n- Never generate a question that asks about protected characteristics.\n- Output one scorecard per interviewer role if the panel splits topics.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming your panel size, your competencies, your question format, and where scores get recorded.",
+      tips: ["**Tip:** The interview surfaces decisions you didn't know you needed to make, and the scope document becomes the brief for every scorecard after it."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real job description. Review for every question tied to one competency, specific score anchors, and no protected-characteristic questions.",
+      tips: ["**Tip:** Anchoring each score to a specific 1, 3, and 5 answer keeps two interviewers from reading the same response as a 2 and a 4."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every hiring cycle, and package it into a skill once it passes a few roles straight.",
+      tips: ["**Tip:** A rubric only reduces bias if interviewers use it instead of scoring on gut feel afterward."],
+    },
+  ],
+});
+
+export const PEOPLE_JOB_DESCRIPTION_GENERATOR_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae44b898aa5eccb908c7",
+  about: [
+    "Writing job descriptions is one of the most common AI use cases in recruiting. This system takes a rough role brief — a few bullets, a Slack message, a past posting — and turns it into a polished, structured draft with a bias check on the wording built in.",
+    "A posting with gendered or exclusionary language narrows the applicant pool before anyone even applies. Run it as a paste-in prompt every time a requisition opens, a saved skill your team reuses across roles, or a scheduled agent that drafts a description the moment a role opens in your tracker.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where the rough brief usually originates — a hiring manager's doc, a Slack thread, or last year's posting."],
+    ["Whether legal or comp and benefits needs to review before anything gets published."],
+    ["Whether there's an existing brand template the draft has to match."],
+  ],
+  buildIntro: "Gather your ATS or job board, your doc or brand-template source, and your comp and benefits data if the posting includes a range. The paste-in version needs none.",
+  prompt: "Goal: Turn the rough brief below into a polished job description for [role name] ready to post.\n\nContext: Brief: [paste notes/bullets]. Company voice/template: [link or pasted example]. Level and reporting line: [detail].\n\nRules:\n- Include sections for role summary, responsibilities, must-have and nice-to-have qualifications, and what makes this role different from similar postings elsewhere.\n- Flag any word or phrase with known gendered or exclusionary connotations and suggest a neutral replacement.\n- Never invent a salary range, benefit, or requirement not present in the brief.\n- Output the final posting plus a short \"flagged language\" list.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming where a rough brief usually lands on your desk, the sections your descriptions always need, your company's tone, and the language you want flagged.",
+      tips: ["**Tip:** The interview surfaces the sections and tone rules you already follow out of habit."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real, unedited brief. Review for every section present, flagged language reasonable, and nothing invented that wasn't in the brief.",
+      tips: ["**Tip:** The rule against inventing details keeps the draft honest to the brief, and the flagged-language list makes the bias check visible."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every posting, and package it into a skill once it passes a few postings straight.",
+      tips: ["**Tip:** A generator trained on your past postings will happily repeat whatever bias was already baked into them — review the flagged list yourself."],
+    },
+  ],
+});
+
+export const PEOPLE_HR_BOT_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae4336554a317a0287a6",
+  about: [
+    "Employees ask the same PTO, benefits, and policy questions on repeat, and a small HR team answering them one at a time has less room left for the judgment-heavy work only a person can do. This system answers from your actual policy documents, quotes the specific policy line where it can, and escalates anything it can't confidently answer instead of guessing.",
+    "Run it as a paste-in prompt for a single question, a saved skill an HR generalist reaches for daily, or a scheduled agent connected to Slack or Teams so employees can ask it directly.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where policy documentation currently lives, and how current it is."],
+    ["What channel employees already use to ask HR questions."],
+    ["Who owns keeping the source documents up to date."],
+  ],
+  buildIntro: "Gather your HR knowledge base, your messaging platform, and your HRIS for anything needing employee-specific data. The paste-in version needs none.",
+  prompt: "Goal: Answer employee questions about PTO, benefits, and company policy using only the documents provided, and escalate anything outside that scope.\n\nContext: [Paste or link your policy source documents.] Escalation contact: [name/channel]. Topics that must always escalate: [e.g. terminations, leave-of-absence disputes, harassment complaints].\n\nRules:\n- Answer only from the provided policy documents, quoting the specific policy line when possible.\n- Never answer a question about compensation, discipline, or legal matters; escalate those immediately with a note on why.\n- State clearly when a question falls outside current documentation instead of guessing.\n- Log every escalation with the question and the employee's name for HR follow-up.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming your source policy documents, the topics that always escalate, and where employees will ask.",
+      tips: ["**Tip:** Naming your escalation topics up front means the bot has a rule to follow before a real employee question ever tests it."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on your actual policy documents. Review for answers that quote the actual policy, comp and legal questions escalating, and nothing outside the docs getting a confident guess.",
+      tips: ["**Tip:** Quoting the source line forces every answer back to a real document instead of a plausible-sounding guess."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every run, and package it into a skill once it passes a few weeks straight.",
+      tips: ["**Tip:** A bot that sounds confident but answers from stale policy docs is worse than no bot at all — keep source documents current."],
+    },
+  ],
+});
+
+export const PEOPLE_RESUME_SCREENS_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae4432d50d2a64f3992c",
+  about: [
+    "AI use in talent acquisition has grown sharply, and screening resumes is one of the most common use cases among teams that use it. This system scores every resume in a batch against your must-have and nice-to-have criteria, then runs a second pass with names, schools, and locations stripped out to check whether the scores move.",
+    "The output is a ranked shortlist plus a bias delta a person has to read and explain before anyone acts on it. Run it as a paste-in prompt for each requisition, a saved skill, or a scheduled agent that watches a resume inbox. Every version stays read-only against your ATS.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where resumes land — an ATS export, a shared inbox, or a folder someone forwards you."],
+    ["Whether your company already has a legal or compliance sign-off process this needs to route through."],
+    ["Whether the role sits in a jurisdiction with its own audit or disclosure rule."],
+  ],
+  buildIntro: "Gather your ATS, your resume inbox, and your HR or legal team's review process. The paste-in version needs none.",
+  prompt: "Goal: Score every resume in [folder/ATS export] against the job description for [role name], then re-run the same scoring with names, schools, and locations stripped out and flag any candidate whose rank shifts.\n\nContext: Job description is at [path/link]. Must-have criteria: [list]. Nice-to-have: [list]. Resumes are in [format: PDF/plain text].\n\nRules:\n- Score 1-5 on each must-have with one sentence of evidence per score.\n- Never infer age, gender, or ethnicity from a name or school.\n- Flag any resume you can't confidently score instead of guessing.\n- Output a ranked table plus a separate bias check table showing blinded vs unblinded rank for every candidate.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming the role you hire for most, your must-have vs nice-to-have criteria, where resumes land, and what would make you distrust a score.",
+      tips: ["**Tip:** The interview forces you to write down criteria you've been applying by instinct."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on the job description and a real batch of resumes. Review for evidence on every score, no inferred demographics, and blinded ranks next to unblinded ones.",
+      tips: ["**Tip:** Scoring the same batch twice with identity details stripped turns bias into a number you can see, instead of a hunch."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every run, and package it into a skill once it passes a few runs straight.",
+      tips: ["**Tip:** A screener that looks objective can still encode bias from the criteria you gave it — never let a score replace a human decision without a visible reason."],
+    },
+  ],
+});
+
+export const PEOPLE_INTERVIEW_DEBRIEF_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae43c5f7e67a49fb2dc8",
+  about: [
+    "Every interviewer takes notes differently — typed, dictated, or dropped into an ATS field — and a hiring committee still has to compare candidates across all of it. This system turns each interviewer's raw notes into a debrief mapped to the scorecard's competencies, so the committee reads one consistent format instead of five personal styles.",
+    "Run it as a paste-in prompt after each interview, a saved skill, or a scheduled agent that watches your ATS and posts debriefs to the hiring committee's channel. Every version stays read-only against your ATS.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["How interviewers capture notes today — typed, dictated, or dropped into an ATS field."],
+    ["Whether debriefs need to sync into an ATS field automatically or just land in a shared doc."],
+    ["Whether the hiring committee reviews debriefs before or during a live discussion."],
+  ],
+  buildIntro: "Gather your ATS, your note source, and your hiring committee's shared space. The paste-in version needs none.",
+  prompt: "Goal: Turn the raw interview notes below into a structured debrief for [candidate name], organized by the competencies on the scorecard for [role name].\n\nContext: Raw notes: [paste/attach]. Scorecard competencies: [list]. Debrief format the hiring committee expects: [describe or link example].\n\nRules:\n- Map every note to a specific competency; if a note doesn't clearly support any competency, put it in a separate \"other observations\" section instead of forcing a fit.\n- Preserve the interviewer's actual language for direct quotes and flag anything that reads as a personal impression rather than a specific example.\n- Never add a rating the interviewer didn't give.\n- Output one debrief per candidate in the agreed format.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming how interviewers take notes, what a debrief has to cover, and how debriefs reach the hiring committee.",
+      tips: ["**Tip:** The interview surfaces the format gaps you didn't know you had."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real set of interview notes. Review for every note mapped to a competency, quotes preserved, and no invented ratings.",
+      tips: ["**Tip:** Mapping every note to a named competency forces the same structure onto five different note-taking styles."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every candidate, and package it into a skill once it passes a few candidates straight.",
+      tips: ["**Tip:** It will smooth over vague or thin notes just as easily as strong ones, so a clean debrief isn't proof the interview itself was rigorous."],
+    },
+  ],
+});
+
+export const FINANCE_PERSONAL_BUDGET_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae4d73126b4dad2c8293",
+  about: [
+    "This build sets up a Claude Project named \"Personal Budget\" with standing instructions and two reference files — financial-context.md and categories.md — so Claude reads your situation and category schema before every chat, instead of you re-explaining it each time.",
+    "From there you hand Claude a 3-month transaction export, it returns a categorized CSV, and you build an Excel dashboard (Transactions, Summary, Variance, Dashboard tabs) with SUMIFS formulas and KPIs. The ongoing monthly review takes 5-8 minutes: new transactions in, categorized rows pasted into Excel, one debrief prompt.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Whether you're using Excel or Google Sheets for the dashboard."],
+    ["Where your 3-month transaction CSV will come from (or use the provided sample data)."],
+    ["What your rough monthly income, big fixed expenses, and 1-2 financial goals are, if you know them."],
+  ],
+  buildIntro: "Create a Claude Project named \"Personal Budget,\" then add financial-context.md and categories.md to its Knowledge panel so every chat in the Project starts from the same foundation.",
+  prompt: "You are my personal finance copilot. You help me understand my spending, plan my budget, and make financial decisions grounded in my real transaction data.\n\nBehavior rules:\n- When categorizing transactions, use the categories defined in categories.md. If a transaction doesn't fit, propose a new category and ASK before creating it.\n- When I share new transactions, return them in the same structured CSV format I provided, with new \"Category\" and \"Subcategory\" columns added.\n- Always reference financial-context.md when answering questions about my situation.\n- Be direct and specific. When I ask 'how am I doing', give me numbers, not vibes.\n- Recognize stress and wins. Never moralize about my spending.\n- When generating Excel formulas, default to formulas that won't break if rows are added (SUMIFS over SUM, structured refs).\n- Round dollar amounts to whole numbers in your home currency.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Set up the Project and its standing instructions, then add financial-context.md (your income, fixed expenses, debt, goals) and categories.md (your spending taxonomy) to Project Knowledge.",
+      tips: ["**Tip:** financial-context.md is the source of truth the Custom Instructions tell Claude to always reference, so every chat starts already knowing your situation."],
+    },
+    {
+      title: "Build",
+      body: "Hand Claude your 3-month transaction CSV to categorize against categories.md, then paste the result into an Excel dashboard's Transactions tab and ask Claude for the SUMIFS formulas for the Summary, Variance, and Dashboard tabs.",
+      tips: ["**Tip:** Specifying column names and order forces Claude's output to paste directly into Excel with no reformatting."],
+    },
+    {
+      title: "Learn",
+      body: "Add a monthly-update.md workflow file to the Project so each month's review is: export, categorize, paste into Excel, run the debrief prompt.",
+      tips: ["**Tip:** A well-written prompt is a reusable analytical template — run the same prompt on each new month's data and results stay comparable over time."],
+    },
+  ],
+});
+
+export const FINANCE_EXPENSE_CATEGORIZATION_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae417f1c80ad957192d1",
+  about: [
+    "A batch of receipts or a bank export lands, and this system assigns every transaction a GL code or spend category, with the reasoning attached so a human can spot-check the uncertain ones. Categorization only holds up when the model shows its reasoning per line item, so a mistake surfaces before it hits the books.",
+    "Run it as a weekly paste-in prompt against a statement export, a saved skill, or a scheduled agent that pulls each new batch through a tool connector. Every version holds its output for review before anything posts to your books.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where your transaction data comes from, and whether it needs cleanup before the AI sees it."],
+    ["Whether your chart of accounts already has enough example-based rules, or whether you need to write those first."],
+    ["Who does the final review pass and how often."],
+  ],
+  buildIntro: "Gather your accounting software, your card or expense platform, and a spreadsheet for the review layer. The paste-in version needs none.",
+  prompt: "Goal: Categorize this batch of transactions against my chart of accounts and flag anything you're not confident about.\n\nContext: Transaction export attached (CSV with date, vendor, amount, memo). My chart of accounts and category rules are [paste or attach: your GL code list with examples of past categorizations]. Recurring vendors that always map to one category: [list them].\n\nRules: Assign one GL code per transaction. If a transaction could reasonably fit more than one code, flag it instead of guessing and explain the ambiguity. Never invent a GL code that isn't in my chart of accounts. Flag any transaction over [$ threshold] regardless of confidence, for manual review.\n\nOutput format: A table with columns Date, Vendor, Amount, Assigned GL Code, Confidence (high/medium/low), Reasoning. A second table listing only the flagged/low-confidence rows.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming where your transactions come from, your chart of accounts, which categorizations are genuinely ambiguous, and who reviews the output.",
+      tips: ["**Tip:** The interview surfaces the edge cases your chart of accounts doesn't already cover."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real batch of transactions. Review for one GL code per row, ambiguous ones flagged with reasoning, and nothing invented outside your chart of accounts.",
+      tips: ["**Tip:** Naming the recurring vendors up front cuts the ambiguous pile down to the transactions that need a human look."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every batch, and package it into a skill once it passes a few batches straight.",
+      tips: ["**Tip:** Never let categorized output post to the ledger without a human review step first."],
+    },
+  ],
+});
+
+export const FINANCE_INVOICE_BOOKKEEPING_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae41e85e62d98b89da14",
+  about: [
+    "A vendor invoice takes far longer to process industry-wide than it does for best-in-class accounts payable teams. Every time a vendor invoice arrives, by email or upload, this system pulls the vendor name, invoice number, dates, line items, and total, then drafts a journal entry against your chart of accounts. The entry sits in a queue labeled pending review until an accountant signs off.",
+    "Anything missing, unreadable, or that looks like a duplicate gets flagged instead of guessed at. Run it as a paste-in prompt each time an invoice lands, a saved skill, or a scheduled agent watching an inbox. Every version stays read-only against your ledger.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["How invoices arrive today, and whether that needs a routing step first."],
+    ["Where your chart of accounts and vendor history live."],
+    ["Who has final sign-off before an entry posts, and what your hold process looks like for exceptions."],
+  ],
+  buildIntro: "Gather your accounting or ERP system, an OCR or document intake tool, and your approval workflow. The paste-in version needs none.",
+  prompt: "Goal: Extract the key data from this invoice and draft a journal entry for review.\n\nContext: Invoice attached (PDF or image). My journal entry format uses these accounts: [paste your relevant GL accounts]. This vendor has historically been coded to [account/category], if that helps.\n\nRules: Extract vendor name, invoice number, invoice date, due date, line items, and total. Draft a journal entry using only accounts from my chart of accounts, never invent one. If any required field is missing, unreadable, or the invoice looks like a duplicate of one already processed, flag it and do not draft an entry. Every draft entry must be labeled \"pending review,\" never \"posted.\"\n\nOutput format: A structured summary of extracted fields, followed by the draft journal entry in debit/credit format, followed by a flags section noting anything uncertain or missing.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming how invoices arrive, the fields you need extracted, your journal entry format, and who approves entries before they post.",
+      tips: ["**Tip:** The interview forces you to define your account structure and hold rules before any invoice touches the system."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real invoice, PDF or image. Review for every field extracted, entries labeled pending review, and duplicates and missing data flagged.",
+      tips: ["**Tip:** The \"pending review\" label and the flag-instead-of-guess rule keep a missing field or duplicate charge from turning into a silent posting error."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every run, and package it into a skill once it passes a few weeks straight.",
+      tips: ["**Tip:** Treat the held-for-review queue as the safety mechanism, and never let a draft entry post on its own."],
+    },
+  ],
+});
+
+export const FINANCE_CASH_FLOW_FORECAST_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae410cf214bba2c1516c",
+  about: [
+    "Cash forecasting is widely cited as the hardest task in treasury. This system pulls your bank balance, AR aging, and AP aging every week and turns them into a rolling 13-week forecast, flagging any week that dips below your cash minimum and naming what changed since last week's run.",
+    "Run it as a weekly paste-in prompt, a saved skill, or a scheduled agent. Every version stays read-only against your bank and accounting systems.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where your bank, AR, and AP data live, and how fresh they are when you pull them."],
+    ["What \"shortfall\" means for your business, since minimum cash thresholds vary a lot by company stage."],
+    ["Who needs this forecast weekly versus who just needs the exception flags."],
+  ],
+  buildIntro: "Gather your bank or banking platform export, your accounting system for AR and AP aging, and a spreadsheet for the rolling model itself. The paste-in version needs none.",
+  prompt: "Goal: Update my rolling 13-week cash flow forecast with this week's data and flag anything concerning.\n\nContext: Bank balance as of [date]: [$ amount]. AR aging report attached. AP aging / upcoming payables attached. Last week's forecast attached for comparison. My minimum cash threshold is [$ amount].\n\nRules: Project cash position week by week for the next 13 weeks using expected AR collections and AP payments. Flag any week where projected cash falls below my minimum threshold. Call out what changed from last week's forecast and why. Do not assume collection timing beyond what the aging data supports; if uncertain, use the invoice due date.\n\nOutput format: A week-by-week table (Week, Beginning Cash, Inflows, Outflows, Ending Cash, Flag), followed by a short summary of what changed since last week.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming your forecast horizon, your data sources, your cash minimum, and who sees the forecast each week.",
+      tips: ["**Tip:** The interview surfaces decisions you didn't know you needed to make, and the scope document becomes the brief for every build session after."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real week's data. Review for thirteen weeks projected, shortfalls flagged, and changes explained against last week.",
+      tips: ["**Tip:** Comparing against last week's forecast turns a static snapshot into a running system that shows what moved."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every weekly run, and package it into a skill once it passes a few weeks straight.",
+      tips: ["**Tip:** Forecasts drift silently when the underlying AR/AP feed goes stale — treat any forecast built on week-old data as unreliable."],
+    },
+  ],
+});
+
+export const FINANCE_BUDGET_VS_ACTUALS_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae40e7196c57e98f073a",
+  about: [
+    "Finance professionals widely expect AI to make their role more strategic, even though few feel it already has. Budget-vs-actual reporting is a template-driven part of that gap. This system reads your budget-vs-actual data at the close of each reporting period and writes the variance narrative in plain language, ready to drop into a board deck.",
+    "Every number in it has to trace back to a source row in the data it was given. Run it as a paste-in prompt each period, a saved skill, or a scheduled agent pulling fresh data automatically. Every version stays read-only against your source systems.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where budget and actuals data lives today, one place or scattered across systems."],
+    ["What variance threshold is meaningful to your stakeholders versus noise."],
+    ["Whether the narrative needs a provenance check before it reaches a board deck."],
+  ],
+  buildIntro: "Gather your accounting or ERP system, an FP&A or planning tool, and a spreadsheet for review. The paste-in version needs none.",
+  prompt: "Goal: Write a variance narrative explaining what moved and why, from this period's budget-vs-actual data.\n\nContext: Budget vs. actual export attached. Prior period's narrative attached for tone reference. My variance threshold for \"worth explaining\" is [e.g. more than 10% or $5,000].\n\nRules: Only write about variances above the stated threshold. Every number cited in the narrative must appear in the source data you were given; do not estimate or round in a way that changes the reported figure. State the direction (over/under), the dollar amount, and the percentage for each variance called out. If you cannot explain why a variance happened from the data alone, say so instead of guessing a cause.\n\nOutput format: A short narrative (200-400 words) organized by department or line item, followed by a table of every variance above threshold.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming your data sources, your real variance threshold, and how it catches a number that doesn't trace back.",
+      tips: ["**Tip:** The interview forces a stakeholder-specific threshold and a provenance check into the scope before you write a single narrative."],
+    },
+    {
+      title: "Build",
+      body: "Build on a real budget-vs-actual export. Review every cited number against the export; threshold followed, no cause invented.",
+      tips: ["**Tip:** The same-data-only rule keeps the narrative from padding out an explanation it can't back up with a real source row."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every period, and package it into a skill once it passes a few periods straight.",
+      tips: ["**Tip:** A hallucinated number in a board deck is a career event — nothing ships until every figure has been traced to a source row."],
+    },
+  ],
+});
+
+export const FINANCE_MONTH_END_CLOSE_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae410824301c8ae79dd5",
+  about: [
+    "Close speed splits on process discipline, and the gap between top-quartile and bottom-quartile close times is wide. This system tracks your close checklist against target dates and task order, flags anything overdue or blocked, and groups the picture by owner so nothing surfaces for the first time on the last day of close.",
+    "It doesn't do the accounting judgment — it matches reported status against the checklist and nags on it before it becomes the reason close slips another day.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where your close checklist lives today, before you can automate tracking it."],
+    ["How task status updates reach the agent, since someone still has to report done."],
+    ["Who gets the overdue nag and how often, so it helps instead of becoming noise."],
+  ],
+  buildIntro: "Gather a task or project tool for the checklist itself, your accounting system, and a channel for reminders and status updates. The paste-in version needs none.",
+  prompt: "Goal: Track our month-end close checklist and tell me what's overdue or blocked right now.\n\nContext: Our close checklist: [paste the full list of tasks, owners, and target dates]. Today's date and where we are in the close cycle: [day X of close]. Status update from the team: [paste any updates on what's done].\n\nRules: Match reported status against the checklist and target dates. Flag anything past its target date as overdue, and anything whose prerequisite task isn't done yet as blocked. Never mark a task complete unless someone explicitly reported it done. Group output by owner so each person sees only their items first, then show the full picture.\n\nOutput format: A status table (Task, Owner, Target Date, Status), followed by a short list of what needs attention today.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming your checklist tasks and owners, what counts as overdue or blocked, and how status updates reach the agent.",
+      tips: ["**Tip:** The interview forces you to define \"done\" and \"overdue\" before you build, so the first cycle doesn't start with a false alarm."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on the current close cycle, with the latest status attached. Review for accurate owner groupings, blocked tasks tied to a real prerequisite, and nothing marked done without a report.",
+      tips: ["**Tip:** Explicit rules for overdue and blocked keep the output consistent from day to day."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every cycle, and package it into a skill once it passes a few cycles straight.",
+      tips: ["**Tip:** A checklist agent that lets a task get marked done without real confirmation just hides the risk of a missed step later."],
+    },
+  ],
+});
+
+export const FINANCE_COLLECTIONS_EMAILS_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae40c4325d194ee62b3b",
+  about: [
+    "Slow collections cost real cash — companies using AI in accounts receivable widely report a lower average days sales outstanding. This system reads your AR aging report and drafts a follow-up email for every overdue invoice, personalized to that customer's history and tone, escalating as days overdue grows.",
+    "Nothing goes out until you review it. Run it as a paste-in prompt against a fresh export, a saved skill, or a scheduled agent that runs weekly.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where your AR aging data lives and how current it is when you pull it."],
+    ["Which customer relationships need a human touch versus a standard template."],
+    ["Whether emails send automatically after a review window or always wait for an explicit send."],
+  ],
+  buildIntro: "Gather your accounting or invoicing system, your email tool, and your CRM if relationship notes live there. The paste-in version needs none.",
+  prompt: "Goal: Draft a follow-up email for each overdue invoice on this AR aging report.\n\nContext: AR aging report attached, showing customer, invoice number, amount, and days overdue. Customer notes: [any relationship context]. My company's tone is [e.g. friendly but direct, never apologetic].\n\nRules:\n- Draft one email per overdue invoice.\n- Match tone to the customer notes provided. Do not invent history you weren't given.\n- Include the invoice number, amount, and due date in every email.\n- Escalate tone gradually based on days overdue: gentle reminder under 30 days, firmer language 30-60 days, final notice language over 60 days.\n- Never threaten legal action or make claims about consequences unless I explicitly authorize that language for a specific account.\n\nOutput as one draft email per invoice, held in a list for my review before sending.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming your AR data source, tone rules by customer, escalation thresholds, and your review process.",
+      tips: ["**Tip:** The interview surfaces tone and escalation decisions up front, and the result becomes the brief for every build after it."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real export, every overdue invoice included. Review each draft for the right tone, correct invoice details, and nothing that reads as a legal threat.",
+      tips: ["**Tip:** Explicit escalation tiers keep tone consistent across dozens of invoices instead of the AI judging firmness case by case."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every run, and package it into a skill once it passes several runs straight.",
+      tips: ["**Tip:** A collections email that gets tone or amount wrong damages a customer relationship worse than a spreadsheet error — route early drafts through human review."],
+    },
+  ],
+});
+
+export const FINANCE_INVOICE_PO_DATA_ENTRY_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae3f9d989c5117dc791d",
+  about: [
+    "Keying in invoices by hand is expensive work, and the cost gap between manual and best-in-class AP teams tracks with how much of the process still runs by hand. This system reads a batch of invoices or POs, whatever format they arrive in, and pulls vendor, amount, line items, and dates into rows that match your tracker's exact columns.",
+    "It cross-checks the invoice total against the line items and flags anything it can't read clearly. It never marks anything approved or paid — extraction only, approval stays with a person.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where invoices land today, before deciding how to feed them in."],
+    ["Your tracker's exact required fields and column order."],
+    ["Who reviews flagged extractions, and how fast."],
+  ],
+  buildIntro: "Gather your document source, your tracker or accounting system, and your approval workflow. The paste-in version needs none.",
+  prompt: "Goal: Extract structured data from my invoices or POs and enter it into my tracker without manual re-typing.\n\nContext: [Documents arrive via a shared inbox, vendor portal, or scanned folder. Note the exact format. Required fields: vendor name, invoice number, date, line items, amount, PO number. Paste your tracker's columns in exact order.]\n\nRules:\n- Flag any document where a required field can't be read clearly. Don't guess.\n- Cross-check the invoice total against the sum of line items and flag any mismatch.\n- Never mark anything approved or paid. Extraction only.\n- Output one row per invoice matching the tracker's exact columns, plus a separate list of flagged items.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming where invoices come from, what format they arrive in, what fields you need extracted, where the data ends up, and what happens when something looks off.",
+      tips: ["**Tip:** The interview surfaces the exact fields and edge cases you'd otherwise discover mid-build."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real batch of invoices or POs. Review for every field traceable to the source, mismatches caught, and nothing marked paid.",
+      tips: ["**Tip:** Cross-checking the total against the line items catches an OCR error math would otherwise hide."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every batch, and package it into a skill once it passes a few runs straight.",
+      tips: ["**Tip:** A missing PO number or mismatched vendor name has to get flagged loudly, never filled in silently."],
+    },
+  ],
+});
+
+export const FINANCE_REPORTS_ACCURATE_DATA_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae39145f62682627ec04",
+  about: [
+    "Every rebuild of a recurring report is a fresh chance for a number to arrive without a source — a well-documented case of fabricated citations reaching a published finance report shows the real cost of getting this wrong. This system hands your AI tool the source of truth and it assembles the report with every figure cited back to it, flagging what it can't trace.",
+    "Run it as a paste-in habit before each close, a saved skill, or a triggered agent.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where your numbers actually live, and what you can hand over as one clean source file."],
+    ["Whether a derived number must show its math to count as traced."],
+    ["How much gets automated — a paste-in habit before each close is a complete version."],
+  ],
+  buildIntro: "Gather your spreadsheet tool, your accounting system's export or reporting API, and a warehouse connector if that's where numbers live. The paste-in version needs only the source file.",
+  prompt: "Goal: Create this period's [report name] from my source data, with every number cited to its source.\n\nContext:\n- Report template or last period's version: [paste or attach]\n- Source of truth: [the source spreadsheet, GL export, or system report every number should come from]\n\nRules:\n- Every number in the output must state which row, cell, or line in the source it came from.\n- If a number the template needs has no traceable match in the source, flag it explicitly. Do not guess or carry forward last period's value.\n- Treat derived numbers as sourced only if you show the underlying figures and the math.\n- Never adjust a source number silently. Flag discrepancies and stop. A human decides the fix.\n- End with a provenance table: Number | Source location | Status: traced / flagged.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Pick one recurring report you own, then have your AI tool interview you into a scope document naming the report, its source files, the output format, and the rule for untraceable numbers.",
+      tips: ["**Tip:** The interview forces the two make-or-break decisions — which report to start with and what counts as a traceable source — before any drafting happens."],
+    },
+    {
+      title: "Build",
+      body: "Test on a period you've already closed and checked by hand. Review whether every figure traces, and whether it flagged the number with no clean source.",
+      tips: ["**Tip:** Building the report and the provenance table in one pass means sourcing is never a cleanup step someone skips under deadline pressure."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every cycle, and package it into a skill once it passes a few cycles straight.",
+      tips: ["**Tip:** A number can be sourced and still stale, so keep the source export current before every run."],
+    },
+  ],
+});
+
+export const PRODUCT_CUSTOMER_INTERVIEW_ANALYZER_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae47c28a183e845f72d5",
+  about: [
+    "Product-market fit problems are the single most common cause named in startup post-mortems. This system reads your customer interview transcripts and notes and adds each new interview to a running document of validated pain points, objections, and direct quotes, grouped by theme, so a pattern across ten interviews shows up instead of getting buried in ten note files.",
+    "Run it as a paste-in prompt after each call, a saved skill, or a scheduled agent that watches your notes folder or meeting tool for a new transcript.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where interview recordings or notes land today — a call tool, a shared drive, or a notebook app."],
+    ["Whether the tracker lives as a standing document the AI tool updates or a fresh output generated each time."],
+    ["Who besides you needs to see a flagged contradiction between two interviews."],
+  ],
+  buildIntro: "Gather your meeting notes tool, your call recording or video tool, and your notes and docs home. The paste-in version needs none.",
+  prompt: "Goal: Read the newest customer interview transcript or notes file and add its findings to my running pain-point tracker without duplicating what's already there.\n\nContext: Interviews live in [folder or tool]. My tracker is a single document organized by theme, not by interview date. Each entry needs the pain point, the customer's own words, which interview it came from, and how many separate interviews have now raised it.\n\nRules:\n- Never merge two different pains into one because they sound similar; flag them side by side instead and let me decide.\n- Quote the customer directly rather than paraphrasing.\n- If a pain point contradicts something an earlier interview said, flag the contradiction instead of picking a side.\n- Output as a markdown table grouped by theme, sorted by how many interviews raised each one.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming where your interviews live, how many you run each month, and what you do with insights today.",
+      tips: ["**Tip:** The interview surfaces decisions you didn't know you needed to make, and the scope document becomes the brief for every build session after it."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on your newest interview file. Review for direct quotes, correct groupings, and contradictions flagged instead of resolved.",
+      tips: ["**Tip:** Sorting by theme instead of interview date is what makes a repeated pain visible, and flagging contradictions instead of resolving them keeps the call on you."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every interview update, and package it into a skill once it passes a few interviews straight.",
+      tips: ["**Tip:** Require a minimum count before it calls a pain point validated — the person who talks most in an interview isn't always the one who represents the market."],
+    },
+  ],
+});
+
+export const PRODUCT_USER_INTERVIEW_PROCESS_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae43fc5f0dd7ad56634f",
+  about: [
+    "Interview synthesis used to eat hours it didn't need to — AI synthesis has cut that time dramatically. This system reads a batch of transcripts from one round and returns the behaviors, pains, and contradictions that show up across the set, each tied to a quote and a participant, instead of one person rereading every call.",
+    "Run it as a paste-in prompt after each round, a saved skill, or a scheduled agent that pulls fresh transcripts from your meeting notes tool. Every version stays read-only against your transcripts and research repository.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Whether transcripts arrive from a notetaker or need manual upload each round."],
+    ["Whether output updates a living persona doc or stays a one-off summary."],
+    ["How many participants need to raise a pain before it counts as a finding."],
+  ],
+  buildIntro: "Gather a meeting notes tool for the transcripts, a research repository for the running history, and a living persona doc if the scope calls for one. The paste-in version needs none.",
+  prompt: "Goal: Synthesize a batch of interview transcripts into a structured findings summary.\n\nContext: [Paste transcripts or notes for this round], [the research question this round is meant to answer], [target customer segment]\n\nRules:\n- Report a pain only when at least 2 participants raise it, unless a single report is safety- or churn-relevant.\n- Attach a quote and participant ID to every claim.\n- Call out contradictions between participants rather than smoothing them over.\n- End with 3 open questions the round left unanswered.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming how many interviews you run per round, your transcript format, what you want to see at the end, and how much it should flag versus decide on its own.",
+      tips: ["**Tip:** The interview surfaces the judgment calls a synthesis system has to make before you're staring at a stack of transcripts."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real batch of transcripts. Review for quotes and IDs attached, contradictions kept in, and the threshold respected.",
+      tips: ["**Tip:** The two-participant threshold keeps one offhand comment from reading as a trend, and the quote-plus-ID rule keeps every finding traceable."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every round, and package it into a skill once it passes a few rounds straight.",
+      tips: ["**Tip:** Synthesis can flatten real disagreement into a false consensus, so contradictions have to survive in the output."],
+    },
+  ],
+});
+
+export const PRODUCT_SPEC_TO_PROTOTYPE_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae430627ffe1b1012dc3",
+  about: [
+    "A spec sitting in a doc waits for an engineering cycle that might be weeks out. This system skips the wait — once a spec clears review, a coding agent reads it and builds a working prototype the team can react to before that meeting ends.",
+    "This works as a one-time paste-in prompt each time a spec clears review, a saved skill your whole team reuses, or an agent triggered automatically whenever a spec is marked approved. Every version builds in a sandbox, isolated from production.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Whether this builds inside an existing codebase or starts from scratch."],
+    ["What counts as done — a throwaway demo or something engineering can build on later."],
+    ["Which design system the prototype needs to match, if any."],
+  ],
+  buildIntro: "Gather code hosting for the branch itself, a design tool for visual fidelity, and a deployment sandbox for review. The paste-in version needs none.",
+  prompt: "Goal: Turn an approved spec into a working prototype for review.\n\nContext: [Paste your approved spec or PRD. Note your target platform or stack, and any existing design system it needs to match.]\n\nRules:\n- Build only what the spec explicitly describes.\n- Flag anything ambiguous instead of guessing at it.\n- Keep the prototype in a separate branch or sandbox. Never touch production.\n- Note what was built, what was skipped, and what still needs an engineer's judgment.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming how detailed your specs are, what kind of prototype you need, the stack it's built in, and how you plan to review it.",
+      tips: ["**Tip:** The interview surfaces decisions you didn't know you needed to make, and the scope document becomes the brief for every prototype after it."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on the approved spec. Review whether it built only what the spec described, flagged ambiguity instead of guessing, and left production untouched.",
+      tips: ["**Tip:** Naming the branch and sandbox constraint up front keeps the agent from wandering into production."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every run, and package it into a skill once it passes a few runs straight.",
+      tips: ["**Tip:** A coding agent will build past the spec's scope if left unchecked, so the run needs a stop-and-ask rule for ambiguity."],
+    },
+  ],
+});
+
+export const PRODUCT_IDEA_TO_PRD_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae43fd30fff006b1a5c7",
+  about: [
+    "A rough feature idea usually turns into a PRD from a blank page. This system does the job standalone — hand it a sketch or a meeting note and it returns a first-draft PRD ready for a human editor.",
+    "Only a small share of product teams consistently use a formal scoring or prioritization framework, and fewer still use any AI-assisted scoring at all. A structured PRD brings more rigor to a feature's reasoning than most teams apply before it reaches engineering.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where feature ideas typically start — a meeting note, a Slack thread, a one-liner."],
+    ["Which sections every PRD needs, and whether past PRDs feed in as style examples."],
+    ["Whether the draft stays a standalone doc or syncs into a ticketing system for handoff."],
+  ],
+  buildIntro: "Gather a docs tool, a ticketing system, and a meeting notes tool. The paste-in version needs none.",
+  prompt: "Goal: Turn a rough feature idea into a first-draft PRD.\n\nContext: [the idea or meeting notes], [primary user segment], [known technical constraints]\n\nRules:\n- Include a problem statement, goals, non-goals, 3 to 5 user stories, acceptance criteria, edge cases, and open questions.\n- Mark any unsupported assumption as [ASSUMPTION].\n- Keep the draft to one page.\n- Never invent a launch date or headcount.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming what sections every PRD should include, where your ideas usually start, how much of your own past PRDs to feed in as examples, and where the draft should land.",
+      tips: ["**Tip:** The interview surfaces decisions you haven't made yet, and the scope document becomes the brief for every draft after it."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real idea. Review for every section present, assumptions flagged, and no invented dates.",
+      tips: ["**Tip:** Marking assumptions keeps you from mistaking a guess for a requirement, and the one-page limit forces the draft to prioritize instead of padding."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every run, and package it into a skill once it passes a few runs straight.",
+      tips: ["**Tip:** A PRD generator will confidently fill gaps you never asked it to fill — flag every unverified claim and treat the output as an early draft."],
+    },
+  ],
+});
+
+export const PRODUCT_FEEDBACK_THEME_TRACKER_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae42324ca1079e90c3a6",
+  about: [
+    "Synthesizing customer signals has become a top time drain for product leaders, with most teams watching feedback scattered across 7 to 9 separate channels at once. This system reads tickets, reviews, and survey responses, clusters them into themes ranked by frequency and severity, and returns each theme with the quotes that back it up, linked to source.",
+    "Run it as a weekly paste-in prompt, a saved skill, or a scheduled agent that pulls from your support tool and survey exports. Every version stays read-only against your feedback sources.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Which support tool, survey tool, and review source feed the clustering, and how to export each cleanly."],
+    ["Whether frequency or severity drives the ranking when the two disagree."],
+    ["What a representative quote needs to include so it stays traceable back to source."],
+  ],
+  buildIntro: "Gather your support tool, a survey tool for intake, and a sheet or doc for the running history. The paste-in version needs none.",
+  prompt: "Goal: Cluster my raw customer feedback into ranked, evidence-backed themes.\n\nContext: [Paste your export of tickets, reviews, and survey responses for the period. Note the product areas you want it to watch.]\n\nRules:\n- Return no more than 8 themes.\n- Rank by frequency and severity, stated separately.\n- Attach 2-3 representative quotes per theme, each with a source link.\n- Never merge two distinct complaints into one theme because the wording overlaps.\n- Flag any single high-severity report on its own, even if it only appears once.\n- Output as a ranked list: theme name, frequency, severity, quotes with source.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming which feedback sources to pull in, how often to run it, whether frequency or severity matters more for ranking, and what a representative quote needs to include.",
+      tips: ["**Tip:** The interview surfaces decisions you didn't know you needed to make, and the scope document becomes the brief for every build session after it."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real export, every source included for the period. Review for distinct themes, traceable quotes, and the lone high-severity report still surfaced.",
+      tips: ["**Tip:** Separating frequency from severity and forcing a source link on every quote keeps a loud minority complaint from reading as consensus."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every run, and package it into a skill once it passes a few runs straight.",
+      tips: ["**Tip:** Clustering can quietly merge two different complaints that share vocabulary into one theme — check that quotes still trace back to source."],
+    },
+  ],
+});
+
+export const PRODUCT_BACKLOG_PRIORITIZER_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae42e4af7bd005835afc",
+  about: [
+    "Most backlogs get ranked by gut feel and whoever argued loudest in the meeting. Only a small share of product teams consistently use a formal scoring framework. This system scores your backlog on impact, effort, confidence, and strategic alignment, and returns a ranked list with the reasoning behind each score visible.",
+    "A visible, evidence-backed score is easier to defend when priorities get challenged mid-cycle. Run it before each planning cycle as a paste-in prompt, a saved skill, or a scheduled agent that pulls straight from your backlog tool. Every version stays read-only against your ticketing system.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Which factors matter most, and how each one is weighted."],
+    ["Where the backlog lives, and whether effort estimates already exist or need pulling from engineering."],
+    ["How ties get broken, and whether scoring runs automatically or only when you trigger it."],
+  ],
+  buildIntro: "Gather your ticketing system and a sheet for the rubric. The paste-in version needs none.",
+  prompt: "Goal: Score and rank a backlog so the team can defend what's next.\n\nContext: [Paste your backlog export, one row per item. Include this quarter's strategic priorities, and any effort estimates already on file.]\n\nRules:\n- Score each item 1-5 on impact, effort, confidence, and strategic alignment.\n- Show the reasoning behind each score.\n- Flag high-impact items with no supporting evidence as needing validation.\n- Never drop an item. If it scores low, rank it low and say why.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming which factors matter most, how ties get broken, where your backlog lives, and whether scoring runs automatically or only when you trigger it.",
+      tips: ["**Tip:** The interview forces you to define scoring factors and tie-breaks before a single ticket gets ranked."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real backlog export, every open item included. Review for every item scored on all four factors, reasoning visible, and nothing dropped.",
+      tips: ["**Tip:** Scoring every item on the same four factors keeps the ranking consistent from cycle to cycle, and visible reasoning gives you something to defend."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every cycle, and package it into a skill once it passes a few cycles straight.",
+      tips: ["**Tip:** A scoring system produces a confident-looking number even when the inputs are guesses — the final call on what ships stays a human decision."],
+    },
+  ],
+});
+
+export const PRODUCT_COMPETITOR_RESEARCH_REPORT_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae4225cab744782f9dbf",
+  about: [
+    "Competitive analysis that once took a PM's week can now run in minutes once an agent handles the synthesis. This system reads your competitors' blogs, changelogs, and pricing pages, filters for what changed since the last run, and sends you a digest with a source link on every item. You still decide what a move means.",
+    "Run it as a weekly paste-in prompt, a saved skill, or a scheduled agent that posts to Slack. Every version only reads public pages.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Which competitors and sources earn a weekly check."],
+    ["Whether pricing pages need a scraper or a direct fetch works."],
+    ["What counts as a meaningful change versus noise, per competitor."],
+  ],
+  buildIntro: "Gather a scheduler, team chat to deliver the digest, and a docs tool to hold the running history. The paste-in version needs none.",
+  prompt: "Goal: Produce a weekly cited digest of meaningful competitor changes.\n\nContext: [3-5 competitors with blog/changelog/pricing URLs], [your core value props to compare against]\n\nRules:\n- Only include changes from the last 7 days.\n- Cite the source URL for every item.\n- Group findings by competitor.\n- Skip cosmetic edits (typo fixes, rewording, date stamps).\n- Flag any pricing or packaging change as high priority.\nOutput as a short weekly digest: competitor name, what changed, why it matters, and the source link.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming which competitors matter most, which sources to check for each, how far back to look, and what counts as a meaningful change versus noise.",
+      tips: ["**Tip:** Naming the noise threshold up front stops the first digest from arriving full of cosmetic edits nobody asked for."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on your competitor list and their URLs. Review for findings grouped by competitor, every item linked, pricing changes flagged, and cosmetic edits gone.",
+      tips: ["**Tip:** A required source link on every line keeps a vague blog post from turning into a confident claim about a shipped feature."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every weekly run, and package it into a skill once it passes a few weeks straight.",
+      tips: ["**Tip:** This stays a monitoring tool — every claim needs a clickable source, and the call on what to do about a competitor's move stays yours."],
+    },
+  ],
+});
+
+export const PRODUCT_AB_TEST_READOUTS_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae414c606334ed556eef",
+  about: [
+    "Checking a test's results before it reaches its planned sample size — \"peeking\" — can inflate a nominal 5% significance threshold far higher, and a lot of declared wins never get checked against that math. This system reads your test-versus-control data and returns a readout of the outcome, its uncertainty, and one recommended next step instead of a single \"we won\" headline.",
+    "Run it as a paste-in prompt each time a test hits its stopping point, a saved skill, or a scheduled agent pulling straight from your experimentation tool. Every version stays read-only against your test data.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Which platform your results come from, and whether that needs a connector or a manual export."],
+    ["Whether your team already pre-registers a stopping rule, or needs one built before this runs."],
+    ["What the readout must always include — confidence interval and segment differences — versus what's optional."],
+  ],
+  buildIntro: "Gather an experimentation tool, a sheet if results are pulled manually, and a docs tool to deliver the readout. The paste-in version needs none.",
+  prompt: "Goal: Turn raw test results into a plain-language readout with a clear recommendation.\n\nContext: [Paste your results export: treatment vs. control, sample sizes, and the metrics tracked.] [Your pre-registered primary metric and any guardrail metrics.] [Your planned sample size or stopping date.]\n\nRules:\n- State whether the pre-set sample size was reached before this readout was run.\n- Report the primary metric's result with its confidence interval, not a single point estimate.\n- Note any segment differences worth flagging, and label them as a hypothesis, not a conclusion.\n- Never call a result a \"winner\" if the test was stopped early.\n- End with one clear recommendation: ship, hold, or extend the test.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming your results source, what the readout always covers, how to handle a test that isn't yet significant, and who reads it.",
+      tips: ["**Tip:** The interview forces the stopping rule and the required fields into writing before a single result gets read."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real results export. Review for the sample size confirmed, the interval stated, segments labeled as hypotheses, and one recommendation given.",
+      tips: ["**Tip:** Requiring the confidence interval and the stopping-rule check up front blocks the shortcut straight to a headline."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every test, and package it into a skill once it passes a few tests straight.",
+      tips: ["**Tip:** It can't know if a test was peeked at early, so that discipline has to be enforced upstream."],
+    },
+  ],
+});
+
+export const OPERATIONS_RECURRING_REPORTS_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae4079403e9797fd44fa",
+  about: [
+    "The typical FP&A team loses real hours a week per staffer to manual reporting, with most of that time going to gathering and managing data rather than analyzing it. This system points an agent at the same sources you'd check by hand, pulls the current numbers, and drafts the written summary in the format your report has always used.",
+    "Run it as a paste-in prompt the day before the report is due, a saved skill, or a scheduled agent dropping a draft into your reporting home. A person reviews and sends it.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Whether your data sources are cleanly exportable or need a manual pull first."],
+    ["The significance threshold for what's worth flagging as a change."],
+    ["Who reviews the draft, and how much time they need before it's due."],
+  ],
+  buildIntro: "Gather your data source, your reporting home, and a scheduling layer if this runs on a timer. The paste-in version needs none.",
+  prompt: "Goal: Draft [report name], a [frequency] report covering [what it covers], in the same format it's always used.\n\nContext: Data sources are [list actual sources]. Past reports for reference at [location]. Audience is [who reads it] and cares most about [what matters to them].\n\nRules:\n- Compare every number to the prior period and call out the direction and size of the change.\n- Only flag a change as significant if it crosses [a defined threshold, e.g. 10%].\n- Never state a number not traceable to a listed source.\n- Match the tone and structure of the last three reports.\n- Output: exact section order of the template, plus a one-line \"what changed\" summary at the top.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming where the data comes from, what the report has always looked like, what counts as a meaningful change versus noise, and who reviews it before it goes out.",
+      tips: ["**Tip:** The interview forces you to name the format and threshold decisions you've been making by feel."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real pull of current data. Review for every number traced to a source, threshold applied consistently, and format matching the last three reports.",
+      tips: ["**Tip:** Naming a numeric threshold up front keeps the draft from flagging every small wiggle as news."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every cycle, and package it into a skill once it passes a few cycles straight.",
+      tips: ["**Tip:** A dashboard pull error looks exactly like a real number until someone checks it — build a sanity check into the pull itself."],
+    },
+  ],
+});
+
+export const OPERATIONS_WORK_GETS_STUCK_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae40662f2c57cbffcf43",
+  about: [
+    "Most teams already have the data that would show them where work stalls — it just sits in a tracker instead of getting analyzed. This system reads an export of that data, calculates time-in-stage for every item, and ranks the stages costing you the most time, with the numbers behind each one.",
+    "Run it as a paste-in prompt whenever throughput feels off, a saved skill for a recurring check, or a scheduled agent that reruns monthly and diffs against the last pass.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Where timestamp data lives and whether it exports cleanly."],
+    ["What counts as a \"stage\" in your tools."],
+    ["How far back to look — long enough to be representative, not so long it spans a process that's since changed."],
+  ],
+  buildIntro: "Gather your ticket or task tracker, a shared spreadsheet if there's no formal tracker, and your communication tool if bottlenecks show up in thread delays. The paste-in version needs none.",
+  prompt: "Goal: Analyze [X weeks/months] of ticket data from [Jira/Asana/Linear] to find where work stalls in our [process name] process and rank the worst offenders.\n\nContext: [Paste your ticket export: created date, stage, assignee, closed date, for every item.] Process stages in order: [list them]. Normal cycle time is roughly [X days].\n\nRules:\n- Calculate time-in-stage for every item, not just total cycle time.\n- Flag any stage where median hold time exceeds [X days].\n- Separate rework loops (items that bounced backward) from items that just sat.\n- Don't recommend headcount changes, only process fixes.\n- Output: a ranked table of stages by hold time, a one-paragraph diagnosis of the worst stage, and 3 next steps.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming the process itself, what data you can export, how far back to look, and what you want to do with the answer.",
+      tips: ["**Tip:** The interview forces you to define a normal cycle time before you see any data, so flagged stages are outliers against your own baseline."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real export, every stage included. Review for every stage measured, rework separated from hold time, and no headcount recommendations.",
+      tips: ["**Tip:** Separating rework loops from items that just sat keeps a slow-but-correct approval stage from getting flagged the same way as a genuine stall."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every run, and package it into a skill once it passes a few runs straight.",
+      tips: ["**Tip:** Timestamps lie when people batch-update status at day's end — treat any finding as a hypothesis to check against real examples."],
+    },
+  ],
+});
+
+export const OPERATIONS_MEETING_ACTION_ITEMS_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae3f6e098a0cda79a8fd",
+  about: [
+    "US knowledge workers spend a significant share of their year in meetings they consider unnecessary, and many see a direct link between missed deadlines and meeting overload. This system takes the transcript or rough notes from a meeting, pulls out who owns what and by when, separates decisions from open questions, and posts the result to wherever your team tracks work.",
+    "Run it as a paste-in prompt right after a meeting ends, a saved skill, or a scheduled agent that reads a recurring meeting's transcript and posts on its own. Keep a human glance before it posts, at least until you trust the owner calls it's making.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Whether your input is a clean transcript or your own rough notes, and how consistent it stays meeting to meeting."],
+    ["Which tracker is the real source of truth for your team."],
+    ["How to handle meetings where nobody assigns a clear owner out loud."],
+  ],
+  buildIntro: "Gather your meeting or recording tool, your task tracker, and your team chat tool for posting a summary alongside tracked items. The paste-in version needs none.",
+  prompt: "Goal: Turn the transcript or notes from [meeting name] into action items with owners and due dates, posted to [tracker].\n\nContext: Meeting recurs [frequency] with [attendees]. Notes come from [tool]. Tracker is [Notion/Asana/Linear] with fields [owner, due date, status, project].\n\nRules:\n- Separate action items from decisions from open questions.\n- Only assign an owner if named explicitly, flag anything ambiguous.\n- Never invent a due date that wasn't discussed.\n- Output as three lists: action items, decisions, and open questions, one line each, owner and date where known.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming which meetings to start with, how notes get in, where action items land, and how owners get assigned when ambiguous.",
+      tips: ["**Tip:** The interview surfaces decisions you didn't know you needed to make, and the scope document becomes the brief for every build session after it."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on the transcript or notes from one real meeting. Review for the three lists kept separate, with no invented owners or dates.",
+      tips: ["**Tip:** Explicit rules for what counts as an action item versus a decision keep it from guessing at ownership when a meeting never assigned one out loud."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every meeting, and package it into a skill once it passes meetings straight.",
+      tips: ["**Tip:** It can only work from what was said out loud, so posting without a human glance first trains people to ignore it the moment it gets an owner wrong in public."],
+    },
+  ],
+});
+
+export const OPERATIONS_REPETITIVE_PROCESS_WALKTHROUGH_TUTORIAL: Block[] = buildTutorial({
+  source: "urn:contentEntry:6ab9ae4037b8bb0628150b48",
+  about: [
+    "A majority of knowledge workers say it's hard to track down information at work despite knowing plenty of people who could help — a clear sign of a process still living in one person's head instead of a doc. This system takes a recorded walkthrough, a screen share with narration, or someone just talking through the steps, and turns the transcript into a numbered SOP with verification steps and a troubleshooting section.",
+    "Steps land in the order performed rather than a cleaned-up ideal, workarounds get called out separately from the standard path, and any step the person skipped without explaining gets flagged. Whoever recorded the walkthrough reviews the draft before it counts as the process.",
+  ],
+  setupHeaders: ["Before you build, decide"],
+  setupRows: [
+    ["Which tool captures the walkthrough, and whether it auto-generates a transcript."],
+    ["Where the finished SOP lives so people find it."],
+    ["Who reviews and approves it before it's treated as the real process."],
+  ],
+  buildIntro: "Gather your recording or transcription tool, your documentation home, and your team chat tool to announce the new SOP. The paste-in version needs none.",
+  prompt: "Goal: Turn a transcript of me walking through [process name] into a numbered SOP that [new hire/teammate] could follow without asking me anything.\n\nContext: Transcript at [file location]. This process uses [tool names from the walkthrough]. The person following it will have [access level, prior knowledge].\n\nRules:\n- Number steps in the order actually performed, not a cleaned-up ideal order.\n- Call out workarounds or exceptions separately from the standard path.\n- Flag any step where I skipped an explanation.\n- Output: numbered steps, a \"before you start\" checklist, and a troubleshooting table.",
+  steps: [
+    {
+      title: "Scope",
+      body: "Have your AI tool interview you into a scope document naming the process, how you'll capture it, who the SOP is for, and where the finished doc lives.",
+      tips: ["**Tip:** The interview forces decisions about capture method and audience up front, before you're staring at a raw transcript guessing what the SOP is for."],
+    },
+    {
+      title: "Build",
+      body: "Build and test on a real walkthrough transcript. Review the draft for real order, workarounds separated out, and troubleshooting covering the likely failures.",
+      tips: ["**Tip:** Ordering steps by what happened keeps the SOP matching reality instead of turning into an idealized description no one follows exactly."],
+    },
+    {
+      title: "Learn",
+      body: "Measure against a rubric, log every SOP you generate, and package it into a skill once it passes a few runs straight.",
+      tips: ["**Tip:** A transcript captures what someone did, so a bad habit narrated clearly still turns into a clean, wrong SOP — check the draft against what the process should be."],
     },
   ],
 });

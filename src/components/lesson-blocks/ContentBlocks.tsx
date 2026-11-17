@@ -686,17 +686,14 @@ function BuildOptionCard({
           : "border border-leland-gray-stroke bg-white hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)]"
       }`}
     >
-      <div className="relative h-16 w-[120px] shrink-0 overflow-hidden rounded-md border border-leland-gray-hover">
-        <img src={image ?? aiBuilderTile} alt="" className="h-full w-full object-cover" />
+      <div className="relative aspect-[1.91/1] h-[80px] w-auto shrink-0 self-start overflow-hidden rounded-md border border-leland-gray-hover">
+        <img src={image ?? aiBuilderTile} alt="" className="size-full object-cover" />
       </div>
       <div className="flex flex-1 flex-col items-start">
         <span className={`line-clamp-2 text-[16px] font-semibold leading-[1.3] ${completed ? "text-leland-gray-light" : "text-leland-gray-dark"}`}>
           {title}
         </span>
-        {description ? <span className="mt-0.5 line-clamp-2 text-[14px] text-leland-gray-light">{description}</span> : null}
-      </div>
-      <div className="self-start">
-        <Tag text={completed ? "Complete" : "Not started"} tagColor={completed ? TagColor.BLACK : TagColor.WHITE} size={TagSize.XS} fontWeight={FontWeight.SEMIBOLD} />
+        {description ? <span className="mt-1 line-clamp-2 text-[14px] leading-[1.35] text-leland-gray-light">{description}</span> : null}
       </div>
     </button>
   );

@@ -2,6 +2,7 @@
 // lesson-blocks renderer (demo of the block/CMS model). Text is adapted from the
 // real Session 1 guide. Lessons 2–4 still use the legacy HTML iframe manifest.
 import type { Block, BlockSection, RoleBuildPickerBlock } from "./lessonBlocks";
+import { pickRoleBuild } from "./lessonBlocks";
 import {
   TOOL_SETUP_CLAUDE,
   TOOL_SETUP_CODEX,
@@ -192,12 +193,7 @@ export function pickLesson1Build(knownRole: string | null): {
   image?: string;
   otherOptionsCount: number;
 } {
-  const { fallback, options } = LESSON_1_ROLE_BUILD_PICKER;
-  const matched = knownRole ? options.filter((opt) => opt.matchesRoles?.includes(knownRole)) : [];
-  const option = matched.length === 1 ? matched[0] : (options.find((o) => o.value === "sales") ?? options[0] ?? null);
-  const builds = option?.builds ?? fallback.builds;
-  const [first, ...rest] = builds;
-  return { buildTitle: first.buildTitle, image: first.image, otherOptionsCount: rest.length };
+  return pickRoleBuild(LESSON_1_ROLE_BUILD_PICKER, knownRole);
 }
 
 export const LESSON_1_SECTIONS: BlockSection[] = [

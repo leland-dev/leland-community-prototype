@@ -288,6 +288,24 @@ export type RoleBuildPickerBlock = {
   fallback: RoleBuildOption; // shown when the role isn't on file or doesn't match any option
 };
 
+// Same role → default-build selection RoleBuildPicker itself uses (see
+// ContentBlocks.tsx), kept here so any lesson's own "Up Next" card can derive
+// the build a learner would actually land on, and how many other options
+// their role has, without duplicating that logic per lesson. Returns
+// otherOptionsCount: 0 when the matched role (or fallback) only has one
+// build on file — that's an accurate read of the content, not a bug, until
+// that role's picker gets more alternates.
+export function pickRoleBuild(
+  block: RoleBuildPickerBlock,
+  knownRole: string | null
+): { buildTitle: string; image?: string; otherOptionsCount: number } {
+  const matched = knownRole ? block.options.filter((opt) => opt.matchesRoles?.includes(knownRole)) : [];
+  const option = matched.length === 1 ? matched[0] : (block.options.find((o) => o.value === "sales") ?? block.options[0] ?? null);
+  const builds = option?.builds ?? block.fallback.builds;
+  const [first, ...rest] = builds;
+  return { buildTitle: first.buildTitle, image: first.image, otherOptionsCount: rest.length };
+}
+
 // One multiple-choice question in a PromptQuizBlock — a short prompt excerpt
 // and which Goal/Context/Rules part it is.
 export type QuizOption = {

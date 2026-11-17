@@ -69,10 +69,17 @@ export function CategoryPicker({
 
       {open && pos && createPortal(
         <>
-          <div className="fixed inset-0 z-[1019]" onClick={() => setOpen(false)} />
+          {/* pointer-events: auto on both — this portals straight to
+              document.body, outside Radix Dialog's own content tree, so when
+              it's opened from inside a Modal, Radix's modal-mode body lock
+              (`body { pointer-events: none }`) would otherwise make these
+              look clickable while silently swallowing every real click,
+              letting it fall through to whatever's underneath that Radix
+              re-enabled instead (e.g. a sibling control in the dialog). */}
+          <div className="fixed inset-0 z-[1019] pointer-events-auto" onClick={() => setOpen(false)} />
           <div
             role="listbox"
-            className="fixed z-[1020] flex flex-col overflow-hidden rounded-xl border border-gray-stroke bg-white shadow-lg"
+            className="pointer-events-auto fixed z-[1020] flex flex-col overflow-hidden rounded-xl border border-gray-stroke bg-white shadow-lg"
             style={{ top: pos.top, left: pos.left, width: pos.width, maxHeight: PANEL_MAX_H }}
           >
             <div className="flex items-center gap-2 border-b border-gray-stroke px-3 py-2.5">
