@@ -62,7 +62,7 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
   setAltLayout: () => {},
   feedEdgeToEdge: false,
   setFeedEdgeToEdge: () => {},
-  hideNavSelections: true,
+  hideNavSelections: false,
   setHideNavSelections: () => {},
 });
 
@@ -113,8 +113,9 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
     return localStorage.getItem(FEED_EDGE_STORAGE_KEY) === "1";
   });
   const [hideNavSelections, setHideNavSelectionsState] = useState<boolean>(() => {
-    // Hidden by default; only an explicit "0" shows the nav selections.
-    return localStorage.getItem(HIDE_NAV_SELECTIONS_STORAGE_KEY) !== "0";
+    // Shown by default; only an explicit "1" hides the nav selections. The
+    // siloed Program Hub experience opts into hiding via its own toggle.
+    return localStorage.getItem(HIDE_NAV_SELECTIONS_STORAGE_KEY) === "1";
   });
   const setStyle = (v: TopNavStyle) => {
     localStorage.setItem(STORAGE_KEY, v);

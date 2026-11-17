@@ -359,9 +359,10 @@ export default function TopNavLinkedIn() {
           <NavLink to={isCoachMode ? "/coach/inbox" : homeTo} className="flex shrink-0 items-center">
             <img src={lelandWordmark} alt="Leland" className="h-6 w-auto" />
           </NavLink>
-          {/* The search input is hidden unless the admin toggle turns it on
-              (or we're on the search-results demo page). */}
-          {!hideNavSelections && (showSearch || isSearchResults) && searchBar}
+          {/* The search input is hidden unless the admin toggle turns it on.
+              The search-results demo always shows it (its filled "harvard"
+              state), overriding the global hide-nav-selections default. */}
+          {(isSearchResults || (!hideNavSelections && showSearch)) && searchBar}
         </div>
 
         {/* Right: icon group + Me dropdown */}
