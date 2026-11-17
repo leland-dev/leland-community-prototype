@@ -158,6 +158,8 @@ export default function TopNavLinkedIn() {
   // Inside the isolated /alt-nav experience, the nav destinations stay within
   // it (e.g. /alt-nav/messages); elsewhere they point at the normal routes.
   const inLinkedInNav = pathname.startsWith("/alt-nav") || pathname.startsWith("/my-leland");
+  // Demo-only: the search-results page shows a filled "harvard" search field.
+  const isSearchResults = pathname === "/search-results";
   const homeTo = "/";
   const navTo = (path: string) => (inLinkedInNav ? `/alt-nav${path}` : path);
   // The nav layout: search bar on the left (opt-in), the icon group + "Me"
@@ -321,7 +323,17 @@ export default function TopNavLinkedIn() {
   // Search bar — a trigger styled like a search field that opens the full-screen
   // ExploreSearchModal takeover. Sits in the left cluster (opt-in via the admin
   // toggle).
-  const searchBar = (
+  const searchBar = isSearchResults ? (
+    // Filled state for the search-results demo: white field, border, a query,
+    // and a clear (X) affordance.
+    <div className="hidden h-11 w-[300px] items-center gap-2.5 self-center rounded-full border border-gray-stroke bg-white px-4 md:flex">
+      <img src={searchIcon} alt="" className="h-5 w-5 shrink-0" />
+      <span className="flex-1 truncate text-[15px] text-gray-dark">harvard</span>
+      <button type="button" aria-label="Clear search" className="shrink-0 text-gray-light transition-colors hover:text-gray-dark">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+      </button>
+    </div>
+  ) : (
     <button
       type="button"
       onClick={() => setSearchModalOpen(true)}
@@ -347,8 +359,9 @@ export default function TopNavLinkedIn() {
           <NavLink to={isCoachMode ? "/coach/inbox" : homeTo} className="flex shrink-0 items-center">
             <img src={lelandWordmark} alt="Leland" className="h-6 w-auto" />
           </NavLink>
-          {/* The search input is hidden unless the admin toggle turns it on */}
-          {!hideNavSelections && showSearch && searchBar}
+          {/* The search input is hidden unless the admin toggle turns it on
+              (or we're on the search-results demo page). */}
+          {!hideNavSelections && (showSearch || isSearchResults) && searchBar}
         </div>
 
         {/* Right: icon group + Me dropdown */}

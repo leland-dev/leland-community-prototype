@@ -9,6 +9,8 @@ interface SubNavItemProps {
   subCategories?: string[];
   onSubCategoryClick?: (cat: string) => void;
   activeSubCategory?: string | null;
+  /** Tailwind text-size class for the label (defaults to 13px). */
+  textSizeClass?: string;
 }
 
 export default function SubNavItem({
@@ -18,6 +20,7 @@ export default function SubNavItem({
   subCategories = [],
   onSubCategoryClick,
   activeSubCategory,
+  textSizeClass = "text-[13px]",
 }: SubNavItemProps) {
   const [open, setOpen] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
@@ -40,7 +43,7 @@ export default function SubNavItem({
     >
       <button
         onClick={onClick}
-        className={`px-3 py-1.5 text-[13px] whitespace-nowrap transition-colors ${
+        className={`px-3 py-1.5 ${textSizeClass} whitespace-nowrap transition-colors ${
           isActive ? "font-medium text-gray-dark" : "font-normal text-gray-light hover:text-gray-dark"
         }`}
       >

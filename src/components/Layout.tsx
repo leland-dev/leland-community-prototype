@@ -116,6 +116,8 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
   // the mobile top padding (which normally clears the shared nav) is dropped.
   const location = useLocation();
   const pathname = location.pathname;
+  // The search-results demo dresses the sub-nav bar as a white, shadowed strip.
+  const isSearchResults = pathname === "/search-results";
   const isPostDetail = pathname.startsWith("/post/");
   const isOwnSurface = isPostDetail || pathname.startsWith("/profile/");
   // Embed mode (?embed=1): strip the global nav chrome so the page renders as
@@ -272,7 +274,7 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
 
         {/* Sub-nav — the full-width bar that belongs to the top-nav chrome. */}
         {!isEmbed && subNav && showSubNav && (
-          <div className="hidden bg-gray-hover md:block">
+          <div className={`relative z-10 hidden md:block ${isSearchResults ? "bg-white shadow-[0_2px_6px_rgba(0,0,0,0.05)]" : "bg-gray-hover"}`}>
             <div className="relative mx-auto max-w-[1280px] px-6">
               {/* Left arrow */}
               {canScrollLeft && (
@@ -286,7 +288,7 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
                         <path d="M8.5 3L5 7L8.5 11" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </button>
-                    <div className="w-8 h-10 -ml-0.5 bg-gradient-to-r from-[#f5f5f5] to-transparent" />
+                    <div className={`w-8 h-10 -ml-0.5 bg-gradient-to-r to-transparent ${isSearchResults ? "from-white" : "from-[#f5f5f5]"}`} />
                   </div>
                 </div>
               )}
@@ -299,7 +301,7 @@ function LayoutChrome({ children }: { children: React.ReactNode }) {
               {canScrollRight && (
                 <div className="pointer-events-none absolute inset-y-0 right-6 z-10 flex items-center">
                   <div className="pointer-events-auto flex items-center">
-                    <div className="w-8 h-10 -mr-0.5 bg-gradient-to-l from-[#f5f5f5] to-transparent" />
+                    <div className={`w-8 h-10 -mr-0.5 bg-gradient-to-l to-transparent ${isSearchResults ? "from-white" : "from-[#f5f5f5]"}`} />
                     <button
                       onClick={() => scroll("right")}
                       className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-stroke bg-white shadow-sm hover:bg-gray-hover"

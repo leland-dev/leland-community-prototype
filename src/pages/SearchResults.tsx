@@ -411,7 +411,7 @@ export default function SearchResults() {
     setContent(
       <>
         {SUBNAV.map((label) => (
-          <SubNavItem key={label} label={label} isActive={activeNav === label} onClick={() => setActiveNav(label)} />
+          <SubNavItem key={label} label={label} isActive={activeNav === label} onClick={() => setActiveNav(label)} textSizeClass="text-[14px]" />
         ))}
       </>
     );
