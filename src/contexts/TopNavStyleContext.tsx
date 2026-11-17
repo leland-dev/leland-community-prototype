@@ -38,7 +38,7 @@ interface TopNavStyleContextValue {
   feedEdgeToEdge: boolean;
   setFeedEdgeToEdge: (v: boolean) => void;
   // Hides every top-nav selection (links/icon group, search bar) except the
-  // logo on the left and the profile avatar on the right. Off by default;
+  // logo on the left and the profile avatar on the right. On by default;
   // toggled from the Program Hub prototype-options menu.
   hideNavSelections: boolean;
   setHideNavSelections: (v: boolean) => void;
@@ -62,7 +62,7 @@ const TopNavStyleContext = createContext<TopNavStyleContextValue>({
   setAltLayout: () => {},
   feedEdgeToEdge: false,
   setFeedEdgeToEdge: () => {},
-  hideNavSelections: false,
+  hideNavSelections: true,
   setHideNavSelections: () => {},
 });
 
@@ -113,8 +113,8 @@ export function TopNavStyleProvider({ children }: { children: ReactNode }) {
     return localStorage.getItem(FEED_EDGE_STORAGE_KEY) === "1";
   });
   const [hideNavSelections, setHideNavSelectionsState] = useState<boolean>(() => {
-    // Shown by default; only an explicit "1" hides the nav selections.
-    return localStorage.getItem(HIDE_NAV_SELECTIONS_STORAGE_KEY) === "1";
+    // Hidden by default; only an explicit "0" shows the nav selections.
+    return localStorage.getItem(HIDE_NAV_SELECTIONS_STORAGE_KEY) !== "0";
   });
   const setStyle = (v: TopNavStyle) => {
     localStorage.setItem(STORAGE_KEY, v);

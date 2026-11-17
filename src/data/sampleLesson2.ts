@@ -54,6 +54,13 @@ import imgCashFlowForecast from "../assets/img/builds-v2/cash-flow-forecast.svg"
 import imgResumeScreening from "../assets/img/builds-v2/resume-screening.svg";
 import imgAbTestReadout from "../assets/img/builds-v2/ab-test-readout.svg";
 import imgOnboardingChecklist from "../assets/img/builds-v2/onboarding-checklist.svg";
+import imgOnboarding from "../assets/img/builds/onboarding-bot.svg";
+import imgCrm from "../assets/img/builds/crm-cleanup.svg";
+import imgInvoice from "../assets/img/builds/invoice-reconciliation.svg";
+import imgLeadQualAgent from "../assets/img/program-hub/lead-qualification-agent.png";
+import imgBudgetOnePager from "../assets/img/leland-plus-thumbnails/budget-one-pager.png";
+import imgInteractiveSopChecklist from "../assets/img/leland-plus-thumbnails/interactive-sop-checklist.png";
+import imgDocsQaBot from "../assets/img/builds-v2/docs-qa-bot.svg";
 
 // Placed above the lesson body on every section of Lesson 2.
 export const LESSON_2_TOP_BLOCKS: Block[] = [
@@ -82,6 +89,7 @@ export const LESSON_2_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
         id: "generic-workflow",
         buildTitle: "Scope your first custom workflow",
         tutorial: GENERIC_WORKFLOW_TUTORIAL,
+        image: imgOnboarding,
       },
     ],
   },
@@ -89,10 +97,12 @@ export const LESSON_2_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
   // confirmed via leland-ops search_resources against the "sales",
   // "marketing", "human-resources", "ai-for-finance", "ai-product-management"
   // and "business-strategy-and-operations" categories — no prototype-original
-  // placeholders. Builds with no local image asset fall back to the generic
-  // AI Builder tile rather than reusing a mismatched one; step content is a
-  // lorem ipsum stub until these get their own authored tutorial, same as
-  // other not-yet-authored builds elsewhere in this prototype.
+  // placeholders. Each reuses an existing local illustration whose theme
+  // reasonably fits (same pattern this file already used elsewhere), rather
+  // than showing the bare AI Builder logo tile on cards styled to look like
+  // real build screenshots; step content is a lorem ipsum stub until these
+  // get their own authored tutorial, same as other not-yet-authored builds
+  // elsewhere in this prototype.
   options: [
     {
       value: "sales",
@@ -104,12 +114,14 @@ export const LESSON_2_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           buildTitle: "Build a signal-based lead gen bot",
           description: "A system that watches a specific niche for buying signals and drafts a short personalized outreach the moment one appears.",
           tutorial: SALES_LEAD_GEN_BOT_TUTORIAL,
+          image: imgLeadQualAgent,
         },
         {
           id: "sales-pricing-lab",
           buildTitle: "Design a pricing and packaging lab",
           description: "A system that turns customer interview notes into a three-tier pricing table with a defensible launch price for each tier.",
           tutorial: SALES_PRICING_LAB_TUTORIAL,
+          image: imgMetrics,
         },
         {
           id: "sales-precall-briefing",
@@ -130,6 +142,7 @@ export const LESSON_2_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           buildTitle: "Build a deal follow-up reminder agent",
           description: "A system that checks your pipeline every day and sends you a short message naming the deals that need a follow-up, and why.",
           tutorial: SALES_DEAL_FOLLOWUP_AGENT_TUTORIAL,
+          image: imgCrm,
         },
       ],
     },
@@ -143,12 +156,14 @@ export const LESSON_2_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           buildTitle: "Create a brand voice guide from content you've already written",
           description: "A system that reads content you've already written and turns it into a written brand voice guide.",
           tutorial: MARKETING_BRAND_VOICE_GUIDE_TUTORIAL,
+          image: imgPrompts,
         },
         {
           id: "marketing-brand-voice-checker",
           buildTitle: "Build a brand voice checker for everything you ship",
           description: "A system that scores any draft against your brand voice guide and flags the exact lines that read generic or off-tone before it ships.",
           tutorial: MARKETING_BRAND_VOICE_CHECKER_TUTORIAL,
+          image: imgNotes,
         },
       ],
     },
@@ -190,6 +205,7 @@ export const LESSON_2_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           buildTitle: "Build a job description generator",
           description: "A system that turns a rough role brief into a polished, bias-checked job description ready to post.",
           tutorial: PEOPLE_JOB_DESCRIPTION_GENERATOR_TUTORIAL,
+          image: imgOnboarding,
         },
         {
           id: "people-hr-bot",
@@ -224,12 +240,14 @@ export const LESSON_2_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           buildTitle: "Build your personal budget with Claude",
           description: "Ship a working Excel budget dashboard and a Claude Project that runs your monthly review in 5-8 minutes.",
           tutorial: FINANCE_PERSONAL_BUDGET_TUTORIAL,
+          image: imgBudgetOnePager,
         },
         {
           id: "finance-expense-categorization",
           buildTitle: "Automate expense categorization",
           description: "A system that checks every transaction against your chart of accounts and flags anything it isn't confident about.",
           tutorial: FINANCE_EXPENSE_CATEGORIZATION_TUTORIAL,
+          image: imgInvoice,
         },
         {
           id: "finance-invoice-bookkeeping",
@@ -250,18 +268,21 @@ export const LESSON_2_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           buildTitle: "Automate your budget vs. actuals reporting",
           description: "A system that reads your budget-vs-actual data at the end of each reporting period and writes a variance narrative you can drop into a board deck, with every number sourced.",
           tutorial: FINANCE_BUDGET_VS_ACTUALS_TUTORIAL,
+          image: imgMetrics,
         },
         {
           id: "finance-month-end-close",
           buildTitle: "Build a month-end close checklist agent",
           description: "A system that tracks your month-end close checklist against target dates and flags what's overdue or blocked, grouped by owner.",
           tutorial: FINANCE_MONTH_END_CLOSE_TUTORIAL,
+          image: imgInteractiveSopChecklist,
         },
         {
           id: "finance-collections-emails",
           buildTitle: "Automate your collections emails",
           description: "A system that drafts a follow-up email for every overdue invoice on your AR aging report and holds it for your review before it sends.",
           tutorial: FINANCE_COLLECTIONS_EMAILS_TUTORIAL,
+          image: imgColdOutboundEmail,
         },
         {
           id: "finance-invoice-po-data-entry",
@@ -275,6 +296,7 @@ export const LESSON_2_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           buildTitle: "Create financial reports with accurate data and formatting",
           description: "A report system that pulls every figure from your source of truth, formats it your way, and flags anything it can't trace before the report ships.",
           tutorial: FINANCE_REPORTS_ACCURATE_DATA_TUTORIAL,
+          image: imgInvoice,
         },
       ],
     },
@@ -302,12 +324,14 @@ export const LESSON_2_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           buildTitle: "Design an agent system that turns specs into prototypes",
           description: "A system that turns an approved spec into a working prototype your team can react to right away.",
           tutorial: PRODUCT_SPEC_TO_PROTOTYPE_TUTORIAL,
+          image: imgDocsQaBot,
         },
         {
           id: "product-idea-to-prd",
           buildTitle: "Build an idea-to-PRD generator",
           description: "A system that turns a rough feature idea into a first-draft PRD ready for a human editor.",
           tutorial: PRODUCT_IDEA_TO_PRD_TUTORIAL,
+          image: imgPrompts,
         },
         {
           id: "product-feedback-theme-tracker",
@@ -321,12 +345,14 @@ export const LESSON_2_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           buildTitle: "Build a backlog prioritizer",
           description: "A system that scores your backlog on impact, effort, confidence, and strategic alignment, and returns a ranked list with the reasoning attached.",
           tutorial: PRODUCT_BACKLOG_PRIORITIZER_TUTORIAL,
+          image: imgMetrics,
         },
         {
           id: "product-competitor-research-report",
           buildTitle: "Create a weekly competitor research report",
           description: "A system that checks your competitors' public pages every week and sends you a cited digest of what changed.",
           tutorial: PRODUCT_COMPETITOR_RESEARCH_REPORT_TUTORIAL,
+          image: imgNotes,
         },
         {
           id: "product-ab-test-readouts",
@@ -361,6 +387,7 @@ export const LESSON_2_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           buildTitle: "Automate action items from your meeting notes",
           description: "A system that turns a meeting transcript into owned action items and posts them where your team tracks work.",
           tutorial: OPERATIONS_MEETING_ACTION_ITEMS_TUTORIAL,
+          image: imgNotes,
         },
         {
           id: "operations-invoice-po-data-entry",
@@ -374,6 +401,7 @@ export const LESSON_2_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           buildTitle: "Automate a repetitive process from a recorded walkthrough",
           description: "A system that turns one recorded walkthrough into a numbered SOP someone else could follow.",
           tutorial: OPERATIONS_REPETITIVE_PROCESS_WALKTHROUGH_TUTORIAL,
+          image: imgInteractiveSopChecklist,
         },
       ],
     },
