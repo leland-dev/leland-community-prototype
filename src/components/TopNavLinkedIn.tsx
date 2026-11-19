@@ -153,8 +153,11 @@ export default function TopNavLinkedIn() {
   const isCoachMode = useIsCoachMode();
   const navTheme = useNavTheme();
   const { pathname } = useLocation();
-  const { setStyle, showNavLabels, showLivestreams, setShowLivestreams, showLelandPlus, setShowLelandPlus, showJobs, setShowJobs, showSearch, setShowSearch, altLayout, setAltLayout, feedEdgeToEdge, setFeedEdgeToEdge, hideNavSelections } = useTopNavStyle();
+  const { setStyle, showNavLabels, showLivestreams, setShowLivestreams, showLelandPlus, setShowLelandPlus, showJobs, setShowJobs, showSearch, setShowSearch, altLayout, setAltLayout, feedEdgeToEdge, setFeedEdgeToEdge, hideNavSelections: hideNavSelectionsPref } = useTopNavStyle();
   const { expert, setExpert } = useExpertMode();
+  // The alt AI Builder experience always hides the nav selections (logo + profile
+  // only), regardless of the global prototype toggle.
+  const hideNavSelections = hideNavSelectionsPref || pathname.startsWith("/program/ai-builder-alt");
   // Inside the isolated /alt-nav experience, the nav destinations stay within
   // it (e.g. /alt-nav/messages); elsewhere they point at the normal routes.
   const inLinkedInNav = pathname.startsWith("/alt-nav") || pathname.startsWith("/my-leland");

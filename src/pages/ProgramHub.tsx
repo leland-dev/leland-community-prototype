@@ -169,7 +169,7 @@ function AllLevelsModal({
   );
 }
 
-type Item = {
+export type Item = {
   title: string;
   description: string;
   author: string;
@@ -188,7 +188,7 @@ type Item = {
   url?: string;
 };
 
-const ITEMS: Item[] = [
+export const ITEMS: Item[] = [
   { title: "A resident portal replacing HOA Group Texts", description: "A resident portal that replaces the HOA's group text chain with a shared calendar, maintenance requests, and announcements.", author: "Matthew Watkins", avatar: pic9, image: imgHoaPortal, categories: [], useCase: "App development", collection: "Community builds", tool: "Slack", url: "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae63480c96373fc42b63" },
   { title: "Lux: A Multi-Agent Travel Planning Operating System", description: "A multi-agent system that researches destinations, builds itineraries, and tracks bookings for a whole trip.", author: "Matthew Watkins", avatar: pic9, image: imgLuxTravel, categories: [], useCase: "Research & Intelligence", collection: "Community builds", tool: "Google Drive", url: "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae722f0e3d6fa14c7652" },
   { title: "SIFT: A Celiac App", description: "An app that scans menus and labels for gluten and flags which items are safe for a celiac diet.", author: "Matthew Watkins", avatar: pic9, image: imgSiftCeliac, categories: [], useCase: "App development", collection: "Community builds", tool: "Wordpress", url: "https://www.joinleland.com/content/item/urn%3AcontentEntry%3A6ab9ae6c77c3e1a09ce081ed" },
@@ -369,7 +369,7 @@ function useCohortSelectedLevels() {
 
 // Curated Sales examples — Tutorials and Skills only (no community builds),
 // sourced from the Sales-tagged rows of the tutorials/skills tagging sheet.
-const SALES_RECOMMENDED_ITEMS: Item[] = [
+export const SALES_RECOMMENDED_ITEMS: Item[] = [
   {
     title: "Build a one-page account brief for any prospect",
     description: "Builds a single shareable web page for a prospect with a company snapshot, likely pains, three talking points, and the questions you still need to ask",
@@ -443,14 +443,14 @@ const SALES_RECOMMENDED_ITEMS: Item[] = [
   },
 ];
 
-const USE_CASES = ["Productivity & Planning", "Content Creation", "Personal website", "Reporting & Analytics", "Automation & Ops", "App development"];
-const COLLECTIONS = ["Community builds", "Tutorials", "Skills"];
-const TOOLS = ["Notion", "Hubspot", "Google Drive", "Asana", "Slack", "Wordpress"];
-const USE_CASE_TILES = ["Productivity & Planning", "Content Creation", "Personal website", "Reporting & Analytics", "App development", "Outreach", "Automation & Ops", "Research & Intelligence"];
+export const USE_CASES = ["Productivity & Planning", "Content Creation", "Personal website", "Reporting & Analytics", "Automation & Ops", "App development"];
+export const COLLECTIONS = ["Community builds", "Tutorials", "Skills"];
+export const TOOLS = ["Notion", "Hubspot", "Google Drive", "Asana", "Slack", "Wordpress"];
+export const USE_CASE_TILES = ["Productivity & Planning", "Content Creation", "Personal website", "Reporting & Analytics", "App development", "Outreach", "Automation & Ops", "Research & Intelligence"];
 // The full universe of use-case tags — a superset of USE_CASES (that list is
 // just the default/narrowed one) — so searching the Use Case filter can find
 // any tag that exists, not only the ones currently shown by default.
-const ALL_USE_CASES = Array.from(new Set([...USE_CASES, ...USE_CASE_TILES]));
+export const ALL_USE_CASES = Array.from(new Set([...USE_CASES, ...USE_CASE_TILES]));
 
 // ─── Small pieces ─────────────────────────────────────────────────────────────
 
@@ -469,7 +469,7 @@ function ProgressBar({ pct, label, className = "" }: { pct: number; label?: stri
   );
 }
 
-function RoundArrow({ dir, disabled, onClick, floating }: { dir: "left" | "right"; disabled?: boolean; onClick?: () => void; floating?: boolean }) {
+export function RoundArrow({ dir, disabled, onClick, floating }: { dir: "left" | "right"; disabled?: boolean; onClick?: () => void; floating?: boolean }) {
   return (
     <button
       type="button"
@@ -511,7 +511,7 @@ function SkillThumb({ title }: { title: string }) {
   );
 }
 
-function ContentCard({ item }: { item: Item }) {
+export function ContentCard({ item }: { item: Item }) {
   const Wrapper = item.url ? "a" : "div";
   return (
     <Wrapper
@@ -549,7 +549,7 @@ function ContentCard({ item }: { item: Item }) {
 
 // Deterministic per-item view count — stable across renders, just not backed
 // by a real analytics source.
-function viewsForTitle(title: string): number {
+export function viewsForTitle(title: string): number {
   let hash = 0;
   for (let i = 0; i < title.length; i++) hash = (hash * 31 + title.charCodeAt(i)) >>> 0;
   return 40 + (hash % 460);
@@ -558,7 +558,7 @@ function viewsForTitle(title: string): number {
 // The larger "boxed" card used in Browse all — a full bordered card (not
 // just the image) with a description and view count, per the Content card
 // large component in the design library.
-function ContentCardLarge({ item }: { item: Item }) {
+export function ContentCardLarge({ item }: { item: Item }) {
   const Wrapper = item.url ? "a" : "div";
   return (
     <Wrapper
@@ -606,7 +606,7 @@ function ContentCardLarge({ item }: { item: Item }) {
 // Shared scroll state for a horizontal card row — the header's nav arrows
 // and the row itself both read/drive this, so the arrows can live in the
 // card header instead of floating below the row.
-function useCardCarousel<T>(items: T[]) {
+export function useCardCarousel<T>(items: T[]) {
   // A plain useRef's effect only ever sees the node that was mounted the
   // first time this hook ran — for a carousel inside a modal (unmounted by
   // Radix while closed), that's `null`, so `pages` would get stuck at 1
@@ -755,11 +755,35 @@ function UpcomingBuildsCarousel({
   );
 }
 
-const sectionTitle = "font-serif text-[28px] font-medium leading-[1.2] text-gray-dark";
+export const sectionTitle = "font-serif text-[28px] font-medium leading-[1.2] text-gray-dark";
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function ProgramHub() {
+// Optional flags to suppress sections that the alt experience moves to sibling
+// tabs. All default false, so the standalone /program/ai-builder is unchanged.
+type ProgramHubProps = {
+  title?: string;
+  hideOfficeHours?: boolean;
+  hideCommunity?: boolean;
+  hideResourceLibrary?: boolean;
+  hideLiveSessions?: boolean;
+  hideRecentlyViewed?: boolean;
+  hideRecommended?: boolean;
+  hideShipped?: boolean;
+  hideBrowseAll?: boolean;
+};
+
+export default function ProgramHub({
+  title = "AI Builder Program",
+  hideOfficeHours = false,
+  hideCommunity = false,
+  hideResourceLibrary = false,
+  hideLiveSessions = false,
+  hideRecentlyViewed = false,
+  hideRecommended = false,
+  hideShipped = false,
+  hideBrowseAll = false,
+}: ProgramHubProps = {}) {
   const navigate = useNavigate();
   const [aboutMe, setAboutMe] = useState<PersonalizationData | null>(() => loadPersonalizationData());
   const learnerRole = aboutMe?.role ?? null;
@@ -1086,25 +1110,31 @@ export default function ProgramHub() {
         {/* Header */}
         <div className="flex flex-col gap-6 pt-16">
           <div className="flex flex-col gap-3">
-            <h1 className="font-serif text-[36px] font-medium leading-[1.1] text-gray-dark sm:text-[46px]">AI Builder Program</h1>
+            <h1 className="font-serif text-[36px] font-medium leading-[1.1] text-gray-dark sm:text-[46px]">{title}</h1>
           </div>
           <div className="scrollbar-hide flex items-center gap-2 overflow-x-auto sm:flex-wrap">
-            <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 shrink-0 !bg-black/5 font-semibold">
-              <IconImg src={calendarArrowIcon} />Office hours
-            </Button>
-            <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 shrink-0 !bg-black/5 font-semibold">
-              <IconImg src={slackIcon} />Community
-            </Button>
-            <Button
-              size="md"
-              variant="secondary"
-              rounded="rounded-full"
-              className="!gap-2 shrink-0 !bg-black/5 font-semibold"
-              onClick={() => document.getElementById("recommended-for-you")?.scrollIntoView({ behavior: "smooth" })}
-            >
-              Resource library
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0" aria-hidden><path d="M12 5v14M5 12l7 7 7-7" /></svg>
-            </Button>
+            {!hideOfficeHours && (
+              <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 shrink-0 !bg-black/5 font-semibold">
+                <IconImg src={calendarArrowIcon} />Office hours
+              </Button>
+            )}
+            {!hideCommunity && (
+              <Button size="md" variant="secondary" rounded="rounded-full" className="!gap-2 shrink-0 !bg-black/5 font-semibold">
+                <IconImg src={slackIcon} />Community
+              </Button>
+            )}
+            {!hideResourceLibrary && (
+              <Button
+                size="md"
+                variant="secondary"
+                rounded="rounded-full"
+                className="!gap-2 shrink-0 !bg-black/5 font-semibold"
+                onClick={() => document.getElementById("recommended-for-you")?.scrollIntoView({ behavior: "smooth" })}
+              >
+                Resource library
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0" aria-hidden><path d="M12 5v14M5 12l7 7 7-7" /></svg>
+              </Button>
+            )}
           </div>
         </div>
 
@@ -1213,7 +1243,7 @@ export default function ProgramHub() {
           )}
         </div>
 
-        {includeFeaturedBuilds && (
+        {includeFeaturedBuilds && !hideLiveSessions && (
           <section className="mt-10">
             <div className="flex flex-col gap-4 rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
               {liveSessionsBody}
@@ -1223,6 +1253,7 @@ export default function ProgramHub() {
 
         {/* Program resources */}
         <section className="mt-10 flex flex-col gap-8">
+          {!hideRecentlyViewed && (
           <div className="flex flex-col gap-4 rounded-2xl border border-gray-stroke bg-white p-6">
             <div className="flex items-center gap-4">
               <p className="flex-1 text-[12px] font-semibold uppercase leading-[1.2] tracking-[1.2px] text-gray-light">Recently viewed</p>
@@ -1258,8 +1289,10 @@ export default function ProgramHub() {
               ))}
             </div>
           </div>
+          )}
 
           {/* Recommended for you */}
+          {!hideRecommended && (
           <div id="recommended-for-you" className="flex flex-col gap-6 rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
               <div className="flex min-w-px flex-1 flex-col gap-2">
@@ -1299,8 +1332,10 @@ export default function ProgramHub() {
               ) : null}
             </div>
           </div>
+          )}
 
           {/* See what others shipped */}
+          {!hideShipped && (
           <div className="flex flex-col gap-6 rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
               <div className="flex min-w-px flex-1 flex-col gap-2">
@@ -1337,6 +1372,7 @@ export default function ProgramHub() {
               <span className="text-[14px] text-gray-light">331 submissions</span>
             </div>
           </div>
+          )}
 
           {/* Browse by use case */}
           {showUseCaseSection ? (
@@ -1375,6 +1411,7 @@ export default function ProgramHub() {
         </section>
 
         {/* Browse all */}
+        {!hideBrowseAll && (
         <section id="browse-all" className="mt-16">
           <div className="flex flex-col gap-4 px-0 sm:flex-row sm:items-end sm:justify-between sm:px-6">
             <div className="flex flex-col gap-2">
@@ -1419,6 +1456,7 @@ export default function ProgramHub() {
             </div>
           </div>
         </section>
+        )}
       </div>
 
       <QuickPreferencesModal

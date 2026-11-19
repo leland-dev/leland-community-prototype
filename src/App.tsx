@@ -114,6 +114,7 @@ import GroupCardTest from "./pages/GroupCardTest";
 import Components from "./pages/Components";
 import StorefrontCardsTest from "./pages/StorefrontCardsTest";
 import ProgramHub from "./pages/ProgramHub";
+import ProgramHubAlt from "./pages/ProgramHubAlt";
 import CourseDetail from "./pages/CourseDetail";
 import CourseBuilder from "./pages/CourseBuilder";
 import CoachLayout from "./components/CoachLayout";
@@ -260,6 +261,7 @@ export default function App() {
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/my-programs" element={<MyCourses />} />
         <Route path="/program/ai-builder" element={<ProgramHub />} />
+        <Route path="/program/ai-builder-alt/*" element={<ProgramHubAlt />} />
         <Route path="/course/:courseId" element={<CourseDetail />} />
         <Route path="/program/session/:urn" element={<LiveSession />} />
         <Route element={<CoachLayout />}>

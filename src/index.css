@@ -504,3 +504,18 @@ input[name="phone"]:-webkit-autofill:focus {
 .aibp-flow button:disabled {
   cursor: not-allowed;
 }
+
+/* "Your level" meter — each fill bar sweeps up and staggers left→right once on
+   mount (pure CSS, so it fires on the fill's first render; --bar-i drives the
+   per-bar delay). transform-origin is set inline alongside the gradient. */
+@keyframes your-level-bar-in {
+  from { transform: scaleY(0); opacity: 0; }
+  to   { transform: none;      opacity: 1; }
+}
+.your-level-fill {
+  animation: your-level-bar-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(340ms + var(--bar-i, 0) * 8ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .your-level-fill { animation: none; }
+}
