@@ -65,10 +65,10 @@ function DealTicket({ className = "" }: { className?: string }) {
 
         {/* Body */}
         <div className="px-4 pt-4 text-center">
-          <div className="font-serif text-[40px] font-medium leading-none text-gray-dark">
-            66<span className="align-top text-[20px]">%</span> off
+          <div className="text-[13px] font-medium text-gray-light">Up to</div>
+          <div className="mt-0.5 font-serif text-[32px] font-medium leading-none text-gray-dark">
+            $900 off
           </div>
-          <div className="mt-1.5 text-[13px] font-medium text-gray-light">Select offerings</div>
         </div>
       </div>
     </div>
