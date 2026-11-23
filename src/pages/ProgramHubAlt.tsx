@@ -1,6 +1,6 @@
 import { NavLink, Route, Routes, useNavigate } from "react-router-dom";
 import { sectionTitle } from "./ProgramHub";
-import ProgramAltRoadmap from "./ProgramAltRoadmap";
+import ProgramRoadmap from "./ProgramRoadmap";
 import ProgramAltLiveSessions from "./ProgramAltLiveSessions";
 import ProgramAltResources from "./ProgramAltResources";
 import ProgramAltCommunity from "./ProgramAltCommunity";
@@ -242,7 +242,7 @@ export default function ProgramHubAlt() {
       <div className="min-w-0 flex-1">
         <Routes>
           <Route index element={<Home />} />
-          <Route path="roadmap" element={<ProgramAltRoadmap />} />
+          <Route path="roadmap" element={<ProgramRoadmap />} />
           <Route path="live-sessions" element={<ProgramAltLiveSessions />} />
           <Route path="resources" element={<ProgramAltResources />} />
           <Route path="community" element={<ProgramAltCommunity />} />

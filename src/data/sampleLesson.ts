@@ -20,6 +20,10 @@ import imgBrandedRecap from "../assets/img/builds/branded-recap.svg";
 import imgBattlecard from "../assets/img/builds/battlecard.svg";
 import imgCustomerWelcome from "../assets/img/builds/customer-welcome.svg";
 import imgWinLoss from "../assets/img/builds/win-loss.svg";
+import imgMetricsDigest from "../assets/img/builds/metrics-digest.svg";
+import imgOnboardingBot from "../assets/img/builds/onboarding-bot.svg";
+import imgPromptLibrary from "../assets/img/builds/prompt-library.svg";
+import imgMeetingNotes from "../assets/img/builds/meeting-notes.svg";
 import {
   SALES_TUTORIAL,
   SALES_PROPOSAL_TUTORIAL,
@@ -61,6 +65,7 @@ export const LESSON_1_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
         id: "generic",
         buildTitle: "Build a one-page summary of a real piece of your work",
         tutorial: GENERIC_TUTORIAL,
+        image: imgLeadBrief,
       },
     ],
   },
@@ -130,6 +135,7 @@ export const LESSON_1_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           id: "marketing-company-story",
           buildTitle: "Build a one-page story of your company",
           tutorial: MARKETING_TUTORIAL,
+          image: imgBrandedProposal,
         },
       ],
     },
@@ -142,6 +148,7 @@ export const LESSON_1_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           id: "people-welcome-page",
           buildTitle: "Build a personal welcome page for each new hire",
           tutorial: PEOPLE_TUTORIAL,
+          image: imgOnboardingBot,
         },
       ],
     },
@@ -154,6 +161,7 @@ export const LESSON_1_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           id: "finance-budget-summary",
           buildTitle: "Build a one-page budget summary for your team",
           tutorial: FINANCE_TUTORIAL,
+          image: imgMetricsDigest,
         },
       ],
     },
@@ -166,6 +174,7 @@ export const LESSON_1_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           id: "product-launch-page",
           buildTitle: "Build a one-page launch page for a new feature",
           tutorial: PRODUCT_TUTORIAL,
+          image: imgPromptLibrary,
         },
       ],
     },
@@ -178,6 +187,7 @@ export const LESSON_1_ROLE_BUILD_PICKER: RoleBuildPickerBlock = {
           id: "operations-checklist",
           buildTitle: "Build an interactive checklist for a process you run again and again",
           tutorial: OPERATIONS_TUTORIAL,
+          image: imgMeetingNotes,
         },
       ],
     },
@@ -681,7 +691,7 @@ export const LESSON_1_SECTIONS: BlockSection[] = [
   {
     kind: "blocks",
     id: "featured-build",
-    title: "Vibe code something you'll actually use in your work",
+    title: "Build something you'll actually use in your work",
     durationMin: 13,
     meta: { minsTotal: 90, builds: 5, model: "Sonnet" },
     label: { text: "Apply", color: "black" },

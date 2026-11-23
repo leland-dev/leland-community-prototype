@@ -108,6 +108,7 @@ export const LESSON_3_SECTIONS: BlockSection[] = [
     description: "Pick a real topic, research it with AI across your connected tools, and fact-check the output.",
     durationMin: 20,
     meta: { minsTotal: 90, builds: 4, model: "Sonnet" },
+    label: { text: "Apply", color: "black" },
     blocks: [
       {
         kind: "markdown",
@@ -294,6 +295,7 @@ export const LESSON_3_SECTIONS: BlockSection[] = [
     description: "Outline your research into a slide-by-slide plan before you design anything.",
     durationMin: 15,
     meta: { minsTotal: 90, builds: 4, model: "Sonnet" },
+    label: { text: "Apply", color: "black" },
     blocks: [
       {
         kind: "toggle",
