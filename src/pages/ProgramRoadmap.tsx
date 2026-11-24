@@ -5,7 +5,7 @@ import { Button } from "../components/Button";
 import { PROGRAM_LEVELS, type RoadmapLevel, type RoadmapSession } from "../data/programRoadmap";
 import type { LiveSessionBannerBlock, RoleBuild, RoleBuildPickerBlock } from "../data/lessonBlocks";
 import { useSelectedCategory } from "../contexts/SelectedCategoryContext";
-import { CATEGORY_TO_ROLE } from "../lib/categories";
+import { CATEGORY_TO_ROLE, ROLE_TO_CATEGORY } from "../lib/categories";
 import { TRACK_STORAGE_KEY, type CourseTrack } from "../components/TrackPickerModal";
 import { IconCheck } from "../components/leland";
 import { CalendarIcon } from "../components/SessionCard";
@@ -198,21 +198,29 @@ function SessionRow({
         }}
         className={`flex w-full flex-col gap-2 bg-white px-5 text-left lg:px-6 ${expanded ? "py-5" : "py-6"}`}
       >
-        <div className="flex w-full items-start gap-3">
+        <div className="flex w-full items-start gap-3 sm:items-center">
           {/* Title + progress bar share this wrapping group, which stays on
               the chevron's row — so the chevron stays aligned with the
               title instead of dropping to its own row. On mobile, where
               the title takes the full line, the progress bar wraps below
               it (still inside this group) instead of next to the chevron. */}
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-4">
             {/* Same eyebrow-above-title pattern the course player itself uses
                 for "Lesson N · Xm" — no separate numbered badge, so a session
                 isn't numbered twice (once here, once as "Session N"). */}
             <div className="min-w-0 basis-full sm:basis-0 sm:flex-1">
               {/* Position in the list already shows sequence, so no "Lesson N"
                   label here — just the duration, when there is one. */}
-              {session.durationMin && <p className="text-[12px] font-medium uppercase tracking-wide text-gray-light">{session.durationMin}m</p>}
+              {session.durationMin && <p className="text-[12px] font-normal text-gray-light">{session.durationMin} min</p>}
               <p className="text-[16px] font-semibold text-gray-dark">{session.title}</p>
+              {/* CTA lives right under the title, in the same header block,
+                  instead of its own section below — so it reads as attached
+                  to this lesson rather than floating in the expanded body. */}
+              {expanded && (
+                <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+                  {sessionCta(status)}
+                </div>
+              )}
             </div>
             {/* Only sessions with real tracked content (Level 1 today) get a
                 progress indicator. */}
@@ -232,7 +240,6 @@ function SessionRow({
             className="overflow-hidden"
           >
             <div className="flex flex-col rounded-b-xl bg-white px-5 pb-5 lg:px-6 lg:pb-6">
-              <div>{sessionCta(status)}</div>
               {session.liveSession && (
                 <div className="mt-6">
                   <LiveSessionBanner liveSession={session.liveSession} />
@@ -242,7 +249,10 @@ function SessionRow({
               {session.hasSignal && allExamples.length > 0 ? (
                 <>
                   <p className="mt-6 text-[14px] font-semibold text-gray-dark">
-                    {allExamples.length} example build{allExamples.length === 1 ? "" : "s"}
+                    {knownRole && ROLE_TO_CATEGORY[knownRole] ? `Example builds for ${ROLE_TO_CATEGORY[knownRole].toLowerCase()}` : "Example builds"}
+                    {allExamples.length > EXAMPLE_BUILDS_SHOWN && (
+                      <span className="ml-2 text-[14px] font-normal text-gray-light">+{allExamples.length - EXAMPLE_BUILDS_SHOWN} more</span>
+                    )}
                   </p>
                   <div className="mt-2.5">
                     <ExampleBuilds builds={allExamples} />

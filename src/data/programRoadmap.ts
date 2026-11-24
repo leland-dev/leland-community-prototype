@@ -104,10 +104,10 @@ export const PROGRAM_LEVELS: RoadmapLevel[] = [
     title: "Use AI to 10x Your Impact",
     status: "in-progress",
     sessions: [
-      deriveSession("Session 1", "Build a Real Product with World-Class Design", null, LESSON_1_SECTIONS, "lesson-1", LESSON_1_TOP_BLOCKS),
-      deriveSession("Session 2", "Automate Communication in Your Voice", null, LESSON_2_SECTIONS, "lesson-2", LESSON_2_TOP_BLOCKS),
-      deriveSession("Session 3", "Analyze Data and Design Presentations That Build Themselves", null, LESSON_3_SECTIONS, "lesson-3", LESSON_3_TOP_BLOCKS),
-      deriveSession("Session 4", "Launch Your Custom AI System + Demo Day", null, LESSON_4_SECTIONS, "lesson-4", LESSON_4_TOP_BLOCKS),
+      deriveSession("Session 1", "Build a Real Product with World-Class Design", 90, LESSON_1_SECTIONS, "lesson-1", LESSON_1_TOP_BLOCKS),
+      deriveSession("Session 2", "Automate Communication in Your Voice", 90, LESSON_2_SECTIONS, "lesson-2", LESSON_2_TOP_BLOCKS),
+      deriveSession("Session 3", "Analyze Data and Design Presentations That Build Themselves", 90, LESSON_3_SECTIONS, "lesson-3", LESSON_3_TOP_BLOCKS),
+      deriveSession("Session 4", "Launch Your Custom AI System + Demo Day", 90, LESSON_4_SECTIONS, "lesson-4", LESSON_4_TOP_BLOCKS),
     ],
   },
   // Levels 2-4 have no hand-authored lesson content in this prototype yet
