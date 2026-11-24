@@ -161,6 +161,10 @@ function SessionRow({
   // this session, so one combined example list reads better than repeating
   // the same structure under each outcome card.
   const allExamples = session.applyBuilds.flatMap((b) => (b.picker ? matchedBuilds(b.picker, knownRole) : []));
+  // When there's no live-session banner, this section's heading is the
+  // first thing after the header, so it needs a tighter top gap than when
+  // it's following the banner.
+  const contentTopGap = session.liveSession ? "mt-6" : "mt-4";
   // Resume where the learner left off — the first not-yet-completed tracked
   // section — same resume logic ContentViewer itself would land on; falls
   // back to the first section when nothing's been completed yet.
@@ -196,7 +200,7 @@ function SessionRow({
             onToggle();
           }
         }}
-        className={`flex w-full flex-col gap-2 bg-white px-5 text-left lg:px-6 ${expanded ? "py-5" : "py-6"}`}
+        className={`flex w-full flex-col gap-2 bg-white px-5 text-left lg:px-6 ${expanded ? "pt-5 pb-4" : "py-6"}`}
       >
         <div className="flex w-full items-start gap-3 sm:items-center">
           {/* Title + progress bar share this wrapping group, which stays on
@@ -241,14 +245,14 @@ function SessionRow({
           >
             <div className="flex flex-col rounded-b-xl bg-white px-5 pb-5 lg:px-6 lg:pb-6">
               {session.liveSession && (
-                <div className="mt-6">
+                <div className="mt-4">
                   <LiveSessionBanner liveSession={session.liveSession} />
                 </div>
               )}
 
-              {session.hasSignal && allExamples.length > 0 ? (
+              {allExamples.length > 0 ? (
                 <>
-                  <p className="mt-6 text-[14px] font-semibold text-gray-dark">
+                  <p className={`${contentTopGap} text-[14px] font-semibold text-gray-dark`}>
                     {knownRole && ROLE_TO_CATEGORY[knownRole] ? `Example builds for ${ROLE_TO_CATEGORY[knownRole].toLowerCase()}` : "Example builds"}
                     {allExamples.length > EXAMPLE_BUILDS_SHOWN && (
                       <span className="ml-2 text-[14px] font-normal text-gray-light">+{allExamples.length - EXAMPLE_BUILDS_SHOWN} more</span>
@@ -258,8 +262,30 @@ function SessionRow({
                     <ExampleBuilds builds={allExamples} />
                   </div>
                 </>
+              ) : session.applyBuilds.length > 0 ? (
+                // There's a real Apply section here, just no example tied to
+                // this learner's role yet (role unknown, or no tagged option
+                // matches it) — so describe the build itself instead of
+                // falling back to the generic "not tagged" copy below, which
+                // would misstate a session that *is* tagged.
+                <>
+                  <p className={`${contentTopGap} text-[14px] font-semibold text-gray-dark`}>What you'll build</p>
+                  <div className="mt-2.5 flex flex-col gap-2">
+                    {session.applyBuilds.map((build) => (
+                      <p key={build.title} className="text-[14px] text-gray-light">
+                        {build.title}
+                      </p>
+                    ))}
+                  </div>
+                </>
               ) : (
-                <p className="mt-6 text-[13px] text-gray-extra-light">{session.totalBuildCount} builds — not tagged for a preview yet</p>
+                // No apply builds at all — either no signal whatsoever, or
+                // only practice builds (which don't have their own preview
+                // treatment here) — so fall back to a plain, learner-facing
+                // build count instead of describing our own tagging gaps.
+                <p className={`${contentTopGap} text-[14px] text-gray-light`}>
+                  {session.totalBuildCount} build{session.totalBuildCount === 1 ? "" : "s"} in this lesson
+                </p>
               )}
             </div>
           </motion.div>
