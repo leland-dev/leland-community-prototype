@@ -33,6 +33,12 @@ export type FeaturedBuild = {
 export type RoadmapSession = {
   ordinal: string; // "Session 1"
   title: string;
+  // A one- or two-sentence summary of what the lesson covers and why it
+  // matters — required at course-creation time, same as the title. Used to
+  // give the featured/"start here" lesson card something to say beyond its
+  // title when it's the one thing on the page getting real display-font
+  // real estate.
+  description: string;
   durationMin: number | null;
   // True when at least one of this lesson's build sections carries a
   // Practice/Apply label — the signal the roadmap preview needs to know
@@ -75,6 +81,7 @@ function pickerOf(section: BlockSection): RoleBuildPickerBlock | undefined {
 function deriveSession(
   ordinal: string,
   title: string,
+  description: string,
   durationMin: number | null,
   sections: BlockSection[],
   lessonId?: string,
@@ -87,6 +94,7 @@ function deriveSession(
   return {
     ordinal,
     title,
+    description,
     durationMin,
     hasSignal: practice.length > 0 || apply.length > 0,
     practiceBuildTitles: practice.map((s) => s.title),
@@ -104,10 +112,10 @@ export const PROGRAM_LEVELS: RoadmapLevel[] = [
     title: "Use AI to 10x Your Impact",
     status: "in-progress",
     sessions: [
-      deriveSession("Session 1", "Build a Real Product with World-Class Design", 90, LESSON_1_SECTIONS, "lesson-1", LESSON_1_TOP_BLOCKS),
-      deriveSession("Session 2", "Automate Communication in Your Voice", 90, LESSON_2_SECTIONS, "lesson-2", LESSON_2_TOP_BLOCKS),
-      deriveSession("Session 3", "Analyze Data and Design Presentations That Build Themselves", 90, LESSON_3_SECTIONS, "lesson-3", LESSON_3_TOP_BLOCKS),
-      deriveSession("Session 4", "Launch Your Custom AI System + Demo Day", 90, LESSON_4_SECTIONS, "lesson-4", LESSON_4_TOP_BLOCKS),
+      deriveSession("Session 1", "Build a Real Product with World-Class Design", "Go from idea to a polished, working product — designing and shipping something real with AI.", 90, LESSON_1_SECTIONS, "lesson-1", LESSON_1_TOP_BLOCKS),
+      deriveSession("Session 2", "Automate Communication in Your Voice", "Train AI to write like you, then put it to work on the emails and messages that eat up your week.", 90, LESSON_2_SECTIONS, "lesson-2", LESSON_2_TOP_BLOCKS),
+      deriveSession("Session 3", "Analyze Data and Design Presentations That Build Themselves", "Turn raw data into a clear story, and let AI draft the deck that tells it.", 90, LESSON_3_SECTIONS, "lesson-3", LESSON_3_TOP_BLOCKS),
+      deriveSession("Session 4", "Launch Your Custom AI System + Demo Day", "Wire together everything you've built into one system, then demo it live.", 90, LESSON_4_SECTIONS, "lesson-4", LESSON_4_TOP_BLOCKS),
     ],
   },
   // Levels 2-4 have no hand-authored lesson content in this prototype yet
@@ -119,10 +127,10 @@ export const PROGRAM_LEVELS: RoadmapLevel[] = [
     title: "Build Complex Agentic Workflows",
     status: "not-started",
     sessions: [
-      { ordinal: "Session 1", title: "Build Your Intern", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 3 },
-      { ordinal: "Session 2", title: "Build Your Second Brain", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 3 },
-      { ordinal: "Session 3", title: "Automate Your Work", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 3 },
-      { ordinal: "Session 4", title: "AI Governance + Demo Day", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 3 },
+      { ordinal: "Session 1", title: "Build Your Intern", description: "Give an AI agent a real, recurring task on your team and teach it to run with it.", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 3 },
+      { ordinal: "Session 2", title: "Build Your Second Brain", description: "Build a personal knowledge system that remembers what you'd otherwise forget.", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 3 },
+      { ordinal: "Session 3", title: "Automate Your Work", description: "Chain multiple tools and steps into one workflow that runs without you.", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 3 },
+      { ordinal: "Session 4", title: "AI Governance + Demo Day", description: "Set guardrails for how your agents operate, then show off what you've automated.", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 3 },
     ],
   },
   {
@@ -130,10 +138,10 @@ export const PROGRAM_LEVELS: RoadmapLevel[] = [
     title: "Create Autonomous Agents",
     status: "not-started",
     sessions: [
-      { ordinal: "Session 1", title: "Build Your Agentic Operating System", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 5 },
-      { ordinal: "Session 2", title: "Build Your First Subagents", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 4 },
-      { ordinal: "Session 3", title: "Strengthen Your Agents with Skills, Tools, and Context", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 5 },
-      { ordinal: "Session 4", title: "Build an Eval System + Demo Day", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 4 },
+      { ordinal: "Session 1", title: "Build Your Agentic Operating System", description: "Stand up the foundation every agent you build from here on will run on.", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 5 },
+      { ordinal: "Session 2", title: "Build Your First Subagents", description: "Break a big task into smaller agents that each own one piece of it.", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 4 },
+      { ordinal: "Session 3", title: "Strengthen Your Agents with Skills, Tools, and Context", description: "Give your agents the tools and context they need to act on their own.", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 5 },
+      { ordinal: "Session 4", title: "Build an Eval System + Demo Day", description: "Build a way to measure whether your agents are actually getting it right, then demo day.", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 4 },
     ],
   },
   {
@@ -141,10 +149,10 @@ export const PROGRAM_LEVELS: RoadmapLevel[] = [
     title: "Build Your Agent Workforce",
     status: "not-started",
     sessions: [
-      { ordinal: "Session 1", title: "Scope Your AI Employee", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 3 },
-      { ordinal: "Session 2", title: "Build Your Orchestrated Pipeline", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 4 },
-      { ordinal: "Session 3", title: "Host and Deploy Your Agent", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 3 },
-      { ordinal: "Session 4", title: "Configure Recursive Improvement Loops + Demo Day", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 4 },
+      { ordinal: "Session 1", title: "Scope Your AI Employee", description: "Define the role, responsibilities, and boundaries for an AI 'employee' of your own.", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 3 },
+      { ordinal: "Session 2", title: "Build Your Orchestrated Pipeline", description: "Connect your agents into a single pipeline that hands work off between them.", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 4 },
+      { ordinal: "Session 3", title: "Host and Deploy Your Agent", description: "Take your agent out of the sandbox and put it somewhere it can actually run.", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 3 },
+      { ordinal: "Session 4", title: "Configure Recursive Improvement Loops + Demo Day", description: "Set your agent workforce up to keep improving itself, then show it off.", durationMin: 90, hasSignal: false, practiceBuildTitles: [], applyBuilds: [], totalBuildCount: 4 },
     ],
   },
 ];
