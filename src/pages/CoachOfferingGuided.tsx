@@ -1,25 +1,45 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "../components/Button";
 import { RoundArrow, useCardCarousel, sectionTitle } from "./ProgramHub";
+import {
+  PageStep, ProductPreview, SingleProductSetupStep, SessionsSetupStep, V2Context,
+  newPageSection, newCohort, defaultConfigFor, isConfigComplete, productListPrice,
+  INCLUDED_SECTION_ID, CONTENT_LIBRARY,
+  type PageSection, type PageSectionKind, type OfferingItem, type CollectionItem, type BuilderCohort,
+} from "./CoachProductNew";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import bookOpenIcon from "../assets/icons/book-open.svg";
 import myCoursesIcon from "../assets/icons/my-courses.svg";
 import videoIcon from "../assets/icons/video-icon.svg";
 import checkmarkFilledIcon from "../assets/icons/checkmark-filled.svg";
+import storeIcon from "../assets/icons/store.svg";
+import moneyIcon from "../assets/icons/money.svg";
+import writeIcon from "../assets/icons/write.svg";
+import eyeIcon from "../assets/icons/eye.svg";
+import labelTagIcon from "../assets/icons/label-tag.svg";
+import repostIcon from "../assets/icons/repost-2.svg";
+import globeIcon from "../assets/icons/globe.svg";
+import lockOutlineIcon from "../assets/icons/lock-outline.svg";
+import stackIcon from "../assets/icons/stack.svg";
+import layoutGridIcon from "../assets/icons/layout-grid.svg";
+import aiIcon from "../assets/icons/ai.svg";
 
 // Guided offering creation — an alternate to CoachProductTypeSelect + CoachProductNew.
 //
 // Instead of asking the coach to pick a product *type* (where "Bundle" and
 // "Subscription" sit awkwardly next to the things they're made of), this flow
-// asks what they want to *include*, then walks through one question per screen
-// for just those pieces. Bundle vs. single product and one-time vs. subscription
+// asks what they want to *include*, and a persistent sidebar (styled like the
+// My Leland nav) lists just the sections those pieces need, ending with the
+// customer-facing page builder borrowed from the existing flow. Sections can be filled in any order, products can
+// be added or removed at any point, and the offering can be published once every
+// section is complete. Bundle vs. single product and one-time vs. subscription
 // fall out of the answers rather than being chosen up front.
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
-const HOURLY_RATE = 150;
-const SESSION_VALUE = 50;
+// Completed-section checkmarks in the section nav — hidden for now.
+const SHOW_NAV_CHECKS = false;
 
 const CATEGORY_NAMES: Record<string, string> = {
   "product-management": "Product Management",
@@ -28,34 +48,42 @@ const CATEGORY_NAMES: Record<string, string> = {
   college: "College",
 };
 
-type ComponentId = "coaching" | "content" | "live" | "course";
-type StepId =
-  | "select"
-  | "coaching-format"
-  | "coaching-hours"
-  | "content-pick"
-  | "live-format"
-  | "live-sessions"
-  | "course-pick"
-  | "billing"
-  | "price"
-  | "name"
-  | "review";
+type ComponentId = "coaching" | "content" | "collection" | "live" | "course";
+type SectionId = "select" | ComponentId | "price" | "details" | "page";
+
+// Tabs every offering has; product tabs live in their own sidebar module.
+const FIXED_SECTIONS: SectionId[] = ["select", "price", "details", "page"];
+
+const SECTION_ICONS: Record<SectionId, string> = {
+  select: storeIcon,
+  coaching: hourglassIcon,
+  content: bookOpenIcon,
+  collection: stackIcon,
+  live: videoIcon,
+  course: myCoursesIcon,
+  price: moneyIcon,
+  details: writeIcon,
+  page: eyeIcon,
+};
+
+const SECTION_LABELS: Record<SectionId, string> = {
+  select: "Select products",
+  coaching: "1:1 coaching",
+  content: "Content",
+  collection: "Collection",
+  live: "Live sessions",
+  course: "Course",
+  price: "Pricing",
+  details: "Name & headline",
+  page: "Customer page",
+};
 
 const COMPONENTS: { id: ComponentId; name: string; blurb: string; icon: string; ready: boolean }[] = [
   { id: "coaching", name: "1:1 coaching", blurb: "Live time with you, sold by the hour.", icon: hourglassIcon, ready: true },
-  { id: "content", name: "Content", blurb: "Guides, templates, and recordings clients use on their own.", icon: bookOpenIcon, ready: true },
+  { id: "content", name: "Content", blurb: "A guide, template, video, or other resource.", icon: bookOpenIcon, ready: true },
+  { id: "collection", name: "Collection", blurb: "Several resources bundled together.", icon: stackIcon, ready: true },
   { id: "live", name: "Live sessions", blurb: "A workshop, or a series of sessions you teach to a group.", icon: videoIcon, ready: true },
   { id: "course", name: "Course", blurb: "A structured, multi-lesson course.", icon: myCoursesIcon, ready: true },
-];
-
-type ContentItem = { id: number; title: string; kind: string; price: number };
-const LIBRARY: ContentItem[] = [
-  { id: 1, title: "Essay Brainstorming Guide", kind: "Guide", price: 49 },
-  { id: 2, title: "Resume Template", kind: "Template", price: 29 },
-  { id: 3, title: "Interview Question Bank", kind: "Guide", price: 39 },
-  { id: 4, title: "School Selection Spreadsheet", kind: "Template", price: 19 },
-  { id: 5, title: "Mock Interview Walkthrough", kind: "Video", price: 59 },
 ];
 
 type Course = { id: number; title: string; lessons: number; price: number };
@@ -65,17 +93,32 @@ const COURSES: Course[] = [
 ];
 const NEW_COURSE = 0;
 
-type Session = { id: number; title: string; date: string; time: string; duration: string };
-const newSession = (id: number, title = ""): Session => ({ id, title, date: "", time: "", duration: "60" });
+// The products configured with the existing builder's own setup UI. Each is an
+// OfferingItem in that builder's shape, keyed by the builder's product slug.
+type ProductId = "coaching" | "content" | "collection";
+const PRODUCT_SLUGS: Record<ProductId, string> = { coaching: "coaching-time", content: "content", collection: "collection" };
+const PRODUCT_IDS: Record<ProductId, number> = { coaching: 1, content: 2, collection: 3 };
+const isProductId = (id: string): id is ProductId => id in PRODUCT_SLUGS;
+const blankProduct = (id: ProductId): OfferingItem => ({ id: PRODUCT_IDS[id], slug: PRODUCT_SLUGS[id], config: defaultConfigFor(PRODUCT_SLUGS[id]), configured: false });
+const blankProducts = (): Record<ProductId, OfferingItem> => ({ coaching: blankProduct("coaching"), content: blankProduct("content"), collection: blankProduct("collection") });
+// Live sessions are workshops in the builder's shape; ids start high so they never collide with products.
+const FIRST_SESSION_ID = 100;
+const blankSession = (id: number, name = ""): OfferingItem => ({ id, slug: "workshop", config: { ...defaultConfigFor("workshop"), name }, configured: false });
+// A library item reused inside the builder's content config.
+const reuseConfig = (i: number): Record<string, string> => {
+  const c = CONTENT_LIBRARY[i % CONTENT_LIBRARY.length];
+  return { ...defaultConfigFor("content"), source: "reuse", libraryId: c.id, r_assetName: c.name, r_title: c.title, r_description: c.description, r_resourceType: c.resourceType, price: c.price.toFixed(2) };
+};
 
 type Template = {
   id: string;
   name: string;
   summary: string;
   components: ComponentId[];
-  coachingMode?: "set" | "range";
   hours?: number;
-  contentIds?: number[];
+  // Number of library resources: one fills Content, several fill a Collection.
+  resources?: number;
+  collectionTitle?: string;
   sessions?: string[];
   courseId?: number;
   billing: "one-time" | "recurring";
@@ -88,10 +131,10 @@ const TEMPLATES: Template[] = [
     id: "bootcamp",
     name: "Application Bootcamp",
     summary: "10 hrs coaching · 3 resources · 4 live sessions",
-    components: ["coaching", "content", "live"],
-    coachingMode: "set",
+    components: ["coaching", "collection", "live"],
     hours: 10,
-    contentIds: [1, 2, 3],
+    resources: 3,
+    collectionTitle: "Application toolkit",
     sessions: ["Kickoff & strategy", "Essay workshop", "Interview prep", "Final review"],
     billing: "one-time",
     price: "1500",
@@ -101,8 +144,9 @@ const TEMPLATES: Template[] = [
     id: "membership",
     name: "Monthly Membership",
     summary: "Group office hours · resource library · billed monthly",
-    components: ["content", "live"],
-    contentIds: [1, 3, 4, 5],
+    components: ["collection", "live"],
+    resources: 4,
+    collectionTitle: "Member library",
     sessions: ["Monthly office hours", "Monthly AMA"],
     billing: "recurring",
     price: "79",
@@ -113,9 +157,8 @@ const TEMPLATES: Template[] = [
     name: "Essay Review Sprint",
     summary: "3 hrs coaching · essay guide",
     components: ["coaching", "content"],
-    coachingMode: "set",
     hours: 3,
-    contentIds: [1],
+    resources: 1,
     billing: "one-time",
     price: "425",
     headline: "Fast, focused feedback on your essays.",
@@ -125,7 +168,6 @@ const TEMPLATES: Template[] = [
     name: "Course + Coaching",
     summary: "Self-paced course · 2 hrs coaching",
     components: ["coaching", "course"],
-    coachingMode: "set",
     hours: 2,
     courseId: 1,
     billing: "one-time",
@@ -183,7 +225,8 @@ function Mark({ active, multi }: { active: boolean; multi: boolean }) {
 }
 
 // A selectable card — the whole card is the control, so this is a card, not a button.
-function ChoiceCard({ active, multi = false, disabled = false, icon, title, desc, tag, onClick }: { active: boolean; multi?: boolean; disabled?: boolean; icon?: string; title: string; desc?: string; tag?: string; onClick: () => void }) {
+// `large` is the product-picker treatment: bigger icon and 15px description.
+function ChoiceCard({ active, multi = false, disabled = false, large = false, icon, title, desc, tag, onClick }: { active: boolean; multi?: boolean; disabled?: boolean; large?: boolean; icon?: string; title: string; desc?: string; tag?: string; onClick: () => void }) {
   return (
     <button
       type="button"
@@ -194,13 +237,13 @@ function ChoiceCard({ active, multi = false, disabled = false, icon, title, desc
       className={`flex w-full items-center gap-3.5 rounded-2xl border-[1.5px] p-4 text-left transition-colors ${disabled ? "cursor-default border-transparent bg-gray-hover" : active ? "border-gray-dark bg-white" : "border-gray-stroke bg-white hover:border-[#c9c9c9]"}`}
     >
       {icon && (
-        <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${disabled ? "bg-white text-gray-extra-light" : "bg-gray-hover text-gray-dark"}`}>
-          <MaskIcon src={icon} className="h-[22px] w-[22px]" />
+        <span className={`flex ${large ? "h-12 w-12" : "h-11 w-11"} shrink-0 items-center justify-center rounded-xl ${disabled ? "bg-white text-gray-extra-light" : "bg-gray-hover text-gray-dark"}`}>
+          <MaskIcon src={icon} className={large ? "h-[26px] w-[26px]" : "h-[22px] w-[22px]"} />
         </span>
       )}
       <span className="min-w-0 flex-1">
         <span className={`block text-[16px] font-semibold ${disabled ? "text-gray-extra-light" : "text-gray-dark"}`}>{title}</span>
-        {desc && <span className={`mt-0.5 block text-[14px] leading-snug ${disabled ? "text-gray-extra-light" : "text-gray-light"}`}>{desc}</span>}
+        {desc && <span className={`mt-0.5 block ${large ? "text-[15px]" : "text-[14px]"} leading-snug ${disabled ? "text-gray-extra-light" : "text-gray-light"}`}>{desc}</span>}
       </span>
       {tag ? (
         <span className="shrink-0 rounded-md bg-white px-2 py-1 text-[10px] font-medium uppercase tracking-[0.05em] text-gray-light">{tag}</span>
@@ -211,19 +254,50 @@ function ChoiceCard({ active, multi = false, disabled = false, icon, title, desc
   );
 }
 
-function Stepper({ value, onChange, min = 1, max = 100, unit }: { value: number; onChange: (n: number) => void; min?: number; max?: number; unit: string }) {
+// Horizontal either/or toggle — the icon-over-label cards used across the
+// existing builder (e.g. "Choose a time format" in Configure coaching time).
+// A `locked` option is dimmed and unclickable; its reason shows as a tooltip on
+// hover and as a note under the toggle.
+type ToggleOption<T extends string> = { value: T; label: string; sub: string; icon: string; locked?: string };
+function ToggleCards<T extends string>({ value, onChange, options, label }: { value: T; onChange: (v: T) => void; options: ToggleOption<T>[]; label: string }) {
+  const lockedOption = options.find((o) => o.locked);
   return (
-    <div className="flex items-center gap-4">
-      <Button size="md" variant="secondary" iconOnly aria-label="Decrease" disabled={value <= min} onClick={() => onChange(Math.max(min, value - 1))}>
-        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M5 12h14" /></svg>
-      </Button>
-      <div className="min-w-[96px] text-center">
-        <span className="text-[40px] font-semibold leading-none text-gray-dark tabular-nums">{value}</span>
-        <span className="ml-1.5 text-[15px] text-gray-light">{unit}</span>
+    <div>
+      <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label={label}>
+        {options.map((opt) => {
+          const active = value === opt.value;
+          const disabled = !!opt.locked;
+          return (
+            <div key={opt.value} className="group relative">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={active}
+                disabled={disabled}
+                onClick={() => onChange(opt.value)}
+                className={`flex h-full w-full flex-col items-center gap-2 rounded-xl border-[1.5px] bg-white px-4 py-5 text-center transition-colors ${active ? "border-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"} ${disabled ? "pointer-events-none cursor-not-allowed opacity-40" : ""}`}
+              >
+                <MaskIcon src={opt.icon} className="h-[26px] w-[26px] text-gray-dark" />
+                <span className="flex flex-col gap-0.5">
+                  <span className="text-[15px] font-semibold text-gray-dark">{opt.label}</span>
+                  <span className="text-[14px] leading-snug text-gray-light">{opt.sub}</span>
+                </span>
+              </button>
+              {disabled && (
+                <span role="tooltip" className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-max max-w-[220px] -translate-x-1/2 rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block">
+                  {opt.locked}
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
-      <Button size="md" variant="secondary" iconOnly aria-label="Increase" disabled={value >= max} onClick={() => onChange(Math.min(max, value + 1))}>
-        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-      </Button>
+      {lockedOption && (
+        <p className="mt-2.5 flex items-start gap-2 text-[13px] leading-snug text-gray-light">
+          <MaskIcon src={lockOutlineIcon} className="mt-px h-4 w-4 shrink-0" />
+          {lockedOption.locked}
+        </p>
+      )}
     </div>
   );
 }
@@ -242,10 +316,7 @@ function TemplateCarousel({ onPick }: { onPick: (t: Template) => void }) {
   const carousel = useCardCarousel(TEMPLATES);
   return (
     <div className="flex flex-col gap-6 rounded-2xl border border-gray-stroke bg-white p-6 sm:p-8">
-      <div className="flex flex-col gap-2">
-        <p className={sectionTitle}>Start from a template</p>
-        <p className="text-[16px] leading-[1.5] text-gray-light">Pre-filled and fully editable</p>
-      </div>
+      <p className={sectionTitle}>Start from a template</p>
       <div className="relative">
         <div ref={carousel.scrollRef} className="flex gap-5 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {TEMPLATES.map((t, i) => (
@@ -296,26 +367,42 @@ function Question({ eyebrow, title, sub, children }: { eyebrow?: string; title: 
   );
 }
 
+function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
+  return (
+    <div>
+      <p className="text-[15px] font-semibold text-gray-dark">{label}</p>
+      {hint && <p className="mt-1 text-[14px] leading-relaxed text-gray-light">{hint}</p>}
+      <div className="mt-3">{children}</div>
+    </div>
+  );
+}
+
 export default function CoachOfferingGuided() {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
   const categoryName = CATEGORY_NAMES[category ?? ""] ?? "your category";
 
-  const [step, setStep] = useState<StepId>("select");
-  const [dir, setDir] = useState(1);
-  const [returnToReview, setReturnToReview] = useState(false);
+  const [view, setView] = useState<SectionId>("select");
+  // Sections the coach has been through. Leaving a section marks it visited; it
+  // counts as complete once it's visited *and* its fields are filled in.
+  const [confirmed, setConfirmed] = useState<SectionId[]>([]);
+  // Set when Publish is pressed with sections still incomplete — only then do
+  // the unfinished ones get flagged in the sidebar.
+  const [publishAttempted, setPublishAttempted] = useState(false);
   const [done, setDone] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
 
   const [selected, setSelected] = useState<ComponentId[]>([]);
-  const [coachingMode, setCoachingMode] = useState<"set" | "range">("set");
-  const [hours, setHours] = useState(5);
-  const [minHours, setMinHours] = useState(1);
-  const [maxHours, setMaxHours] = useState(10);
-  const [library, setLibrary] = useState<ContentItem[]>(LIBRARY);
-  const [contentIds, setContentIds] = useState<number[]>([]);
-  const [newContent, setNewContent] = useState("");
-  const [liveMode, setLiveMode] = useState<"single" | "series">("single");
-  const [sessions, setSessions] = useState<Session[]>([newSession(1, "Workshop")]);
+  // Coaching, content and collection — configured by the existing builder's setup step.
+  const [products, setProducts] = useState<Record<ProductId, OfferingItem>>(blankProducts);
+  // Live sessions — the existing builder's sessions step (sessions + the cohorts that date them).
+  const [sessionMode, setSessionMode] = useState<"single" | "multi">("single");
+  const [sessions, setSessions] = useState<OfferingItem[]>(() => [blankSession(FIRST_SESSION_ID)]);
+  const [cohorts, setCohorts] = useState<BuilderCohort[]>(() => [newCohort(0)]);
+  const [multiCohorts, setMultiCohorts] = useState(false);
+  const [activeCohortId, setActiveCohortId] = useState(0);
+  const nextSessionId = useRef(FIRST_SESSION_ID + 1);
+  const nextCohortId = useRef(1);
   const [courseId, setCourseId] = useState<number>(COURSES[0].id);
   const [newCourseTitle, setNewCourseTitle] = useState("");
   const [billingChoice, setBillingChoice] = useState<"one-time" | "recurring">("one-time");
@@ -323,33 +410,46 @@ export default function CoachOfferingGuided() {
   const [annual, setAnnual] = useState(false);
   const [name, setName] = useState("");
   const [headline, setHeadline] = useState("");
+  const [visibility, setVisibility] = useState<"public" | "private">("public");
+  // Customer-facing page — same state shape as the existing builder's Page step.
+  const [description, setDescription] = useState("");
+  const [pageSections, setPageSections] = useState<PageSection[]>(() => [newPageSection("included", INCLUDED_SECTION_ID)]);
+  const nextPageSectionId = useRef(0);
 
   useEffect(() => {
     document.title = "Leland Prototype | New offering (guided)";
   }, []);
 
   const has = (id: ComponentId) => selected.includes(id);
-  const isRange = has("coaching") && coachingMode === "range";
-  // Range-of-hours coaching is pay-per-hour, so it can't be a subscription.
-  const billing = isRange ? "one-time" : billingChoice;
-  const recurring = billing === "recurring";
-  const pickedContent = library.filter((c) => contentIds.includes(c.id));
+  // A subscription and range-of-hours coaching are mutually exclusive: whichever
+  // is chosen first locks the other. The coaching setup locks its own "Range of
+  // hours" option under a subscription; here we lock "Subscription" under a range.
+  const recurring = billingChoice === "recurring";
+  const coachingIsRange = products.coaching.config.mode === "range";
+  const subscriptionLocked = !recurring && has("coaching") && coachingIsRange;
+  const patchProduct = (id: number, change: (item: OfferingItem) => OfferingItem) => {
+    setProducts((ps) => {
+      const key = (Object.keys(ps) as ProductId[]).find((k) => ps[k].id === id);
+      return key ? { ...ps, [key]: change(ps[key]) } : ps;
+    });
+    setSessions((ss) => (ss.some((x) => x.id === id) ? ss.map((x) => (x.id === id ? change(x) : x)) : ss));
+  };
+  const onConfigChange = (id: number, patch: Record<string, string>) => patchProduct(id, (it) => ({ ...it, config: { ...it.config, ...patch } }));
+  const onItemsChange = (id: number, items: CollectionItem[]) => patchProduct(id, (it) => ({ ...it, items }));
+  const onConfigured = (id: number) => patchProduct(id, (it) => (it.configured ? it : { ...it, configured: true }));
+  const chooseSubscription = () => {
+    if (coachingIsRange) onConfigChange(products.coaching.id, { mode: "set" });
+    setBillingChoice("recurring");
+  };
   const course = COURSES.find((c) => c.id === courseId);
   const courseTitle = course ? course.title : newCourseTitle.trim() || "New course";
-  const activeSessions = liveMode === "single" ? sessions.slice(0, 1) : sessions;
 
-  // Only the questions that apply to what was picked.
-  const steps = useMemo<StepId[]>(() => {
-    const s: StepId[] = ["select"];
-    if (selected.includes("coaching")) s.push("coaching-format", "coaching-hours");
-    if (selected.includes("content")) s.push("content-pick");
-    if (selected.includes("live")) s.push("live-format", "live-sessions");
-    if (selected.includes("course")) s.push("course-pick");
-    if (!isRange) s.push("billing");
-    if (!(isRange && selected.length === 1)) s.push("price");
-    s.push("name", "review");
-    return s;
-  }, [selected, isRange]);
+  // The sidebar: only the sections that apply to what was picked.
+  // Pricing (billing model + price) comes after the products it's priced from.
+  const sections = useMemo<SectionId[]>(() => {
+    // The fixed tabs, then one per selected product (the "Configure products" module below them).
+    return [...FIXED_SECTIONS, ...COMPONENTS.filter((c) => selected.includes(c.id)).map((c) => c.id)];
+  }, [selected]);
 
   // What the answers add up to — the label the old flow made coaches choose first.
   const offeringType = recurring
@@ -359,255 +459,227 @@ export default function CoachOfferingGuided() {
       : has("coaching")
         ? "Hourly coaching"
         : has("content")
-          ? pickedContent.length > 1 ? "Collection" : "Content"
-          : has("live")
-            ? liveMode === "series" ? "Program" : "Workshop"
+          ? "Content"
+          : has("collection")
+            ? "Collection"
+            : has("live")
+              ? sessionMode === "multi" ? "Program" : "Workshop"
             : has("course")
               ? "Course"
               : "Offering";
 
-  // Value of everything with a fixed price (range coaching is billed per hour on top).
-  const fixedValue =
-    (has("coaching") && !isRange ? hours * HOURLY_RATE : 0) +
-    (has("content") ? pickedContent.reduce((sum, c) => sum + c.price, 0) : 0) +
-    (has("live") ? activeSessions.length * SESSION_VALUE : 0) +
-    (has("course") ? course?.price ?? 0 : 0);
+  // What each selected product would cost separately — the builder's own per-product
+  // list prices. Live sessions carry no price of their own; they're priced with the offering.
+  const productValue = (id: ProductId) => productListPrice({ ...products[id], configured: true });
+  const valueLines = [
+    ...(Object.keys(PRODUCT_SLUGS) as ProductId[]).filter(has).map((id) => ({ label: SECTION_LABELS[id], value: productValue(id) })),
+    ...(has("course") && course ? [{ label: course.title, value: course.price }] : []),
+  ];
+  const fixedValue = valueLines.reduce((sum, l) => sum + l.value, 0);
   const effectivePrice = price !== "" ? Number(price) : fixedValue;
   const savings = !recurring && fixedValue > 0 && effectivePrice < fixedValue ? Math.round((1 - effectivePrice / fixedValue) * 100) : 0;
 
   const suggestedName = `${categoryName} ${offeringType === "Offering" ? "Offering" : offeringType}`;
 
-  const priceLabel = (() => {
-    const hourly = `${money(HOURLY_RATE)}/hr`;
-    if (isRange && selected.length === 1) return hourly;
-    const base = `${money(effectivePrice)}${recurring ? "/mo" : ""}`;
-    return isRange ? `${base} + ${hourly}` : base;
-  })();
+  const priceLabel = `${money(effectivePrice)}${recurring ? "/mo" : ""}`;
 
-  const canContinue = (() => {
-    switch (step) {
+  const isValid = (id: SectionId) => {
+    switch (id) {
       case "select": return selected.length > 0;
-      case "coaching-hours": return coachingMode === "set" ? hours >= 1 : minHours < maxHours;
-      case "content-pick": return contentIds.length > 0;
-      case "live-sessions": return activeSessions.every((s) => s.title.trim() !== "");
-      case "course-pick": return courseId !== NEW_COURSE || newCourseTitle.trim() !== "";
+      case "page": return true;
+      case "coaching":
+      case "content":
+      case "collection": return isConfigComplete(products[id], true);
+      case "live": return sessionMode === "single" || sessions.every((s) => s.config.name.trim() !== "");
+      case "course": return courseId !== NEW_COURSE || newCourseTitle.trim() !== "";
       case "price": return effectivePrice > 0;
-      case "name": return name.trim() !== "";
-      default: return true;
+      case "details": return name.trim() !== "";
     }
-  })();
+  };
+  const isComplete = (id: SectionId, saved: SectionId[] = confirmed) => saved.includes(id) && isValid(id);
 
-  const go = (to: StepId, direction: number) => {
-    if (to === "name" && name.trim() === "") setName(suggestedName);
-    setDir(direction);
-    setStep(to);
+  const withCurrent = (saved: SectionId[]) => (saved.includes(view) ? saved : [...saved, view]);
+  // Moving anywhere marks the section being left as visited.
+  const openSection = (id: SectionId) => {
+    if (id === view) return;
+    if (id === "details" && name.trim() === "") setName(suggestedName);
+    setConfirmed(withCurrent);
+    setView(id);
   };
-  const next = () => {
-    if (!canContinue) return;
-    if (step === "review") { setDone(true); return; }
-    if (returnToReview && step !== "select") { setReturnToReview(false); go("review", 1); return; }
-    setReturnToReview(false);
-    const i = steps.indexOf(step);
-    go(steps[Math.min(i + 1, steps.length - 1)], 1);
+  // First unfinished section after `from` (wrapping round), if any.
+  const nextIncomplete = (saved: SectionId[], from: number) =>
+    [...sections.slice(from + 1), ...sections.slice(0, from + 1)].find((s) => !isComplete(s, saved));
+
+  // Back / Next step through the tabs in sidebar order.
+  const viewIndex = sections.indexOf(view);
+  const isLast = viewIndex === sections.length - 1;
+  const goBack = () => { if (viewIndex > 0) openSection(sections[viewIndex - 1]); };
+  const goNext = () => { if (!isLast) openSection(sections[viewIndex + 1]); };
+  // The section on screen counts as visited for publishing purposes.
+  const readyToPublish = sections.every((s) => isComplete(s, withCurrent(confirmed)));
+  const publish = () => {
+    if (readyToPublish) { setDone(true); return; }
+    const saved = withCurrent(confirmed);
+    setConfirmed(saved);
+    setPublishAttempted(true);
+    const target = nextIncomplete(saved, -1);
+    if (target && target !== view) {
+      if (target === "details" && name.trim() === "") setName(suggestedName);
+      setView(target);
+    }
   };
-  const back = () => {
-    setReturnToReview(false);
-    const i = steps.indexOf(step);
-    if (i > 0) go(steps[i - 1], -1);
-  };
-  const edit = (to: StepId) => { setReturnToReview(to !== "select"); go(to, -1); };
   const close = () => navigate(`/my-leland/manage/${category}`);
 
-  // Enter advances, Typeform-style (unless focus is on a control that uses Enter itself).
+  // Enter moves to the next section (unless focus is on a control that uses Enter itself).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Enter" || done) return;
+      // Only on the short tabs — the product and page builders have their own fields and modals.
+      if (e.key !== "Enter" || done || !(view === "select" || view === "price" || view === "details")) return;
       const tag = (e.target as HTMLElement | null)?.tagName;
       if (tag === "BUTTON" || tag === "TEXTAREA" || tag === "SELECT" || tag === "A") return;
       e.preventDefault();
-      next();
+      goNext();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   });
 
   const toggleComponent = (id: ComponentId) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : COMPONENTS.filter((c) => c.id === id || s.includes(c.id)).map((c) => c.id)));
-  const toggleContent = (id: number) => setContentIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
-  const addContent = () => {
-    const title = newContent.trim();
-    if (!title) return;
-    const id = Math.max(0, ...library.map((c) => c.id)) + 1;
-    setLibrary((l) => [...l, { id, title, kind: "New", price: 0 }]);
-    setContentIds((ids) => [...ids, id]);
-    setNewContent("");
+  // Live sessions: session and cohort handlers for the builder's sessions step.
+  const addSession = () => setSessions((ss) => [...ss, blankSession(nextSessionId.current++)]);
+  const removeSession = (id: number) => setSessions((ss) => ss.filter((x) => x.id !== id));
+  const toggleMultiCohorts = () => {
+    if (multiCohorts) {
+      setCohorts((cs) => cs.slice(0, 1));
+      setActiveCohortId(cohorts[0]?.id ?? 0);
+    }
+    setMultiCohorts((m) => !m);
   };
-  const updateSession = (id: number, patch: Partial<Session>) => setSessions((ss) => ss.map((s) => (s.id === id ? { ...s, ...patch } : s)));
-  const chooseLiveMode = (mode: "single" | "series") => {
-    setLiveMode(mode);
-    if (mode === "series" && sessions.length < 2) setSessions((ss) => [...ss, newSession(Math.max(...ss.map((s) => s.id)) + 1)]);
-  };
+  const addCohort = () => setCohorts((cs) => [...cs, newCohort(nextCohortId.current++)]);
+  const removeCohort = (id: number) => setCohorts((cs) => cs.filter((c) => c.id !== id));
+  const updateCohort = (id: number, patch: Partial<BuilderCohort>) => setCohorts((cs) => cs.map((c) => (c.id === id ? { ...c, ...patch } : c)));
 
+  const pagePrice = effectivePrice.toLocaleString();
+  const addPageSection = (kind: PageSectionKind) => setPageSections((s) => [...s, newPageSection(kind, nextPageSectionId.current++)]);
+  const removePageSection = (id: number) => { if (id !== INCLUDED_SECTION_ID) setPageSections((s) => s.filter((sec) => sec.id !== id)); };
+  const updatePageSection = (next: PageSection) => setPageSections((s) => s.map((sec) => (sec.id === next.id ? next : sec)));
+
+  // A template fills in and saves every section except the customer page, which opens next.
   const applyTemplate = (t: Template) => {
     setSelected(t.components);
-    setCoachingMode(t.coachingMode ?? "set");
-    if (t.hours) setHours(t.hours);
-    setContentIds(t.contentIds ?? []);
-    if (t.sessions) {
-      setLiveMode(t.sessions.length > 1 ? "series" : "single");
-      setSessions(t.sessions.map((title, i) => newSession(i + 1, title)));
+    const next = blankProducts();
+    if (t.hours) next.coaching = { ...next.coaching, configured: true, config: { ...next.coaching.config, mode: "set", hours: String(t.hours), minutes: "0", delivery: "live", priceMode: "sync" } };
+    const resources = Array.from({ length: t.resources ?? 0 }, (_, i) => reuseConfig(i));
+    if (t.components.includes("content") && resources[0]) next.content = { ...next.content, configured: true, config: resources[0] };
+    if (t.components.includes("collection")) {
+      next.collection = {
+        ...next.collection,
+        configured: true,
+        config: { ...next.collection.config, title: t.collectionTitle ?? "Resources", price: resources.reduce((sum, c) => sum + Number(c.price), 0).toFixed(2) },
+        items: resources.map((config, i) => ({ id: i + 1, config })),
+      };
     }
+    setProducts(next);
+    const titles = t.sessions ?? [""];
+    setSessionMode(titles.length > 1 ? "multi" : "single");
+    setSessions(titles.map((title, i) => ({ ...blankSession(FIRST_SESSION_ID + i, title), configured: true })));
+    nextSessionId.current = FIRST_SESSION_ID + titles.length;
+    setCohorts([newCohort(0)]); setMultiCohorts(false); setActiveCohortId(0);
     setCourseId(t.courseId ?? COURSES[0].id);
     setBillingChoice(t.billing);
     setPrice(t.price);
     setAnnual(false);
     setName(t.name);
     setHeadline(t.headline);
-    setReturnToReview(false);
-    setDir(1);
-    setStep("review");
+    setConfirmed(["select", ...t.components, "price", "details"]);
+    setView("page");
   };
 
   const reset = () => {
-    setSelected([]); setCoachingMode("set"); setHours(5); setMinHours(1); setMaxHours(10);
-    setContentIds([]); setLiveMode("single"); setSessions([newSession(1, "Workshop")]);
+    setSelected([]); setProducts(blankProducts());
+    setSessionMode("single"); setSessions([blankSession(FIRST_SESSION_ID)]); nextSessionId.current = FIRST_SESSION_ID + 1;
+    setCohorts([newCohort(0)]); setMultiCohorts(false); setActiveCohortId(0);
     setCourseId(COURSES[0].id); setNewCourseTitle("");
     setBillingChoice("one-time"); setPrice(""); setAnnual(false); setName(""); setHeadline("");
-    setDone(false); setReturnToReview(false); setDir(1); setStep("select");
+    setVisibility("public"); setDescription(""); setPageSections([newPageSection("included", INCLUDED_SECTION_ID)]);
+    setDone(false); setConfirmed([]); setPublishAttempted(false); setView("select");
   };
 
-  const coachingSummary = isRange ? `${minHours}–${maxHours} hrs, client chooses` : `${plural(hours, "hr")}${recurring ? " per month" : ""}`;
-  const contentSummary = pickedContent.length ? pickedContent.map((c) => c.title).join(", ") : "Not chosen yet";
-  const liveSummary = liveMode === "series" ? `${plural(activeSessions.length, "session")} series` : "Single session";
-
-  const courseSummary = course ? `${course.title} · ${plural(course.lessons, "lesson")}` : `${courseTitle} · new`;
-  const componentSummary = (id: ComponentId) =>
-    id === "coaching" ? coachingSummary : id === "content" ? (pickedContent.length ? plural(pickedContent.length, "resource") : "Not chosen yet") : id === "live" ? liveSummary : courseSummary;
-
-  const stepIndex = steps.indexOf(step);
-  const progress = done ? 1 : stepIndex / (steps.length - 1);
-
-  const renderStep = () => {
-    switch (step) {
+  const renderSection = () => {
+    switch (view) {
       case "select":
         return (
-          <Question title="What do you want to include in this offering?" sub={`Select everything that applies — we'll walk you through each piece and assemble it for ${categoryName}.`}>
+          <Question title="Select products" sub={`Choose everything you want to include in this offering for ${categoryName}. Each product adds its own section to the sidebar.`}>
+            <div className="mb-5 flex flex-wrap gap-2">
+              <Button size="md" variant="secondary" rounded="rounded-full" className="gap-2 font-semibold" onClick={() => setShowTemplates((v) => !v)}>
+                <MaskIcon src={layoutGridIcon} className="h-[18px] w-[18px]" />
+                Start from a template
+              </Button>
+              <Button size="md" variant="secondary" rounded="rounded-full" className="gap-2 font-semibold">
+                <MaskIcon src={aiIcon} className="h-[18px] w-[18px]" />
+                Build with an agent
+              </Button>
+            </div>
+            {showTemplates && (
+              <div className="mb-6">
+                <TemplateCarousel onPick={applyTemplate} />
+              </div>
+            )}
             <div className="grid gap-3">
               {COMPONENTS.map((c) => (
-                <ChoiceCard key={c.id} multi icon={c.icon} title={c.name} desc={c.blurb} active={has(c.id)} disabled={!c.ready} tag={c.ready ? undefined : "Coming soon"} onClick={() => toggleComponent(c.id)} />
+                <ChoiceCard key={c.id} multi large icon={c.icon} title={c.name} desc={c.blurb} active={has(c.id)} disabled={!c.ready} tag={c.ready ? undefined : "Coming soon"} onClick={() => toggleComponent(c.id)} />
               ))}
             </div>
-            <div className="mt-9">
-              <TemplateCarousel onPick={applyTemplate} />
-            </div>
           </Question>
         );
 
-      case "coaching-format":
+      // Coaching, content and collection use the existing builder's setup step as-is
+      // (it renders its own heading, and opens the collection modal itself).
+      case "coaching":
+      case "content":
+      case "collection":
         return (
-          <Question eyebrow="1:1 coaching" title="How do you want to sell your time?">
-            <div className="grid gap-3" role="radiogroup">
-              <ChoiceCard title="A set number of hours" desc="Everyone who buys gets the same amount of time with you." active={coachingMode === "set"} onClick={() => setCoachingMode("set")} />
-              <ChoiceCard title="A range of hours" desc={`Clients choose how many hours they want and pay your ${money(HOURLY_RATE)}/hr rate.`} active={coachingMode === "range"} onClick={() => setCoachingMode("range")} />
-            </div>
-          </Question>
+          <SingleProductSetupStep
+            key={view}
+            item={products[view]}
+            billingModel={billingChoice}
+            showCoachingDeliveryExpiration
+            onConfigChange={onConfigChange}
+            onItemsChange={onItemsChange}
+            onConfigured={onConfigured}
+          />
         );
 
-      case "coaching-hours":
-        return coachingMode === "set" ? (
-          <Question eyebrow="1:1 coaching" title="How many hours are included?" sub={`At your ${money(HOURLY_RATE)}/hr rate, that's ${money(hours * HOURLY_RATE)} of coaching.`}>
-            <Stepper value={hours} onChange={setHours} unit={hours === 1 ? "hour" : "hours"} />
-          </Question>
-        ) : (
-          <Question eyebrow="1:1 coaching" title="What range of hours can clients choose from?" sub={`They'll pay ${money(HOURLY_RATE)}/hr — between ${money(minHours * HOURLY_RATE)} and ${money(maxHours * HOURLY_RATE)}.`}>
-            <div className="flex flex-wrap items-center gap-x-10 gap-y-6">
-              <div>
-                <p className="mb-3 text-[14px] font-semibold text-gray-dark">Minimum</p>
-                <Stepper value={minHours} onChange={setMinHours} max={maxHours - 1} unit="hrs" />
-              </div>
-              <div>
-                <p className="mb-3 text-[14px] font-semibold text-gray-dark">Maximum</p>
-                <Stepper value={maxHours} onChange={setMaxHours} min={minHours + 1} unit="hrs" />
-              </div>
-            </div>
-          </Question>
-        );
-
-      case "content-pick":
+      // Live sessions use the existing builder's sessions step (single vs. multiple, cohorts, dates).
+      case "live":
         return (
-          <Question eyebrow="Content" title="Which content should be included?" sub="Pick from your library or add something new. More than one becomes a collection.">
-            <div className="grid gap-2.5">
-              {library.map((c) => (
-                <ChoiceCard key={c.id} multi title={c.title} desc={c.price ? `${c.kind} · ${money(c.price)}` : "New — upload after you finish"} active={contentIds.includes(c.id)} onClick={() => toggleContent(c.id)} />
-              ))}
-            </div>
-            <div className="mt-4 flex gap-2.5">
-              <input
-                value={newContent}
-                onChange={(e) => setNewContent(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); e.nativeEvent.stopImmediatePropagation(); addContent(); } }}
-                placeholder="Add new content by title…"
-                className={INPUT}
-              />
-              <Button size="md" variant="secondary" className="shrink-0" disabled={!newContent.trim()} onClick={addContent}>Add</Button>
-            </div>
-          </Question>
+          <SessionsSetupStep
+            mode={sessionMode}
+            onChangeMode={setSessionMode}
+            sessions={sessions}
+            cohorts={cohorts}
+            multiCohorts={multiCohorts}
+            onToggleMultiCohorts={toggleMultiCohorts}
+            activeCohortId={activeCohortId}
+            onSelectCohort={setActiveCohortId}
+            onAddSession={addSession}
+            onRemoveSession={removeSession}
+            onConfigChange={onConfigChange}
+            onConfigured={onConfigured}
+            onAddCohort={addCohort}
+            onRemoveCohort={removeCohort}
+            onUpdateCohort={updateCohort}
+          />
         );
 
-      case "live-format":
+      case "course":
         return (
-          <Question eyebrow="Live sessions" title="Is this one session or a series?">
-            <div className="grid gap-3" role="radiogroup">
-              <ChoiceCard title="A single session" desc="A one-off workshop or class." active={liveMode === "single"} onClick={() => chooseLiveMode("single")} />
-              <ChoiceCard title="A series of sessions" desc="A multi-session program people go through together." active={liveMode === "series"} onClick={() => chooseLiveMode("series")} />
-            </div>
-          </Question>
-        );
-
-      case "live-sessions":
-        return (
-          <Question eyebrow="Live sessions" title={liveMode === "series" ? "What sessions are in the series?" : "Tell us about the session"} sub="Dates are optional — you can schedule later.">
-            <div className="grid gap-3">
-              {activeSessions.map((s, i) => (
-                <div key={s.id} className="rounded-2xl border border-gray-stroke p-4">
-                  <div className="flex items-center gap-2.5">
-                    {liveMode === "series" && <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-hover text-[13px] font-semibold text-gray-dark">{i + 1}</span>}
-                    <input value={s.title} onChange={(e) => updateSession(s.id, { title: e.target.value })} placeholder="Session title" aria-label={`Session ${i + 1} title`} className={INPUT} />
-                    {liveMode === "series" && activeSessions.length > 2 && (
-                      <Button size="sm" variant="ghost" iconOnly aria-label={`Remove session ${i + 1}`} onClick={() => setSessions((ss) => ss.filter((x) => x.id !== s.id))}>
-                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-                      </Button>
-                    )}
-                  </div>
-                  <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-                    <input type="date" value={s.date} onChange={(e) => updateSession(s.id, { date: e.target.value })} aria-label={`Session ${i + 1} date`} className={INPUT} />
-                    <input type="time" value={s.time} onChange={(e) => updateSession(s.id, { time: e.target.value })} aria-label={`Session ${i + 1} time`} className={INPUT} />
-                    <select value={s.duration} onChange={(e) => updateSession(s.id, { duration: e.target.value })} aria-label={`Session ${i + 1} duration`} className={INPUT}>
-                      <option value="30">30 min</option>
-                      <option value="45">45 min</option>
-                      <option value="60">60 min</option>
-                      <option value="90">90 min</option>
-                      <option value="120">2 hours</option>
-                    </select>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {liveMode === "series" && (
-              <Button size="sm" variant="secondary" className="mt-3" onClick={() => setSessions((ss) => [...ss, newSession(Math.max(...ss.map((x) => x.id)) + 1)])}>
-                + Add session
-              </Button>
-            )}
-          </Question>
-        );
-
-      case "course-pick":
-        return (
-          <Question eyebrow="Course" title="Which course should be included?" sub="Pick one you've already built, or start a new one.">
+          <Question title="Course" sub="Pick one you've already built, or start a new one.">
             <div className="grid gap-3" role="radiogroup">
               {COURSES.map((c) => (
                 <ChoiceCard key={c.id} title={c.title} desc={`${plural(c.lessons, "lesson")} · ${money(c.price)}`} active={courseId === c.id} onClick={() => setCourseId(c.id)} />
               ))}
-              <ChoiceCard title="A new course" desc="Name it now and build the lessons after you finish." active={courseId === NEW_COURSE} onClick={() => setCourseId(NEW_COURSE)} />
+              <ChoiceCard title="A new course" desc="Name it now and build the lessons after you publish." active={courseId === NEW_COURSE} onClick={() => setCourseId(NEW_COURSE)} />
             </div>
             {courseId === NEW_COURSE && (
               <input autoFocus value={newCourseTitle} maxLength={80} onChange={(e) => setNewCourseTitle(e.target.value)} placeholder="Course title" aria-label="Course title" className={`mt-3 ${INPUT}`} />
@@ -615,104 +687,154 @@ export default function CoachOfferingGuided() {
           </Question>
         );
 
-      case "billing":
-        return (
-          <Question title="How should clients pay?">
-            <div className="grid gap-3" role="radiogroup">
-              <ChoiceCard title="One-time payment" desc="Clients pay once and get everything in the offering." active={billingChoice === "one-time"} onClick={() => setBillingChoice("one-time")} />
-              <ChoiceCard title="Recurring subscription" desc={has("coaching") ? `Clients pay monthly — ${plural(hours, "hour")} of coaching renews each month.` : "Clients pay monthly for ongoing access."} active={billingChoice === "recurring"} onClick={() => setBillingChoice("recurring")} />
-            </div>
-          </Question>
-        );
-
       case "price":
         return (
-          <Question
-            title={recurring ? "What's the monthly price?" : isRange ? "What's the price for everything besides coaching?" : "What's the price?"}
-            sub={isRange ? `Coaching is billed on top at ${money(HOURLY_RATE)}/hr for the hours each client chooses.` : undefined}
-          >
-            <div className="flex items-center rounded-lg border border-gray-stroke bg-white px-4 transition-colors focus-within:border-gray-dark">
-              <span className="text-[20px] text-gray-light">$</span>
-              <input
-                autoFocus
-                inputMode="decimal"
-                value={price}
-                onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ""))}
-                placeholder={String(fixedValue)}
-                aria-label="Price"
-                className="w-full bg-transparent py-3.5 pl-2 text-[20px] font-semibold text-gray-dark outline-none placeholder:font-normal placeholder:text-[#B1B1B1]"
+          <Question title="Pricing" sub="How clients pay, and how much.">
+            <Field label="Is this a one-time purchase or a subscription?">
+              <ToggleCards
+                label="Is this a one-time purchase or a subscription?"
+                value={billingChoice}
+                onChange={(v) => (v === "recurring" ? chooseSubscription() : setBillingChoice("one-time"))}
+                options={[
+                  { value: "one-time", label: "One-time purchase", sub: "Clients pay once", icon: labelTagIcon },
+                  { value: "recurring", label: "Subscription", sub: "Clients pay monthly", icon: repostIcon, locked: subscriptionLocked ? "A subscription isn't available with a range of coaching hours. Switch 1:1 coaching to a set amount of hours to unlock it." : undefined },
+                ]}
               />
-              {recurring && <span className="shrink-0 text-[15px] text-gray-light">/ month</span>}
+            </Field>
+            <div className="mt-8">
+              <Field label={recurring ? "Monthly price" : "Price"}>
+                <div className="flex items-center rounded-lg border border-gray-stroke bg-white px-4 transition-colors focus-within:border-gray-dark">
+                  <span className="text-[20px] text-gray-light">$</span>
+                  <input
+                    inputMode="decimal"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ""))}
+                    placeholder={String(fixedValue)}
+                    aria-label="Price"
+                    className="w-full bg-transparent py-3.5 pl-2 text-[20px] font-semibold text-gray-dark outline-none placeholder:font-normal placeholder:text-[#B1B1B1]"
+                  />
+                  {recurring && <span className="shrink-0 text-[15px] text-gray-light">/ month</span>}
+                </div>
+                {fixedValue > 0 && (
+                  <div className="mt-3 rounded-xl bg-gray-hover p-4 text-[14px] text-gray-light">
+                    <p>
+                      <span className="font-semibold text-gray-dark">{money(fixedValue)}</span> is what these would cost separately{recurring ? " each month" : ""}
+                      {price === "" ? " — we'll use that unless you enter your own." : savings > 0 ? ` — clients save ${savings}%.` : "."}
+                    </p>
+                    <ul className="mt-2 grid gap-1">
+                      {valueLines.map((l) => <li key={l.label}>{l.label} = {money(l.value)}</li>)}
+                      {has("live") && <li>Live sessions — included in the offering price</li>}
+                      {has("course") && !course && <li>{courseTitle} — new, not priced yet</li>}
+                    </ul>
+                  </div>
+                )}
+                {recurring && (
+                  <div className="mt-3">
+                    <ChoiceCard multi title="Also offer annual billing" desc={`Members can pay ${money(Math.round(effectivePrice * 12 * 0.8))}/yr — 20% off.`} active={annual} onClick={() => setAnnual((a) => !a)} />
+                  </div>
+                )}
+              </Field>
             </div>
-            <div className="mt-3 rounded-xl bg-gray-hover p-4 text-[14px] text-gray-light">
-              <p>
-                <span className="font-semibold text-gray-dark">{money(fixedValue)}</span> is what these would cost separately{recurring ? " each month" : ""}
-                {price === "" ? " — we'll use that unless you enter your own." : savings > 0 ? ` — clients save ${savings}%.` : "."}
-              </p>
-              <ul className="mt-2 grid gap-1">
-                {has("coaching") && !isRange && <li>{plural(hours, "hr")} of coaching × {money(HOURLY_RATE)}/hr = {money(hours * HOURLY_RATE)}</li>}
-                {has("content") && <li>{plural(pickedContent.length, "resource")} = {money(pickedContent.reduce((sum, c) => sum + c.price, 0))}</li>}
-                {has("live") && <li>{plural(activeSessions.length, "live session")} × {money(SESSION_VALUE)} = {money(activeSessions.length * SESSION_VALUE)}</li>}
-                {has("course") && <li>{course ? `${course.title} = ${money(course.price)}` : `${courseTitle} — new, not priced yet`}</li>}
-              </ul>
-            </div>
-            {recurring && (
-              <div className="mt-3">
-                <ChoiceCard multi title="Also offer annual billing" desc={`Members can pay ${money(Math.round(effectivePrice * 12 * 0.8))}/yr — 20% off.`} active={annual} onClick={() => setAnnual((a) => !a)} />
-              </div>
-            )}
           </Question>
         );
 
-      case "name":
+      case "page":
         return (
-          <Question title="What should we call it?" sub="This is what clients see on your profile.">
+          <PageStep
+            name={name}
+            headline={headline}
+            pricingMode="paid"
+            paidType={recurring ? "recurring" : "one-time"}
+            interval="1 month"
+            price={pagePrice}
+            description={description}
+            setDescription={setDescription}
+            sections={pageSections}
+            onAddSection={addPageSection}
+            onUpdateSection={updatePageSection}
+            onRemoveSection={removePageSection}
+            onReorderSections={setPageSections}
+          />
+        );
+
+      case "details":
+        return (
+          <Question title="Name & headline" sub="This is what clients see on your profile.">
             <label className="mb-2 block text-[14px] font-semibold text-gray-dark" htmlFor="guided-name">Name</label>
             <input id="guided-name" autoFocus value={name} maxLength={60} onChange={(e) => setName(e.target.value)} placeholder={suggestedName} className={INPUT} />
             <label className="mb-2 mt-5 block text-[14px] font-semibold text-gray-dark" htmlFor="guided-headline">Headline <span className="font-normal text-gray-extra-light">(optional)</span></label>
             <input id="guided-headline" value={headline} maxLength={120} onChange={(e) => setHeadline(e.target.value)} placeholder="One line on who it's for and what they get" className={INPUT} />
-          </Question>
-        );
-
-      case "review":
-        return (
-          <Question title="Here's your offering" sub="Check it over — you can change anything before creating it.">
-            <div className="rounded-2xl border border-gray-stroke">
-              <ReviewRow label="Name" value={name || suggestedName} sub={headline || undefined} onEdit={() => edit("name")} />
-              <ReviewRow label="Includes" value={COMPONENTS.filter((c) => has(c.id)).map((c) => c.name).join(", ")} onEdit={() => edit("select")} />
-              {has("coaching") && <ReviewRow label="1:1 coaching" value={coachingSummary} onEdit={() => edit("coaching-format")} />}
-              {has("content") && <ReviewRow label="Content" value={contentSummary} onEdit={() => edit("content-pick")} />}
-              {has("live") && <ReviewRow label="Live sessions" value={liveSummary} sub={activeSessions.map((s) => s.title).filter(Boolean).join(", ") || undefined} onEdit={() => edit("live-sessions")} />}
-              {has("course") && <ReviewRow label="Course" value={courseSummary} onEdit={() => edit("course-pick")} />}
-              {!isRange && <ReviewRow label="Billing" value={recurring ? `Monthly subscription${annual ? ", with annual option" : ""}` : "One-time payment"} onEdit={() => edit("billing")} />}
-              <ReviewRow label="Price" value={priceLabel} sub={savings > 0 ? `${savings}% off the ${money(fixedValue)} value` : undefined} onEdit={steps.includes("price") ? () => edit("price") : undefined} last />
-            </div>
+            <p className="mb-2.5 mt-5 text-[14px] font-semibold text-gray-dark">Visibility</p>
+            <ToggleCards
+              label="Visibility"
+              value={visibility}
+              onChange={setVisibility}
+              options={[
+                { value: "public", label: "Public", sub: "Appears in search and on your profile", icon: globeIcon },
+                { value: "private", label: "Private", sub: "Only reachable with a direct link", icon: lockOutlineIcon },
+              ]}
+            />
           </Question>
         );
     }
   };
 
-  return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <header className="sticky top-0 z-20 border-b border-gray-stroke bg-white">
-        <div className="flex items-center gap-4 px-4 py-3 sm:px-6">
-          <Button size="sm" variant="secondary" iconOnly onClick={close} aria-label="Close">
-            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-          </Button>
-          <span className="text-[15px] font-semibold text-gray-dark">New offering</span>
-          {!done && <span className="ml-auto text-[13px] text-gray-extra-light tabular-nums">Step {stepIndex + 1} of {steps.length}</span>}
-        </div>
-        <div className="h-[3px] bg-gray-hover">
-          <motion.div className="h-full bg-gray-dark" initial={false} animate={{ width: `${Math.max(progress, 0.04) * 100}%` }} transition={{ duration: 0.4, ease: EASE }} />
-        </div>
-      </header>
+  // One sidebar row. Rows animate open/closed as products are added and removed.
+  const navRow = (id: SectionId) => {
+    const active = view === id;
+    const complete = isComplete(id);
+    const needsFix = publishAttempted && !complete;
+    return (
+      <motion.div
+        key={id}
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: "auto", opacity: 1 }}
+        exit={{ height: 0, opacity: 0 }}
+        transition={{ duration: 0.28, ease: EASE }}
+        className="overflow-hidden [&:not(:first-child)]:pt-1"
+      >
+      <button
+        type="button"
+        aria-current={active ? "step" : undefined}
+        onClick={() => openSection(id)}
+        className={`flex w-full items-center gap-3 rounded-lg px-3 py-[10px] text-left text-[15px] transition-colors ${active ? "bg-[#222222]/5 font-semibold text-gray-dark" : "font-medium text-gray-light hover:text-gray-dark"}`}
+      >
+        <MaskIcon src={SECTION_ICONS[id]} className="h-[22px] w-[22px] shrink-0" />
+        <span className="min-w-0 flex-1 truncate">{SECTION_LABELS[id]}</span>
+        {SHOW_NAV_CHECKS && complete && (
+          <span aria-label="Complete" className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-[#DDF3E4]">
+            <svg className="h-2.5 w-2.5 text-[#15803D]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+          </span>
+        )}
+        {needsFix && <span aria-label="Needs attention" className="h-2 w-2 shrink-0 rounded-full bg-[#F3392C]" />}
+      </button>
+      </motion.div>
+    );
+  };
 
+  const productSections = sections.filter((id) => !FIXED_SECTIONS.includes(id));
+  const NAV_CARD = "rounded-[12px] border border-[#222222]/[0.12] bg-white shadow-[0px_4px_8px_-2px_rgba(16,24,40,0.10),0px_2px_4px_-2px_rgba(16,24,40,0.06)]";
+
+  // Back to the category page + title — sits above the sidebar (and above the tab strip on small screens).
+  const titleBar = (
+    <div className="flex items-center gap-2.5 px-1">
+      <Button size="sm" variant="secondary" iconOnly onClick={close} aria-label={`Back to ${categoryName}`}>
+        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+      </Button>
+      <span className="text-[17px] font-semibold text-gray-dark">New offering</span>
+    </div>
+  );
+
+  return (
+    // The existing builder's components read this context; "v2" is that builder's current default.
+    <V2Context.Provider value={true}>
+    <div className="flex min-h-screen flex-col bg-white">
       {done ? (
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE }} className="flex flex-1 flex-col items-center justify-center px-4 py-10 text-center">
           <img src={checkmarkFilledIcon} alt="" className="h-12 w-12" />
-          <h1 className="mt-5 text-[26px] font-semibold text-gray-dark">{name || suggestedName} is saved as a draft</h1>
+          <h1 className="mt-5 text-[26px] font-semibold text-gray-dark">{name || suggestedName} is published</h1>
           <p className="mt-2 max-w-[440px] text-[15px] leading-relaxed text-gray-light">
-            We set it up as a {offeringType.toLowerCase()} at {priceLabel}. Publish it from your {categoryName} page when you're ready.
+            We set it up as a {offeringType.toLowerCase()} at {priceLabel}. It's now on your {categoryName} page.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-2.5">
             <Button size="lg" variant="primary" rounded="rounded-full" onClick={close}>Go to {categoryName}</Button>
@@ -720,86 +842,102 @@ export default function CoachOfferingGuided() {
           </div>
         </motion.div>
       ) : (
-        <div className="mx-auto flex w-full max-w-[1040px] flex-1 items-start justify-center gap-12 px-4 py-10 sm:px-6 lg:py-16">
-          <div className="w-full min-w-0 max-w-[560px]">
-            <AnimatePresence mode="wait" initial={false} custom={dir}>
-              <motion.div
-                key={step}
-                custom={dir}
-                variants={{
-                  enter: (d: number) => ({ opacity: 0, y: d * 24 }),
-                  center: { opacity: 1, y: 0 },
-                  exit: (d: number) => ({ opacity: 0, y: d * -24 }),
-                }}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.28, ease: EASE }}
-              >
-                {renderStep()}
-              </motion.div>
-            </AnimatePresence>
+        <div className="flex flex-1">
+          {/* Persistent section nav — same floating-card treatment as the My Leland sidebar,
+              with a checkmark on the right of each completed section. */}
+          <aside className="hidden w-[264px] shrink-0 md:block">
+            <div className="sticky top-0 flex flex-col gap-4 px-4 pb-4 pt-5">
+              {titleBar}
+              <div className={`shrink-0 p-2 ${NAV_CARD}`}>
+                <nav aria-label="Offering sections" className="flex flex-col">
+                  <AnimatePresence initial={false}>{FIXED_SECTIONS.map(navRow)}</AnimatePresence>
+                </nav>
+              </div>
 
-            <div className="mt-9 flex items-center gap-3">
-              {stepIndex > 0 && !returnToReview && (
-                <Button size="lg" variant="secondary" rounded="rounded-full" onClick={back}>Back</Button>
+              {/* Product tabs get their own module with a header, like "Expert tools" on My Leland.
+                  It slides in with the first product and out with the last. */}
+              <AnimatePresence initial={false}>
+                {productSections.length > 0 && (
+                  <motion.div
+                    key="products"
+                    initial={{ height: 0, opacity: 0, marginTop: -16 }}
+                    animate={{ height: "auto", opacity: 1, marginTop: 0 }}
+                    exit={{ height: 0, opacity: 0, marginTop: -16 }}
+                    transition={{ duration: 0.3, ease: EASE }}
+                    className="-mx-2 -mb-2 shrink-0 overflow-hidden px-2 pb-2"
+                  >
+                    <div className={`overflow-hidden ${NAV_CARD}`}>
+                      <p className="bg-gray-hover px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-gray-extra-light">Configure products</p>
+                      <nav aria-label="Configure products" className="flex flex-col p-2">
+                        <AnimatePresence initial={false}>{productSections.map(navRow)}</AnimatePresence>
+                      </nav>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <Button size="lg" variant="primary" rounded="rounded-full" className="w-full font-semibold" onClick={publish}>Publish</Button>
+            </div>
+          </aside>
+
+          <div className="min-w-0 flex-1 px-4 py-8 sm:px-6 md:py-12">
+            {/* The customer page mirrors the existing builder: wider column plus the live preview card on the right. */}
+            <div className={`mx-auto w-full ${view === "page" ? "max-w-[1080px]" : isProductId(view) || view === "live" ? "max-w-[660px]" : "max-w-[560px]"}`}>
+              {/* Small screens: the title and the same nav as a scrollable strip. */}
+              <div className="mb-4 md:hidden">{titleBar}</div>
+              <div className="mb-7 flex gap-2 overflow-x-auto [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden">
+                {sections.map((id) => (
+                  <Button key={id} size="tag" variant={view === id ? "dark" : "outline"} rounded="rounded-full" className="shrink-0" onClick={() => openSection(id)}>
+                    {SECTION_LABELS[id]}
+                    {SHOW_NAV_CHECKS && isComplete(id) && <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-10 xl:flex-row xl:gap-14">
+              <div className="min-w-0 flex-1">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div key={view} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.22, ease: EASE }}>
+                  {renderSection()}
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Step controls: Back on the left, Next on the right. Publish lives under the sidebar; on small
+                  screens, where the sidebar is hidden, it takes Next's place on the last tab. */}
+              <div className="mt-10 flex items-center justify-between gap-3">
+                {viewIndex > 0 ? (
+                  <Button size="lg" variant="secondary" className="font-semibold" onClick={goBack}>Back</Button>
+                ) : (
+                  <span />
+                )}
+                {isLast ? (
+                  <Button size="lg" variant="primary" className="font-semibold md:hidden" onClick={publish}>Publish</Button>
+                ) : (
+                  <Button size="lg" variant="dark" className="font-semibold" onClick={goNext}>Next</Button>
+                )}
+              </div>
+              </div>
+              {view === "page" && (
+                <motion.aside initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.35, ease: EASE }} className="w-full xl:sticky xl:top-12 xl:h-fit xl:w-[320px] xl:shrink-0">
+                  <ProductPreview
+                    name={name}
+                    headline={headline}
+                    pricingMode="paid"
+                    paidType={recurring ? "recurring" : "one-time"}
+                    interval="1 month"
+                    price={String(effectivePrice)}
+                    cover={null}
+                    multiOption={false}
+                    joinLabel="Purchase"
+                  />
+                </motion.aside>
               )}
-              <Button size="lg" variant="primary" rounded="rounded-full" className="px-8" disabled={!canContinue} onClick={next}>
-                {step === "review" ? "Create offering" : returnToReview ? "Save" : "Continue"}
-              </Button>
-              <span className="hidden text-[13px] text-gray-extra-light sm:inline">or press Enter ↵</span>
+              </div>
             </div>
           </div>
-
-          {/* Running summary — the offering assembling itself as questions are answered. */}
-          {step !== "review" && step !== "select" && (
-            <aside className="sticky top-28 hidden w-[300px] shrink-0 rounded-2xl bg-gray-hover p-5 lg:block">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-[14px] font-semibold text-gray-dark">Your offering</p>
-                {selected.length > 0 && <span className="rounded-md bg-white px-2 py-1 text-[11px] font-medium text-gray-dark">{offeringType}</span>}
-              </div>
-              {selected.length === 0 ? (
-                <p className="mt-3 text-[14px] leading-relaxed text-gray-light">Pick what to include and it'll come together here.</p>
-              ) : (
-                <>
-                  <ul className="mt-4 grid gap-3.5">
-                    {COMPONENTS.filter((c) => has(c.id)).map((c) => (
-                      <li key={c.id} className="flex items-start gap-3">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-gray-dark">
-                          <MaskIcon src={c.icon} className="h-[18px] w-[18px]" />
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block text-[14px] font-semibold text-gray-dark">{c.name}</span>
-                          <span className="block text-[13px] leading-snug text-gray-light">
-                            {componentSummary(c.id)}
-                          </span>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-4 flex items-baseline justify-between gap-3 border-t border-gray-stroke pt-4">
-                    <span className="text-[13px] text-gray-light">{recurring ? "Subscription" : "One-time"}</span>
-                    <span className="text-[16px] font-semibold text-gray-dark">{priceLabel}</span>
-                  </div>
-                </>
-              )}
-            </aside>
-          )}
         </div>
       )}
     </div>
-  );
-}
-
-function ReviewRow({ label, value, sub, onEdit, last = false }: { label: string; value: string; sub?: string; onEdit?: () => void; last?: boolean }) {
-  return (
-    <div className={`flex items-center gap-4 px-4 py-3.5 ${last ? "" : "border-b border-gray-stroke"}`}>
-      <div className="min-w-0 flex-1">
-        <p className="text-[13px] text-gray-extra-light">{label}</p>
-        <p className="mt-0.5 text-[15px] font-semibold text-gray-dark">{value}</p>
-        {sub && <p className="mt-0.5 text-[14px] text-gray-light">{sub}</p>}
-      </div>
-      {onEdit && <Button size="sm" variant="secondary" aria-label={`Edit ${label.toLowerCase()}`} onClick={onEdit}>Edit</Button>}
-    </div>
+    </V2Context.Provider>
   );
 }
