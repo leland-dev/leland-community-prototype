@@ -2,18 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, type Variants } from "motion/react";
 import { Button } from "../components/Button";
+import OfferingFlowSwitcher from "../components/OfferingFlowSwitcher";
 import hourglassIcon from "../assets/icons/time-clock-hourglass.svg";
 import bookOpenIcon from "../assets/icons/book-open.svg";
 import stackIcon from "../assets/icons/stack.svg";
 import myCoursesIcon from "../assets/icons/my-courses.svg";
 import videoIcon from "../assets/icons/video-icon.svg";
-import lteSignalIcon from "../assets/icons/lte-signal.svg";
 import checkmarkFilledIcon from "../assets/icons/checkmark-filled.svg";
 import packageBoxOpenIcon from "../assets/icons/package-box-open.svg";
 import repostIcon from "../assets/icons/repost-2.svg";
 
-// Entrance animation — the left column fades its blocks up in sequence, with the
-// type-card grid staggering its cards; the right preview scales in alongside.
+// Entrance animation — the column fades its blocks up in sequence, with the
+// type-card grid staggering its cards.
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 const pageContainer: Variants = {
   hidden: {},
@@ -99,24 +99,15 @@ const PRODUCT_TYPES: ProductType[] = [
     blurb: "A structured, multi-lesson course.",
     description: "Build a structured course with lessons and sections clients progress through at their own pace.",
     features: ["Multi-lesson structure", "Organized into sections", "Self-paced learning", "Track progress"],
-    ready: true,
-  },
-  {
-    id: "livestream",
-    name: "Free livestream",
-    icon: lteSignalIcon,
-    blurb: "Host a free live event to grow your audience.",
-    description: "Go live for free to reach new leads and showcase your expertise. Schedule it, promote it, and optionally share the recording with Leland+ afterward.",
-    features: ["Free to attend", "Scheduled live event", "Grows your audience", "Optional Leland+ recording"],
-    ready: true,
+    ready: false,
   },
   {
     id: "live",
-    name: "Group Session",
+    name: "Workshop",
     icon: videoIcon,
     blurb: "Paid live sessions — one-off or a cohort-based program.",
-    description: "Teach live in real time. Run a single paid group session, or build a full program of several sessions — then open one or more cohorts so people can join on their own schedule.",
-    features: ["One-off or multi-session", "Cohort-based programs", "Paid group sessions", "Session recordings"],
+    description: "Teach live in real time. Run a single paid workshop, or build a full program of several sessions — then open one or more cohorts so people can join on their own schedule.",
+    features: ["One-off or multi-session", "Cohort-based programs", "Paid live sessions", "Session recordings"],
     ready: true,
   },
   {
@@ -138,45 +129,6 @@ const PRODUCT_TYPES: ProductType[] = [
     ready: true,
   },
 ];
-
-// Browser-framed preview of what the selected type produces (illustrative).
-function TypePreview({ type }: { type: ProductType }) {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_8px_32px_rgba(16,24,40,0.10)]">
-      {/* Browser chrome */}
-      <div className="flex items-center gap-1.5 bg-gray-hover px-4 py-3">
-        <span className="h-2.5 w-2.5 rounded-full bg-gray-stroke" />
-        <span className="h-2.5 w-2.5 rounded-full bg-gray-stroke" />
-        <span className="h-2.5 w-2.5 rounded-full bg-gray-stroke" />
-      </div>
-      {/* Nav skeleton */}
-      <div className="flex items-center gap-3 border-b border-gray-stroke px-4 py-3.5">
-        <div className="h-2.5 w-28 rounded-full bg-gray-stroke" />
-        <div className="ml-auto flex gap-2.5">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-2 w-10 rounded-full bg-[#ECECEC]" />
-          ))}
-        </div>
-      </div>
-      {/* Hero */}
-      <div className="border-b border-gray-stroke bg-[#F7F7F7] px-8 py-12 text-center">
-        <p className="text-[18px] font-semibold text-gray-dark">{type.name}</p>
-        <p className="mx-auto mt-1 max-w-[320px] text-[14px] leading-snug text-gray-light">{type.blurb}</p>
-        <div className="mx-auto mt-4 h-7 w-28 rounded-full bg-gray-stroke" />
-      </div>
-      {/* Content skeleton */}
-      <div className="grid grid-cols-3 gap-5 p-6">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="flex flex-col gap-2.5">
-            <div className="aspect-[4/3] rounded-lg bg-[#F2F2F2]" />
-            <div className="h-2.5 w-4/5 rounded-full bg-[#ECECEC]" />
-            <div className="h-2.5 w-3/5 rounded-full bg-[#F2F2F2]" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // The coach's categories (slug + display name), mirroring CoachCategoryEdit's
 // categoryData. The switcher below the heading lets the coach retarget the new
@@ -230,11 +182,11 @@ export default function CoachProductTypeSelect() {
         <span className="hidden text-[15px] font-semibold text-gray-dark sm:inline">New product</span>
       </motion.header>
 
-      {/* Two equal halves; left content is vertically centered. */}
-      <div className="grid flex-1 lg:grid-cols-2">
-        {/* Left — choose a type + its detail (vertically centered) */}
-        <div className="flex items-center px-4 py-10 sm:px-6 lg:px-12 xl:px-16">
-          <motion.div variants={pageContainer} initial="hidden" animate="show" className="mx-auto w-full max-w-[520px] min-w-0">
+      {/* A single, centered choice — no preview. Picking a type and continuing
+          carries this same simple layout forward into the builder. */}
+      <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6">
+        <div className="flex items-center">
+          <motion.div variants={pageContainer} initial="hidden" animate="show" className="mx-auto w-full max-w-[560px] min-w-0">
             <motion.h1 variants={fadeUp} className="text-[24px] font-semibold text-gray-dark">Add something new to your profile</motion.h1>
 
             {/* Category switcher — a subtext line naming the current category
@@ -280,38 +232,45 @@ export default function CoachProductTypeSelect() {
                     key={t.id}
                     variants={cardItem}
                     type="button"
+                    disabled={!t.ready}
                     onClick={() => setSelectedId(t.id)}
-                    className={`flex items-center gap-3 rounded-2xl border-[1.5px] bg-white p-4 text-left transition-colors ${active ? "border-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"}`}
+                    className={`flex items-center gap-3 rounded-2xl border-[1.5px] p-4 text-left transition-colors ${!t.ready ? "cursor-default border-transparent bg-gray-hover" : active ? "border-gray-dark bg-white" : "border-gray-stroke bg-white hover:border-[#c9c9c9]"}`}
                   >
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-hover text-gray-dark">
+                    <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${t.ready ? "bg-gray-hover text-gray-dark" : "bg-white text-gray-extra-light"}`}>
                       <MaskIcon src={t.icon} className="h-[22px] w-[22px]" />
                     </span>
-                    <span className="min-w-0 text-[16px] font-semibold text-gray-dark">{t.name}</span>
+                    <span className={`min-w-0 flex-1 text-[16px] font-semibold ${t.ready ? "text-gray-dark" : "text-gray-extra-light"}`}>{t.name}</span>
+                    {!t.ready && (
+                      <span className="shrink-0 rounded-md bg-white px-2 py-1 text-[10px] font-medium uppercase tracking-[0.05em] text-gray-light">Coming soon</span>
+                    )}
                   </motion.button>
                 );
               })}
             </motion.div>
 
-            {/* Selected-type detail */}
+            {/* Selected-type detail — boxed in a gray-hover card so it reads as a
+                panel that swaps out as you change the selection above. */}
             <motion.div variants={fadeUp} className="mt-8">
-              <h2 className="text-[20px] font-semibold text-gray-dark">{selected.name}</h2>
-              <p className="mt-1.5 text-[15px] leading-relaxed text-gray-light">{selected.description}</p>
+              <div className="rounded-2xl bg-gray-hover p-6">
+                <h2 className="text-[20px] font-semibold text-gray-dark">{selected.name}</h2>
+                <p className="mt-1.5 text-[15px] leading-relaxed text-gray-light">{selected.description}</p>
 
-              <p className="mt-5 text-[14px] font-semibold text-gray-dark">What's included</p>
-              <div className="mt-2.5 grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2">
-                {selected.features.map((f) => (
-                  <span key={f} className="flex items-center gap-2 text-[14px] text-gray-dark">
-                    <img src={checkmarkFilledIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
-                    {f}
-                  </span>
-                ))}
+                <p className="mt-5 text-[14px] font-semibold text-gray-dark">What's included</p>
+                <div className="mt-2.5 grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2">
+                  {selected.features.map((f) => (
+                    <span key={f} className="flex items-center gap-2 text-[14px] text-gray-dark">
+                      <img src={checkmarkFilledIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
+                      {f}
+                    </span>
+                  ))}
+                </div>
               </div>
 
               <Button
                 size="lg"
                 variant="primary"
                 rounded="rounded-full"
-                className="mt-7 w-full text-[15px] font-semibold"
+                className="mt-6 w-full text-[15px] font-semibold"
                 disabled={!selected.ready}
                 onClick={start}
               >
@@ -320,19 +279,8 @@ export default function CoachProductTypeSelect() {
             </motion.div>
           </motion.div>
         </div>
-
-        {/* Right — preview of the result (vertically centered on a subtle panel) */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: EASE, delay: 0.15 }}
-          className="hidden items-center justify-center border-l border-gray-stroke bg-gray-hover px-10 py-10 lg:flex xl:px-16"
-        >
-          <div className="w-full max-w-[560px]">
-            <TypePreview type={selected} />
-          </div>
-        </motion.div>
       </div>
+      <OfferingFlowSwitcher current="original" />
     </div>
   );
 }

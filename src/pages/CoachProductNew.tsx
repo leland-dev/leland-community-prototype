@@ -630,7 +630,7 @@ function SelectTag({ children, className = "" }: { children: ReactNode; classNam
   return <span className={`shrink-0 rounded-full bg-gray-hover px-2 py-0.5 text-[12px] font-medium text-gray-light ${className}`}>{children}</span>;
 }
 
-function Select({ value, onChange, options, placeholder, className = "", triggerClassName = "py-2.5 pl-3.5 pr-3 text-[14px]" }: { value: string; onChange: (v: string) => void; options: { value: string; label: string; info?: string; sub?: string; tag?: string }[]; placeholder?: string; className?: string; triggerClassName?: string }) {
+export function Select({ value, onChange, options, placeholder, className = "", triggerClassName = "py-2.5 pl-3.5 pr-3 text-[14px]" }: { value: string; onChange: (v: string) => void; options: { value: string; label: string; info?: string; sub?: string; tag?: string }[]; placeholder?: string; className?: string; triggerClassName?: string }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   // Menu is portaled to the body so it isn't clipped by any overflow-hidden
@@ -1558,6 +1558,14 @@ function CoachProductNewFlow() {
                     </button>
                   );
                 })}
+                {/* …or over to the guided flow. */}
+                <button
+                  type="button"
+                  onClick={() => { setAdminOpen(false); navigate(`/my-leland/manage/${category}/new-guided`); }}
+                  className="flex w-full items-center rounded-lg px-2 py-1.5 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                >
+                  Guided flow
+                </button>
               </div>
             </motion.div>
           )}

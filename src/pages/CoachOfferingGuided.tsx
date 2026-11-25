@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, type Variants } from "motion/react";
 import { Button } from "../components/Button";
+import OfferingFlowSwitcher from "../components/OfferingFlowSwitcher";
 import { RoundArrow, useCardCarousel, sectionTitle } from "./ProgramHub";
 import {
-  PageStep, ProductPreview, SingleProductSetupStep, SessionsSetupStep, V2Context,
+  PageStep, ProductPreview, SingleProductSetupStep, SessionsSetupStep, V2Context, Select,
   newPageSection, newCohort, defaultConfigFor, isConfigComplete, productListPrice,
   INCLUDED_SECTION_ID, CONTENT_LIBRARY,
   type PageSection, type PageSectionKind, type OfferingItem, type CollectionItem, type BuilderCohort,
@@ -16,13 +17,14 @@ import videoIcon from "../assets/icons/video-icon.svg";
 import checkmarkFilledIcon from "../assets/icons/checkmark-filled.svg";
 import storeIcon from "../assets/icons/store.svg";
 import moneyIcon from "../assets/icons/money.svg";
-import writeIcon from "../assets/icons/write.svg";
-import eyeIcon from "../assets/icons/eye.svg";
+import textIcon from "../assets/icons/text.svg";
 import labelTagIcon from "../assets/icons/label-tag.svg";
 import repostIcon from "../assets/icons/repost-2.svg";
 import globeIcon from "../assets/icons/globe.svg";
 import lockOutlineIcon from "../assets/icons/lock-outline.svg";
 import stackIcon from "../assets/icons/stack.svg";
+import trashIcon from "../assets/icons/trash.svg";
+import editFilledIcon from "../assets/icons/edit-filled.svg";
 import layoutGridIcon from "../assets/icons/layout-grid.svg";
 import aiIcon from "../assets/icons/ai.svg";
 
@@ -38,6 +40,9 @@ import aiIcon from "../assets/icons/ai.svg";
 // fall out of the answers rather than being chosen up front.
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+// Entrance for the opening "Select products" screen: heading, actions, then the cards in a stagger.
+const introContainer: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } } };
+const introItem: Variants = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } } };
 // Completed-section checkmarks in the section nav — hidden for now.
 const SHOW_NAV_CHECKS = false;
 
@@ -52,7 +57,8 @@ type ComponentId = "coaching" | "content" | "collection" | "live" | "course";
 type SectionId = "select" | ComponentId | "price" | "details" | "page";
 
 // Tabs every offering has; product tabs live in their own sidebar module.
-const FIXED_SECTIONS: SectionId[] = ["select", "price", "details", "page"];
+// Offering-level tabs in the sidebar's lower menu. "select" is reached from the Products panel's Edit link.
+const FIXED_SECTIONS: SectionId[] = ["price", "details", "page"];
 
 const SECTION_ICONS: Record<SectionId, string> = {
   select: storeIcon,
@@ -62,24 +68,24 @@ const SECTION_ICONS: Record<SectionId, string> = {
   live: videoIcon,
   course: myCoursesIcon,
   price: moneyIcon,
-  details: writeIcon,
-  page: eyeIcon,
+  details: textIcon,
+  page: storeIcon,
 };
 
 const SECTION_LABELS: Record<SectionId, string> = {
   select: "Select products",
-  coaching: "1:1 coaching",
+  coaching: "Time with you",
   content: "Content",
   collection: "Collection",
   live: "Live sessions",
   course: "Course",
   price: "Pricing",
-  details: "Name & headline",
-  page: "Customer page",
+  details: "Name & visibility",
+  page: "Page",
 };
 
 const COMPONENTS: { id: ComponentId; name: string; blurb: string; icon: string; ready: boolean }[] = [
-  { id: "coaching", name: "1:1 coaching", blurb: "Live time with you, sold by the hour.", icon: hourglassIcon, ready: true },
+  { id: "coaching", name: "Time with you", blurb: "Live time with you, sold by the hour.", icon: hourglassIcon, ready: true },
   { id: "content", name: "Content", blurb: "A guide, template, video, or other resource.", icon: bookOpenIcon, ready: true },
   { id: "collection", name: "Collection", blurb: "Several resources bundled together.", icon: stackIcon, ready: true },
   { id: "live", name: "Live sessions", blurb: "A workshop, or a series of sessions you teach to a group.", icon: videoIcon, ready: true },
@@ -172,7 +178,7 @@ const TEMPLATES: Template[] = [
     courseId: 1,
     billing: "one-time",
     price: "549",
-    headline: "Learn at your own pace, with 1:1 help when you need it.",
+    headline: "Learn at your own pace, with one-on-one help when you need it.",
   },
   {
     id: "workshop",
@@ -391,6 +397,8 @@ export default function CoachOfferingGuided() {
   const [publishAttempted, setPublishAttempted] = useState(false);
   const [done, setDone] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  // The flow opens on "Select products" alone; the sidebar and Publish appear once that first step is passed.
+  const [setupDone, setSetupDone] = useState(false);
 
   const [selected, setSelected] = useState<ComponentId[]>([]);
   // Coaching, content and collection — configured by the existing builder's setup step.
@@ -408,6 +416,11 @@ export default function CoachOfferingGuided() {
   const [billingChoice, setBillingChoice] = useState<"one-time" | "recurring">("one-time");
   const [price, setPrice] = useState("");
   const [annual, setAnnual] = useState(false);
+  // Discount off the products' combined list price — same three states as the builder's pricing
+  // roll-up: idle ("Add discount"), editing (type + amount), done (the applied amount).
+  const [discountType, setDiscountType] = useState<"percent" | "flat">("percent");
+  const [discountValue, setDiscountValue] = useState("");
+  const [discountMode, setDiscountMode] = useState<"idle" | "editing" | "done">("idle");
   const [name, setName] = useState("");
   const [headline, setHeadline] = useState("");
   const [visibility, setVisibility] = useState<"public" | "private">("public");
@@ -447,8 +460,8 @@ export default function CoachOfferingGuided() {
   // The sidebar: only the sections that apply to what was picked.
   // Pricing (billing model + price) comes after the products it's priced from.
   const sections = useMemo<SectionId[]>(() => {
-    // The fixed tabs, then one per selected product (the "Configure products" module below them).
-    return [...FIXED_SECTIONS, ...COMPONENTS.filter((c) => selected.includes(c.id)).map((c) => c.id)];
+    // Step order: pick products, configure each one, then the offering-level tabs.
+    return ["select", ...COMPONENTS.filter((c) => selected.includes(c.id)).map((c) => c.id), "price", "details", "page"];
   }, [selected]);
 
   // What the answers add up to — the label the old flow made coaches choose first.
@@ -476,8 +489,15 @@ export default function CoachOfferingGuided() {
     ...(has("course") && course ? [{ label: course.title, value: course.price }] : []),
   ];
   const fixedValue = valueLines.reduce((sum, l) => sum + l.value, 0);
-  const effectivePrice = price !== "" ? Number(price) : fixedValue;
-  const savings = !recurring && fixedValue > 0 && effectivePrice < fixedValue ? Math.round((1 - effectivePrice / fixedValue) * 100) : 0;
+  // Priced products roll up to subtotal − discount. With nothing priced (live sessions or a new
+  // course only) there's no subtotal to roll up, so the price is typed in directly.
+  const discountAmount = Math.min(fixedValue, Math.round(discountType === "percent" ? (fixedValue * Number(discountValue || 0)) / 100 : Number(discountValue || 0)));
+  const effectivePrice = fixedValue > 0 ? fixedValue - discountAmount : Number(price || 0);
+  const applyDiscount = () => {
+    if (Number(discountValue || 0) > 0) setDiscountMode("done");
+    else { setDiscountValue(""); setDiscountMode("idle"); }
+  };
+  const removeDiscount = () => { setDiscountValue(""); setDiscountMode("idle"); };
 
   const suggestedName = `${categoryName} ${offeringType === "Offering" ? "Offering" : offeringType}`;
 
@@ -514,7 +534,13 @@ export default function CoachOfferingGuided() {
   const viewIndex = sections.indexOf(view);
   const isLast = viewIndex === sections.length - 1;
   const goBack = () => { if (viewIndex > 0) openSection(sections[viewIndex - 1]); };
-  const goNext = () => { if (!isLast) openSection(sections[viewIndex + 1]); };
+  const goNext = () => {
+    if (!setupDone) {
+      if (selected.length === 0) return;
+      setSetupDone(true);
+    }
+    if (!isLast) openSection(sections[viewIndex + 1]);
+  };
   // The section on screen counts as visited for publishing purposes.
   const readyToPublish = sections.every((s) => isComplete(s, withCurrent(confirmed)));
   const publish = () => {
@@ -580,6 +606,13 @@ export default function CoachOfferingGuided() {
       };
     }
     setProducts(next);
+    // The template's price becomes a flat discount off what its products list for.
+    const listTotal = (Object.keys(PRODUCT_SLUGS) as ProductId[]).filter((id) => t.components.includes(id)).reduce((sum, id) => sum + productListPrice(next[id]), 0)
+      + (t.components.includes("course") ? COURSES.find((c) => c.id === t.courseId)?.price ?? 0 : 0);
+    const off = listTotal - Number(t.price);
+    setDiscountType("flat");
+    setDiscountValue(off > 0 ? String(off) : "");
+    setDiscountMode(off > 0 ? "done" : "idle");
     const titles = t.sessions ?? [""];
     setSessionMode(titles.length > 1 ? "multi" : "single");
     setSessions(titles.map((title, i) => ({ ...blankSession(FIRST_SESSION_ID + i, title), configured: true })));
@@ -592,6 +625,7 @@ export default function CoachOfferingGuided() {
     setName(t.name);
     setHeadline(t.headline);
     setConfirmed(["select", ...t.components, "price", "details"]);
+    setSetupDone(true);
     setView("page");
   };
 
@@ -600,17 +634,23 @@ export default function CoachOfferingGuided() {
     setSessionMode("single"); setSessions([blankSession(FIRST_SESSION_ID)]); nextSessionId.current = FIRST_SESSION_ID + 1;
     setCohorts([newCohort(0)]); setMultiCohorts(false); setActiveCohortId(0);
     setCourseId(COURSES[0].id); setNewCourseTitle("");
-    setBillingChoice("one-time"); setPrice(""); setAnnual(false); setName(""); setHeadline("");
+    setBillingChoice("one-time"); setPrice(""); setDiscountType("percent"); setDiscountValue(""); setDiscountMode("idle"); setAnnual(false); setName(""); setHeadline("");
     setVisibility("public"); setDescription(""); setPageSections([newPageSection("included", INCLUDED_SECTION_ID)]);
-    setDone(false); setConfirmed([]); setPublishAttempted(false); setView("select");
+    setDone(false); setConfirmed([]); setPublishAttempted(false); setSetupDone(false); setView("select");
   };
 
   const renderSection = () => {
     switch (view) {
       case "select":
         return (
-          <Question title="Select products" sub={`Choose everything you want to include in this offering for ${categoryName}. Each product adds its own section to the sidebar.`}>
-            <div className="mb-5 flex flex-wrap gap-2">
+          // Staggers in on first load only; coming back via the sidebar's Edit link uses the normal tab fade.
+          <motion.div variants={introContainer} initial={setupDone ? false : "hidden"} animate="show">
+            <motion.div variants={introItem}>
+              <h1 className="text-[26px] font-semibold leading-tight text-gray-dark">Select products</h1>
+              <p className="mt-2 text-[15px] leading-relaxed text-gray-light">{`Choose everything you want to include in this offering for ${categoryName}. Each product adds its own section to the sidebar.`}</p>
+            </motion.div>
+            <div className="mt-7">
+            <motion.div variants={introItem} className="mb-5 flex flex-wrap gap-2">
               <Button size="md" variant="secondary" rounded="rounded-full" className="gap-2 font-semibold" onClick={() => setShowTemplates((v) => !v)}>
                 <MaskIcon src={layoutGridIcon} className="h-[18px] w-[18px]" />
                 Start from a template
@@ -619,7 +659,7 @@ export default function CoachOfferingGuided() {
                 <MaskIcon src={aiIcon} className="h-[18px] w-[18px]" />
                 Build with an agent
               </Button>
-            </div>
+            </motion.div>
             {showTemplates && (
               <div className="mb-6">
                 <TemplateCarousel onPick={applyTemplate} />
@@ -627,10 +667,13 @@ export default function CoachOfferingGuided() {
             )}
             <div className="grid gap-3">
               {COMPONENTS.map((c) => (
-                <ChoiceCard key={c.id} multi large icon={c.icon} title={c.name} desc={c.blurb} active={has(c.id)} disabled={!c.ready} tag={c.ready ? undefined : "Coming soon"} onClick={() => toggleComponent(c.id)} />
+                <motion.div key={c.id} variants={introItem} className="grid">
+                <ChoiceCard multi large icon={c.icon} title={c.name} desc={c.blurb} active={has(c.id)} disabled={!c.ready} tag={c.ready ? undefined : "Coming soon"} onClick={() => toggleComponent(c.id)} />
+                </motion.div>
               ))}
             </div>
-          </Question>
+            </div>
+          </motion.div>
         );
 
       // Coaching, content and collection use the existing builder's setup step as-is
@@ -697,11 +740,78 @@ export default function CoachOfferingGuided() {
                 onChange={(v) => (v === "recurring" ? chooseSubscription() : setBillingChoice("one-time"))}
                 options={[
                   { value: "one-time", label: "One-time purchase", sub: "Clients pay once", icon: labelTagIcon },
-                  { value: "recurring", label: "Subscription", sub: "Clients pay monthly", icon: repostIcon, locked: subscriptionLocked ? "A subscription isn't available with a range of coaching hours. Switch 1:1 coaching to a set amount of hours to unlock it." : undefined },
+                  { value: "recurring", label: "Subscription", sub: "Clients pay monthly", icon: repostIcon, locked: subscriptionLocked ? "A subscription isn't available with a range of coaching hours. Switch Time with you to a set amount of hours to unlock it." : undefined },
                 ]}
               />
             </Field>
             <div className="mt-8">
+              {fixedValue > 0 ? (
+                // Mirrors the regular builder's pricing roll-up: subtotal, discount, total.
+                <div className="flex flex-col divide-y divide-gray-stroke border-t border-gray-stroke text-[15px]">
+                  <div className="flex items-center justify-between py-4">
+                    <span className="text-gray-light">Subtotal</span>
+                    <span className="text-gray-dark">{money(fixedValue)}</span>
+                  </div>
+                  <div className="py-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-gray-light">Discount</span>
+                      {discountMode === "done" ? (
+                        <div className="flex items-center gap-2">
+                          <button type="button" onClick={() => setDiscountMode("editing")} aria-label="Edit discount" className="flex h-5 w-5 items-center justify-center text-gray-extra-light transition-colors hover:text-gray-light">
+                            <MaskIcon src={editFilledIcon} className="h-4 w-4" />
+                          </button>
+                          <span>
+                            {discountType === "percent" && <span className="text-gray-extra-light">{discountValue}% </span>}
+                            <span className="text-gray-dark">−{money(discountAmount)}</span>
+                          </span>
+                        </div>
+                      ) : discountMode === "idle" ? (
+                        <button type="button" onClick={() => setDiscountMode("editing")} className="text-gray-light underline decoration-dotted underline-offset-2 transition-colors hover:text-gray-dark">
+                          Add discount
+                        </button>
+                      ) : null}
+                    </div>
+                    <AnimatePresence initial={false}>
+                      {discountMode === "editing" && (
+                        <motion.div key="discount-editing" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25, ease: EASE }} className="overflow-hidden">
+                          <div className="flex items-center gap-3 pt-3">
+                            <Select
+                              value={discountType}
+                              onChange={(v) => setDiscountType(v as "percent" | "flat")}
+                              options={[{ value: "percent", label: "Percentage" }, { value: "flat", label: "Dollar amount" }]}
+                              className="flex-1"
+                            />
+                            <div className="flex flex-1 items-center rounded-lg border border-gray-stroke bg-white px-3 transition-colors focus-within:border-gray-dark">
+                              {discountType === "flat" && <span className="text-[15px] text-gray-light">$</span>}
+                              <input
+                                autoFocus
+                                inputMode="decimal"
+                                value={discountValue}
+                                onChange={(e) => setDiscountValue(e.target.value.replace(/[^0-9.]/g, ""))}
+                                onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); applyDiscount(); } }}
+                                placeholder="0"
+                                aria-label="Discount amount"
+                                className="w-full min-w-0 bg-transparent px-1 py-2 text-[15px] text-gray-dark outline-none placeholder:text-[#B1B1B1]"
+                              />
+                              {discountType === "percent" && <span className="text-[15px] text-gray-light">%</span>}
+                            </div>
+                            <div className="flex shrink-0 items-center gap-2">
+                              <Button size="sm" variant="secondary" iconOnly aria-label="Remove discount" onClick={removeDiscount}>
+                                <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
+                              </Button>
+                              <Button size="sm" variant="dark" rounded="rounded-full" onClick={applyDiscount} className="text-[14px]">Apply</Button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  <div className="flex items-center justify-between py-4">
+                    <span className="text-[16px] font-semibold text-gray-dark">Total</span>
+                    <span className="text-[18px] font-semibold text-gray-dark">{money(effectivePrice)}{recurring && <span className="text-[15px] font-normal text-gray-light"> / month</span>}</span>
+                  </div>
+                </div>
+              ) : (
               <Field label={recurring ? "Monthly price" : "Price"}>
                 <div className="flex items-center rounded-lg border border-gray-stroke bg-white px-4 transition-colors focus-within:border-gray-dark">
                   <span className="text-[20px] text-gray-light">$</span>
@@ -709,31 +819,19 @@ export default function CoachOfferingGuided() {
                     inputMode="decimal"
                     value={price}
                     onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ""))}
-                    placeholder={String(fixedValue)}
+                    placeholder="0"
                     aria-label="Price"
                     className="w-full bg-transparent py-3.5 pl-2 text-[20px] font-semibold text-gray-dark outline-none placeholder:font-normal placeholder:text-[#B1B1B1]"
                   />
                   {recurring && <span className="shrink-0 text-[15px] text-gray-light">/ month</span>}
                 </div>
-                {fixedValue > 0 && (
-                  <div className="mt-3 rounded-xl bg-gray-hover p-4 text-[14px] text-gray-light">
-                    <p>
-                      <span className="font-semibold text-gray-dark">{money(fixedValue)}</span> is what these would cost separately{recurring ? " each month" : ""}
-                      {price === "" ? " — we'll use that unless you enter your own." : savings > 0 ? ` — clients save ${savings}%.` : "."}
-                    </p>
-                    <ul className="mt-2 grid gap-1">
-                      {valueLines.map((l) => <li key={l.label}>{l.label} = {money(l.value)}</li>)}
-                      {has("live") && <li>Live sessions — included in the offering price</li>}
-                      {has("course") && !course && <li>{courseTitle} — new, not priced yet</li>}
-                    </ul>
-                  </div>
-                )}
+              </Field>
+              )}
                 {recurring && (
                   <div className="mt-3">
                     <ChoiceCard multi title="Also offer annual billing" desc={`Members can pay ${money(Math.round(effectivePrice * 12 * 0.8))}/yr — 20% off.`} active={annual} onClick={() => setAnnual((a) => !a)} />
                   </div>
                 )}
-              </Field>
             </div>
           </Question>
         );
@@ -759,7 +857,7 @@ export default function CoachOfferingGuided() {
 
       case "details":
         return (
-          <Question title="Name & headline" sub="This is what clients see on your profile.">
+          <Question title="Name & visibility" sub="This is what clients see on your profile.">
             <label className="mb-2 block text-[14px] font-semibold text-gray-dark" htmlFor="guided-name">Name</label>
             <input id="guided-name" autoFocus value={name} maxLength={60} onChange={(e) => setName(e.target.value)} placeholder={suggestedName} className={INPUT} />
             <label className="mb-2 mt-5 block text-[14px] font-semibold text-gray-dark" htmlFor="guided-headline">Headline <span className="font-normal text-gray-extra-light">(optional)</span></label>
@@ -812,12 +910,12 @@ export default function CoachOfferingGuided() {
     );
   };
 
-  const productSections = sections.filter((id) => !FIXED_SECTIONS.includes(id));
+  const productSections = sections.filter((id) => id !== "select" && !FIXED_SECTIONS.includes(id));
   const NAV_CARD = "rounded-[12px] border border-[#222222]/[0.12] bg-white shadow-[0px_4px_8px_-2px_rgba(16,24,40,0.10),0px_2px_4px_-2px_rgba(16,24,40,0.06)]";
 
-  // Back to the category page + title — sits above the sidebar (and above the tab strip on small screens).
+  // Back to the category page + title — the left end of the top bar, directly above the sidebar.
   const titleBar = (
-    <div className="flex items-center gap-2.5 px-1">
+    <div className="flex min-w-0 items-center gap-2.5">
       <Button size="sm" variant="secondary" iconOnly onClick={close} aria-label={`Back to ${categoryName}`}>
         <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
       </Button>
@@ -829,6 +927,19 @@ export default function CoachOfferingGuided() {
     // The existing builder's components read this context; "v2" is that builder's current default.
     <V2Context.Provider value={true}>
     <div className="flex min-h-screen flex-col bg-white">
+      {/* Top bar: back + title on the left (above the sidebar), offering status + Publish on the right. */}
+      <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-gray-stroke bg-white pl-5 pr-4 sm:pr-6">
+        {titleBar}
+        {setupDone && (
+        <div className="flex shrink-0 items-center gap-3">
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px] font-semibold ${done ? "bg-[#E7F6EC] text-[#0E7A3B]" : "bg-gray-hover text-gray-light"}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${done ? "bg-[#0E7A3B]" : "bg-gray-extra-light"}`} />
+            {done ? "Live" : "Draft"}
+          </span>
+          {!done && <Button size="md" variant="primary" rounded="rounded-full" className="font-semibold" onClick={publish}>Publish</Button>}
+        </div>
+        )}
+      </header>
       {done ? (
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE }} className="flex flex-1 flex-col items-center justify-center px-4 py-10 text-center">
           <img src={checkmarkFilledIcon} alt="" className="h-12 w-12" />
@@ -845,19 +956,13 @@ export default function CoachOfferingGuided() {
         <div className="flex flex-1">
           {/* Persistent section nav — same floating-card treatment as the My Leland sidebar,
               with a checkmark on the right of each completed section. */}
-          <aside className="hidden w-[264px] shrink-0 md:block">
-            <div className="sticky top-0 flex flex-col gap-4 px-4 pb-4 pt-5">
-              {titleBar}
-              <div className={`shrink-0 p-2 ${NAV_CARD}`}>
-                <nav aria-label="Offering sections" className="flex flex-col">
-                  <AnimatePresence initial={false}>{FIXED_SECTIONS.map(navRow)}</AnimatePresence>
-                </nav>
-              </div>
-
+          {setupDone && (
+          <motion.aside initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, ease: EASE }} className="hidden w-[264px] shrink-0 md:block">
+            <div className="sticky top-16 flex flex-col gap-4 px-4 pb-4 pt-5">
               {/* Product tabs get their own module with a header, like "Expert tools" on My Leland.
-                  It slides in with the first product and out with the last. */}
+                  It stays put even with no products, since its Edit link is the way back to "Select products". */}
               <AnimatePresence initial={false}>
-                {productSections.length > 0 && (
+                {(
                   <motion.div
                     key="products"
                     initial={{ height: 0, opacity: 0, marginTop: -16 }}
@@ -867,8 +972,11 @@ export default function CoachOfferingGuided() {
                     className="-mx-2 -mb-2 shrink-0 overflow-hidden px-2 pb-2"
                   >
                     <div className={`overflow-hidden ${NAV_CARD}`}>
-                      <p className="bg-gray-hover px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-gray-extra-light">Configure products</p>
-                      <nav aria-label="Configure products" className="flex flex-col p-2">
+                      <div className="flex items-center justify-between bg-gray-hover px-4 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-gray-extra-light">Products</p>
+                        <button type="button" onClick={() => openSection("select")} className="text-[13px] font-medium text-gray-light underline-offset-2 transition-colors hover:text-gray-dark hover:underline">Edit</button>
+                      </div>
+                      <nav aria-label="Products" className={`flex flex-col ${productSections.length > 0 ? "p-2" : ""}`}>
                         <AnimatePresence initial={false}>{productSections.map(navRow)}</AnimatePresence>
                       </nav>
                     </div>
@@ -876,16 +984,20 @@ export default function CoachOfferingGuided() {
                 )}
               </AnimatePresence>
 
-              <Button size="lg" variant="primary" rounded="rounded-full" className="w-full font-semibold" onClick={publish}>Publish</Button>
+              <div className={`shrink-0 p-2 ${NAV_CARD}`}>
+                <nav aria-label="Offering sections" className="flex flex-col">
+                  <AnimatePresence initial={false}>{FIXED_SECTIONS.map(navRow)}</AnimatePresence>
+                </nav>
+              </div>
             </div>
-          </aside>
+          </motion.aside>
+          )}
 
           <div className="min-w-0 flex-1 px-4 py-8 sm:px-6 md:py-12">
             {/* The customer page mirrors the existing builder: wider column plus the live preview card on the right. */}
             <div className={`mx-auto w-full ${view === "page" ? "max-w-[1080px]" : isProductId(view) || view === "live" ? "max-w-[660px]" : "max-w-[560px]"}`}>
-              {/* Small screens: the title and the same nav as a scrollable strip. */}
-              <div className="mb-4 md:hidden">{titleBar}</div>
-              <div className="mb-7 flex gap-2 overflow-x-auto [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden">
+              {/* Small screens: the same nav as a scrollable strip. */}
+              <div className={`mb-7 gap-2 overflow-x-auto [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden ${setupDone ? "flex" : "hidden"}`}>
                 {sections.map((id) => (
                   <Button key={id} size="tag" variant={view === id ? "dark" : "outline"} rounded="rounded-full" className="shrink-0" onClick={() => openSection(id)}>
                     {SECTION_LABELS[id]}
@@ -902,23 +1014,18 @@ export default function CoachOfferingGuided() {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Step controls: Back on the left, Next on the right. Publish lives under the sidebar; on small
-                  screens, where the sidebar is hidden, it takes Next's place on the last tab. */}
-              <div className="mt-10 flex items-center justify-between gap-3">
+              {/* Step controls: Back on the left, Next on the right. Publish lives in the top bar. */}
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.5 }} className="mt-10 flex items-center justify-between gap-3">
                 {viewIndex > 0 ? (
                   <Button size="lg" variant="secondary" className="font-semibold" onClick={goBack}>Back</Button>
                 ) : (
                   <span />
                 )}
-                {isLast ? (
-                  <Button size="lg" variant="primary" className="font-semibold md:hidden" onClick={publish}>Publish</Button>
-                ) : (
-                  <Button size="lg" variant="dark" className="font-semibold" onClick={goNext}>Next</Button>
-                )}
-              </div>
+                {!isLast && <Button size="lg" variant="dark" className="font-semibold" disabled={!setupDone && selected.length === 0} onClick={goNext}>Next</Button>}
+              </motion.div>
               </div>
               {view === "page" && (
-                <motion.aside initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.35, ease: EASE }} className="w-full xl:sticky xl:top-12 xl:h-fit xl:w-[320px] xl:shrink-0">
+                <motion.aside initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.35, ease: EASE }} className="w-full xl:sticky xl:top-28 xl:h-fit xl:w-[320px] xl:shrink-0">
                   <ProductPreview
                     name={name}
                     headline={headline}
@@ -937,6 +1044,7 @@ export default function CoachOfferingGuided() {
           </div>
         </div>
       )}
+      <OfferingFlowSwitcher current="guided" />
     </div>
     </V2Context.Provider>
   );
