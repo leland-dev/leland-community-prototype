@@ -36,6 +36,7 @@ import eyeClosedIcon from "../assets/icons/eye-closed.svg";
 import trashIcon from "../assets/icons/trash.svg";
 import dotsIcon from "../assets/icons/dots-horizontal.svg";
 import dragDotsIcon from "../assets/icons/drag-dots.svg";
+import chevronDownIcon from "../assets/icons/chevron-down.svg";
 
 // Sentinel drop target for the catch-all "All offerings" section — dropping here
 // removes an item from every section (leaving it unassigned). Not a real section
@@ -244,6 +245,39 @@ function AddOfferingsButton({ onChooseExisting, onCreateNew }: { onChooseExistin
           <button onClick={() => { setOpen(false); onCreateNew(); }} className={row}>
             <MaskIcon src={addPlusIcon} className="h-[18px] w-[18px] shrink-0" />
             Create new
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// "New" dropdown next to Drafts — create a new offering or add a blank section.
+function NewMenuButton({ onNewOffering, onNewSection }: { onNewOffering: () => void; onNewSection: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+  const row = "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[14px] font-semibold text-gray-dark transition-colors hover:bg-gray-hover";
+  return (
+    <div ref={ref} className="relative shrink-0">
+      <Button size="md" variant="dark" rounded="rounded-full" className="font-semibold" onClick={() => setOpen((v) => !v)}>
+        New
+        <MaskIcon src={chevronDownIcon} className="h-4 w-4" />
+      </Button>
+      {open && (
+        <div className="absolute right-0 top-full z-30 mt-2 w-[200px] rounded-xl border border-gray-stroke bg-white p-1.5 shadow-lg">
+          <button onClick={() => { setOpen(false); onNewOffering(); }} className={row}>
+            <MaskIcon src={addPlusIcon} className="h-[18px] w-[18px] shrink-0" />
+            New offering
+          </button>
+          <button onClick={() => { setOpen(false); onNewSection(); }} className={row}>
+            <MaskIcon src={layoutGridIcon} className="h-[18px] w-[18px] shrink-0" />
+            New section
           </button>
         </div>
       )}
@@ -594,8 +628,8 @@ export default function CategorySectionBuilder({ category }: { category?: string
       <div className="mb-6 flex items-center justify-between gap-3">
         <div className="inline-flex gap-1 rounded-full bg-[#222222]/5 p-1">
           {([
-            { id: "storefront", label: "My Storefront", icon: storeIcon },
-            { id: "private", label: "Private Offerings", icon: eyeClosedIcon },
+            { id: "storefront", label: "Storefront", icon: storeIcon },
+            { id: "private", label: "Private", icon: eyeClosedIcon },
           ] as const).map((t) => (
             <button
               key={t.id}
@@ -609,9 +643,15 @@ export default function CategorySectionBuilder({ category }: { category?: string
             </button>
           ))}
         </div>
-        <Button size="md" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => setDraftsOpen(true)}>
-          Drafts ({DRAFT_OFFERINGS.length})
-        </Button>
+        <div className="flex shrink-0 items-center gap-3">
+          <Button size="md" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => setDraftsOpen(true)}>
+            Drafts ({DRAFT_OFFERINGS.length})
+          </Button>
+          <NewMenuButton
+            onNewOffering={() => navigate(`/my-leland/manage/${category}/new-guided`)}
+            onNewSection={addSection}
+          />
+        </div>
       </div>
 
       {tab === "private" ? (
@@ -633,19 +673,6 @@ export default function CategorySectionBuilder({ category }: { category?: string
         </div>
       ) : (
       <>
-      <button
-        type="button"
-        onClick={addSection}
-        className="mb-5 flex w-full cursor-pointer items-center justify-center gap-2 rounded-[12px] bg-[#222222]/[0.04] px-5 py-10 text-[16px] font-semibold text-gray-dark transition-colors hover:bg-[#222222]/[0.06]"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3csvg%20width='100%25'%20height='100%25'%20xmlns='http://www.w3.org/2000/svg'%3e%3crect%20width='100%25'%20height='100%25'%20fill='none'%20rx='12'%20ry='12'%20stroke='%23222222'%20stroke-opacity='0.3'%20stroke-width='2'%20stroke-dasharray='3%204'/%3e%3c/svg%3e\")",
-        }}
-      >
-        <MaskIcon src={addPlusIcon} className="h-6 w-6" />
-        New section
-      </button>
-
       <div className="flex flex-col gap-5">
         <AnimatePresence initial={false}>
           {sections.flatMap((section, i) => {
@@ -694,7 +721,7 @@ export default function CategorySectionBuilder({ category }: { category?: string
               <div className="mt-4 flex">
                 <AddOfferingsButton
                   onChooseExisting={() => setMoveFor(section.id)}
-                  onCreateNew={() => navigate(`/my-leland/manage/${category}/new`)}
+                  onCreateNew={() => navigate(`/my-leland/manage/${category}/new-guided`)}
                 />
               </div>
             </motion.section>
@@ -731,7 +758,7 @@ export default function CategorySectionBuilder({ category }: { category?: string
               <div className="mt-4 flex">
                 <AddOfferingsButton
                   onChooseExisting={() => setMoveFor(CATCH_ALL_DROP_ID)}
-                  onCreateNew={() => navigate(`/my-leland/manage/${category}/new`)}
+                  onCreateNew={() => navigate(`/my-leland/manage/${category}/new-guided`)}
                 />
               </div>
             </section>

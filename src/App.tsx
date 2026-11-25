@@ -150,6 +150,7 @@ import AltNavContent from "./pages/AltNavContent";
 import CoachCategoryEdit from "./pages/CoachCategoryEdit";
 import CoachProductNew from "./pages/CoachProductNew";
 import CoachProductTypeSelect from "./pages/CoachProductTypeSelect";
+import CoachOfferingGuided from "./pages/CoachOfferingGuided";
 import CoachEventTypeSelect from "./pages/CoachEventTypeSelect";
 import CoachContentTypeSelect from "./pages/CoachContentTypeSelect";
 import CoachMembershipDetails from "./pages/CoachMembershipDetails";
@@ -219,6 +220,8 @@ export default function App() {
       {/* Product-creation flow — standalone full-screen surface (no app chrome).
           Lives under /my-leland so it stays in the My Leland shell's context. */}
       <Route path="/my-leland/manage/:category/new" element={<CoachProductTypeSelect />} />
+      {/* Alternate guided ("select all that apply") creation flow — for team testing. */}
+      <Route path="/my-leland/manage/:category/new-guided" element={<CoachOfferingGuided />} />
       <Route path="/my-leland/manage/:category/new-event" element={<CoachEventTypeSelect />} />
       <Route path="/my-leland/manage/:category/new-content" element={<CoachContentTypeSelect />} />
       <Route path="/my-leland/manage/:category/new-product" element={<CoachProductNew />} />

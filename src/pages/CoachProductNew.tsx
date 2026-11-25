@@ -69,7 +69,7 @@ type StepKey = "product" | "offerings" | "scheduling" | "page";
 // price. v2: each product carries its own price and the option shows a roll-up
 // (subtotal → discount → total). Provided via context so deeply-nested config
 // fields and the roll-up can read it without prop-drilling.
-const V2Context = createContext(false);
+export const V2Context = createContext(false);
 const useV2 = () => useContext(V2Context);
 
 // Product types that carry a price in v2 (everything with a real config modal;
@@ -141,8 +141,8 @@ const STEPS: { key: StepKey; label: string; icon: string }[] = [
 //  - `seedConfig`: extra config merged into the seeded product (e.g. mark a
 //    livestream free so its setup hides the price).
 //  - `lockBilling`: hide the inline Payment switcher so a forced model can't change.
-const TYPE_CONFIG: Record<string, { label: string; slug: string | null; billing: BillingModel; gate: boolean; firstStep: "single" | "sessions" | "bundle" | "subscription"; lockBilling: boolean; seedConfig?: Record<string, string> }> = {
-  hourly:       { label: "Coaching",   slug: "coaching-time",  billing: "one-time",  gate: false, firstStep: "single",   lockBilling: false },
+const TYPE_CONFIG: Record<string, { label: string; icon?: string; slug: string | null; billing: BillingModel; gate: boolean; firstStep: "single" | "sessions" | "bundle" | "subscription"; lockBilling: boolean; seedConfig?: Record<string, string> }> = {
+  hourly:       { label: "Time", icon: hourglassIcon, slug: "coaching-time",  billing: "one-time",  gate: false, firstStep: "single",   lockBilling: false },
   async:        { label: "Content",    slug: "content",        billing: "one-time",  gate: false, firstStep: "single",   lockBilling: false },
   collection:   { label: "Collection", slug: "collection",     billing: "one-time",  gate: false, firstStep: "single",   lockBilling: false },
   course:       { label: "Course",     slug: "course",         billing: "one-time",  gate: false, firstStep: "single",   lockBilling: false },
@@ -153,6 +153,19 @@ const TYPE_CONFIG: Record<string, { label: string; slug: string | null; billing:
   // type, so there's no "How do people pay?" gate and no inline billing switcher.
   package:      { label: "Products", slug: null,            billing: "one-time",  gate: false, firstStep: "bundle", lockBilling: true },
 };
+
+// Admin-menu flow switcher — lets me jump between the individual creation flows
+// while building them out. Each entry's id is the `:type` route param. Keep this
+// in sync with CoachProductTypeSelect's cards (Free livestream is dropped for now).
+const FLOW_SWITCHER: { id: string; name: string }[] = [
+  { id: "hourly", name: "Hourly coaching" },
+  { id: "async", name: "Content" },
+  { id: "collection", name: "Collection" },
+  { id: "course", name: "Course" },
+  { id: "live", name: "Workshop" },
+  { id: "package", name: "Bundle" },
+  { id: "subscription", name: "Subscription" },
+];
 
 // Mask-tinted icon so it follows the surrounding text color (bg-current).
 function MaskIcon({ src, className = "h-[18px] w-[18px]" }: { src: string; className?: string }) {
@@ -181,7 +194,7 @@ const offeringTypes = [
   { slug: "content", label: "Content", blurb: "Guides, templates, videos", icon: bookOpenIcon },
   { slug: "collection", label: "Collection", blurb: "Group products into a bundle", icon: stackIcon },
   { slug: "course", label: "Course", blurb: "Structured multi-lesson course", icon: myCoursesIcon },
-  { slug: "workshop", label: "Group Session", blurb: "Host a paid live class", icon: videoIcon },
+  { slug: "workshop", label: "Workshop", blurb: "Host a paid live class", icon: videoIcon },
   { slug: "agent", label: "Agent", blurb: "An AI assistant trained on you", icon: aiIcon },
   { slug: "membership", label: "Private group", blurb: "A private community for members", icon: crownIcon },
 ];
@@ -200,12 +213,12 @@ const offeringAddDescription: Record<string, string> = {
 };
 
 // The kinds of section a coach can add to the customer-facing page.
-type PageSectionKind = "text" | "faqs" | "checklist" | "media" | "reviews" | "included";
+export type PageSectionKind = "text" | "faqs" | "checklist" | "media" | "reviews" | "included";
 
 // The always-present "What's included" section (a preview of the offering's
 // products + total). It can be reordered but not added or removed, so it lives
 // at a reserved id that never collides with user-added sections.
-const INCLUDED_SECTION_ID = -1;
+export const INCLUDED_SECTION_ID = -1;
 
 // A single Q&A pair inside a FAQs section.
 type FaqItem = { id: number; question: string; answer: string };
@@ -215,7 +228,7 @@ type ChecklistItem = { id: number; text: string };
 
 // A configured page section. Each kind carries its own content shape; the
 // discriminant `kind` narrows to the right fields.
-type PageSection =
+export type PageSection =
   | { id: number; kind: "text"; heading: string; body: string }
   | { id: number; kind: "faqs"; heading: string; faqs: FaqItem[] }
   | { id: number; kind: "checklist"; heading: string; items: ChecklistItem[] }
@@ -237,7 +250,7 @@ const pageSectionTypes: { kind: PageSectionKind; label: string; icon: string }[]
 const MAX_CHECKLIST_ITEMS = 10;
 
 // A blank section of the given kind, ready to edit.
-function newPageSection(kind: PageSectionKind, id: number): PageSection {
+export function newPageSection(kind: PageSectionKind, id: number): PageSection {
   switch (kind) {
     case "text": return { id, kind, heading: "", body: "" };
     case "faqs": return { id, kind, heading: "", faqs: [{ id: 1, question: "", answer: "" }] };
@@ -263,7 +276,7 @@ type CourseSection = { id: number; name: string };
 // An item inside a list offering. Collections use `config` as content config;
 // courses use `config` for a lesson's name/description and `sections` for its
 // ordered sections.
-type CollectionItem = { id: number; config: Record<string, string>; sections?: CourseSection[] };
+export type CollectionItem = { id: number; config: Record<string, string>; sections?: CourseSection[] };
 
 // What's selected in the course modal sidebar.
 type CourseSelection = { type: "general" } | { type: "lesson"; lessonId: number } | { type: "section"; lessonId: number; sectionId: number };
@@ -296,7 +309,9 @@ const newCourseSection = (existing: CourseSection[]): CourseSection => ({
 const configDefaults: Record<string, Record<string, string>> = {
   // `expiration` default must match DEFAULT_EXPIRATION below (kept as a literal
   // here since this object is initialized before that const).
-  "coaching-time": { mode: "set", hours: "", minutes: "", minHours: "", maxHours: "", delivery: "", expiration: "3 months" },
+  // `mode` starts empty so the time format is unselected — the Amount of time
+  // and the sections below it only reveal once a format is chosen.
+  "coaching-time": { mode: "", hours: "", minutes: "", minHours: "", maxHours: "", delivery: "", expiration: "3 months" },
   content: { assetName: "", title: "", description: "", downloadable: "false", attachFile: "false", attachmentName: "", resourceType: "", lelandPlus: "true", anonymous: "false" },
   collection: { title: "", description: "" },
   course: { title: "", description: "" },
@@ -325,7 +340,7 @@ const isConfigurable = (slug: string) => slug in configDefaults;
 const configPrompts: Record<string, string> = {
   content: "Upload your file and add the details.",
   "paid-livestream": "Schedule and set up your livestream.",
-  workshop: "Schedule your group session and set a price.",
+  workshop: "Schedule your workshop and set a price.",
 };
 
 // Unfinished-state CTA (label + optional icon) shown on the added row. The
@@ -432,7 +447,7 @@ const EXPIRATION_OPTIONS = [
 const DEFAULT_EXPIRATION = "3 months";
 
 // Whether a configurable offering has enough filled in to be saved as finished.
-function isConfigComplete(item: OfferingItem, v2 = false): boolean {
+export function isConfigComplete(item: OfferingItem, v2 = false): boolean {
   const c = item.config;
   if (item.slug === "coaching-time") {
     if (c.mode === "range") return Boolean(c.minHours && c.maxHours && c.price);
@@ -548,7 +563,7 @@ function CharField({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-[14px] font-medium text-gray-light">
+      <label className="mb-2.5 block text-[15px] font-semibold text-gray-dark">
         {label}
         {required && <span className="text-[#E5484D]"> *</span>}
       </label>
@@ -615,7 +630,7 @@ function SelectTag({ children, className = "" }: { children: ReactNode; classNam
   return <span className={`shrink-0 rounded-full bg-gray-hover px-2 py-0.5 text-[12px] font-medium text-gray-light ${className}`}>{children}</span>;
 }
 
-function Select({ value, onChange, options, placeholder, className = "", triggerClassName = "py-2.5 pl-3.5 pr-3 text-[14px]" }: { value: string; onChange: (v: string) => void; options: { value: string; label: string; info?: string; sub?: string; tag?: string }[]; placeholder?: string; className?: string; triggerClassName?: string }) {
+export function Select({ value, onChange, options, placeholder, className = "", triggerClassName = "py-2.5 pl-3.5 pr-3 text-[14px]" }: { value: string; onChange: (v: string) => void; options: { value: string; label: string; info?: string; sub?: string; tag?: string }[]; placeholder?: string; className?: string; triggerClassName?: string }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   // Menu is portaled to the body so it isn't clipped by any overflow-hidden
@@ -838,7 +853,14 @@ function PublishMenu({ disabled, onChoose }: { disabled: boolean; onChoose: (sta
   );
 }
 
+// Keyed by `:type` so switching flows (e.g. from the admin flow switcher)
+// fully remounts the builder and re-seeds its once-initialized state.
 export default function CoachProductNew() {
+  const { type } = useParams<{ type?: string }>();
+  return <CoachProductNewFlow key={type ?? "package"} />;
+}
+
+function CoachProductNewFlow() {
   const { category, type } = useParams<{ category: string; type?: string }>();
   const navigate = useNavigate();
   // The product type being created (card id from the type picker). Defaults to
@@ -865,6 +887,17 @@ export default function CoachProductNew() {
     const slug = typeCfg.slug;
     return [{ id: 0, slug, config: { ...defaultConfigFor(slug), ...(typeCfg.seedConfig ?? {}) }, configured: false, ...(isListOffering(slug) ? { items: [] } : {}) }];
   });
+
+  // Sessions type only: whether this offering is a single session or a multi-
+  // session program. Picked inline on the Sessions tab (a persistent two-card
+  // toggle) and changeable anytime. Single → the session carries no title/
+  // description of its own; the offering's (entered on Details) stand in. Multi
+  // → each session is titled/described AND the offering gets its own on Details.
+  // Edits infer the starting mode from how many sessions the seed already has.
+  const seedWorkshopCount = seed?.added.filter((a) => a.slug === "workshop").length ?? 0;
+  const [sessionMode, setSessionMode] = useState<"single" | "multi">(
+    editing && seedWorkshopCount > 1 ? "multi" : "single",
+  );
 
   // Offering status — shown in the top bar and chosen when publishing. New
   // offerings start as a draft until the coach publishes; edited ones are live.
@@ -897,6 +930,11 @@ export default function CoachProductNew() {
   // keyed by pricing-option id. The primary option is id 0.
   const [cohortsByOption, setCohortsByOption] = useState<Record<number, BuilderCohort[]>>(() => ({ 0: seed?.cohorts.length ? seed.cohorts : [newCohort(0)] }));
   const nextCohortId = useRef(seed?.cohorts.length || 1);
+  // Sessions type: whether the offering runs multiple cohorts (toggle lives in
+  // the sidebar) and which cohort's schedule is currently being edited. Scoped to
+  // the primary pricing option — the only one the sessions flow uses.
+  const [multiCohorts, setMultiCohorts] = useState((seed?.cohorts.length ?? 0) > 1);
+  const [activeCohortId, setActiveCohortId] = useState<number>(seed?.cohorts[0]?.id ?? 0);
   // Subscription offerings schedule live sessions as a rolling calendar instead
   // of cohorts: per group session (keyed by product id), a list of upcoming
   // occurrences members can join while active.
@@ -908,13 +946,16 @@ export default function CoachProductNew() {
   // subcategories, and the Leland+ recording toggle apply to the whole offering
   // (set on the Details tab), not to each individual session.
   const [sessionPrice, setSessionPrice] = useState("");
+  const [sessionVisibility, setSessionVisibility] = useState("public");
   const [sessionSubcats, setSessionSubcats] = useState("");
   const [sessionLelandPlus, setSessionLelandPlus] = useState(false);
-  // Subscription type: the coach's existing offerings (by slug) that this
-  // subscription grants access to — picked on the first tab, not built from
-  // product types like the other flows.
+  // Subscription type: like the bundle, the coach adds products (what's included)
+  // via OfferingsStep. Its own pricing is a flat monthly price plus an optional
+  // annual plan at a discount (the annual price is derived from the two).
   const isSubscriptionType = typeCfg.firstStep === "subscription";
-  const [subOfferings, setSubOfferings] = useState<string[]>([]);
+  const [subMonthlyPrice, setSubMonthlyPrice] = useState("");
+  const [subAnnualEnabled, setSubAnnualEnabled] = useState(false);
+  const [subAnnualDiscount, setSubAnnualDiscount] = useState("");
   // Thumbnail image (demo-only object URL) — set on the Details step, previewed
   // in the sidebar card and on the Page step.
   const [thumbnail, setThumbnail] = useState<string | null>(seed?.thumbnail ?? null);
@@ -923,6 +964,11 @@ export default function CoachProductNew() {
   ]);
   const nextOfferingId = useRef(seed?.added.length ?? singleSeed?.length ?? 0);
   const nextSectionId = useRef(0);
+
+  // "Make it a bundle" — single-product and sessions flows can convert in place
+  // into the bundle builder (from the sidebar card), unlocking multi-product +
+  // tiers while keeping the already-configured product.
+  const [bundleMode, setBundleMode] = useState(false);
 
   // Admin tool — MVP on shows the full feature set; off hides not-yet-built bits.
   const [mvp, setMvp] = useState(true);
@@ -960,7 +1006,9 @@ export default function CoachProductNew() {
   const steps = STEPS
     .filter((s) => s.key !== "scheduling" || (hasLive && !foldScheduling))
     .map((s) => (s.key === "offerings"
-      ? { ...s, label: typeCfg.label, icon: foldScheduling ? calendarPageIcon : s.icon }
+      // Converted-to-bundle flows show the generic "Products" tab like the real
+      // bundle builder; otherwise the type's own label/icon.
+      ? { ...s, label: bundleMode ? "Products" : typeCfg.label, icon: foldScheduling ? calendarPageIcon : (bundleMode ? s.icon : (typeCfg.icon ?? s.icon)) }
       : s));
   if (step === "scheduling" && (!hasLive || foldScheduling)) setStep(foldScheduling ? "offerings" : "product");
   const stepIndex = steps.findIndex((s) => s.key === step);
@@ -1009,7 +1057,7 @@ export default function CoachProductNew() {
   // Whether the offering has enough to proceed / show the preview. The
   // subscription type counts its selected offerings; every other flow counts the
   // products added.
-  const hasContent = isSubscriptionType ? subOfferings.length > 0 : added.length > 0;
+  const hasContent = added.length > 0;
   const [previewMounted, setPreviewMounted] = useState(hasContent);
   if (hasContent && !previewMounted) setPreviewMounted(true);
 
@@ -1061,22 +1109,49 @@ export default function CoachProductNew() {
   const previewItems = (primaryPricing?.productIds ?? [])
     .map((id) => added.find((a) => a.id === id))
     .filter((it): it is OfferingItem => Boolean(it));
-  // Live group learning: a lone session IS the offering, so its own title +
-  // description stand in as the offering's (the Details tab hides the duplicate
-  // name/headline fields). Adding a second session makes it a program, at which
-  // point the offering needs its own name/headline (entered on the Details tab).
+  // Live group learning: the offering always carries its own title + description
+  // (entered on the Details tab) — for a single session the session itself stays
+  // untitled, for a program each session is also titled. So the preview/page read
+  // the offering's name + headline regardless of mode.
   const isSessionsType = typeCfg.firstStep === "sessions";
-  const isSingleSession = isSessionsType && previewItems.length === 1;
-  const effectiveName = isSingleSession ? (previewItems[0]?.config.name ?? "") : name;
-  const effectiveHeadline = isSingleSession ? (previewItems[0]?.config.description ?? "") : headline;
+  const isSingleSession = isSessionsType && sessionMode === "single";
+  const effectiveName = name;
+  const effectiveHeadline = headline;
+
+  // Sessions-type cohort controls. The toggle lives in the sidebar; turning it on
+  // just reveals the existing single cohort (the coach adds more via the "+"),
+  // off trims back to the first. The preview card lists each cohort with its date.
+  const sessionCohorts = primaryPricing ? (cohortsByOption[primaryPricing.id] ?? []) : [];
+  const toggleMultiCohorts = () => {
+    if (!primaryPricing) return;
+    if (multiCohorts) {
+      sessionCohorts.slice(1).forEach((c) => removeCohort(primaryPricing.id, c.id));
+      setActiveCohortId(sessionCohorts[0]?.id ?? 0);
+      setMultiCohorts(false);
+    } else {
+      setMultiCohorts(true);
+    }
+  };
+  const cohortPreview = isSessionsType && multiCohorts
+    ? sessionCohorts.map((c, i) => {
+        const dates = Object.values(c.slots).map((s) => s.date).filter(Boolean).sort();
+        const iso = dates[0] ?? "";
+        return {
+          id: c.id,
+          label: c.label || `Cohort ${i + 1}`,
+          day: iso ? String(Number(iso.slice(8, 10))) : "–",
+          date: iso ? shortDate(iso) : "Dates TBD",
+        };
+      })
+    : null;
   const previewPaidType: "recurring" | "one-time" = billingModel === "recurring" ? "recurring" : "one-time";
   const previewInterval = primaryPricing?.interval ?? "1 month";
   // v2 derives the price from the option's roll-up total; v1 uses its set price.
   // Free is derived from a $0 price either way.
   const v2Total = optionRollup(previewItems, primaryPricing ?? { discountType: "percent", discountValue: "" }).total;
-  // Sessions type prices the whole offering once (on Details), not per session —
-  // so the preview reads that single price instead of the per-product roll-up.
-  const previewPrice = isSessionsType ? (sessionPrice || "") : v2 ? v2Total.toFixed(2) : (primaryPricing?.price ?? "");
+  // Sessions type prices the whole offering once (on Details); the subscription
+  // reads its flat monthly price — both skip the per-product roll-up.
+  const previewPrice = isSubscriptionType ? (subMonthlyPrice || "") : isSessionsType ? (sessionPrice || "") : v2 ? v2Total.toFixed(2) : (primaryPricing?.price ?? "");
   const previewMode: "free" | "paid" = Number(previewPrice || 0) === 0 ? "free" : "paid";
 
   const makeOffering = (slug: string): OfferingItem => ({ id: nextOfferingId.current++, slug, config: defaultConfigFor(slug), configured: false, ...(isListOffering(slug) ? { items: [] } : {}) });
@@ -1240,23 +1315,51 @@ export default function CoachProductNew() {
                     headline={headline} setHeadline={setHeadline}
                     thumbnail={thumbnail} setThumbnail={setThumbnail}
                     buttonText={buttonText} setButtonText={setButtonText}
-                    hideIdentity={isSingleSession}
+                    sessionsType={isSessionsType}
                     offeringExtras={isSessionsType ? {
                       price: sessionPrice, setPrice: setSessionPrice,
+                      visibility: sessionVisibility, setVisibility: setSessionVisibility,
                       subcategories: sessionSubcats, setSubcategories: setSessionSubcats,
                       lelandPlus: sessionLelandPlus, setLelandPlus: setSessionLelandPlus,
+                    } : undefined}
+                    coachingTime={typeCfg.slug === "coaching-time" && added[0] ? {
+                      config: added[0].config,
+                      onChange: (patch) => updateOfferingConfig(added[0].id, patch),
                     } : undefined}
                     mvp={mvp}
                   />
                 )}
                 {step === "offerings" && (
                   typeCfg.firstStep === "subscription" ? (
-                    <SubscriptionSetupStep
-                      selected={subOfferings}
-                      onChange={setSubOfferings}
-                      onCreateNew={() => setPendingNav(`/my-leland/manage/${category}/new`)}
-                    />
-                  ) : typeCfg.firstStep === "single" ? (
+                    // Subscription mirrors the bundle builder (add products via
+                    // OfferingsStep) but swaps the roll-up for its own monthly +
+                    // annual pricing section below.
+                    <>
+                      <OfferingsStep
+                        added={added} onConfigChange={updateOfferingConfig} onItemsChange={setOfferingItems} onConfigured={markOfferingConfigured}
+                        billingModel={billingModel}
+                        onChangeBillingModel={chooseBillingModel}
+                        lockBilling={typeCfg.lockBilling}
+                        hidePricing
+                        pricingOptions={pricingOptions}
+                        onAddPricingOption={addPricingOption}
+                        onRemovePricingOption={removePricingOption}
+                        onUpdatePricingOption={updatePricingOption}
+                        onAddProductToOption={addOfferingToOption}
+                        onRemoveProductFromOption={removeOfferingFromOption}
+                        multiEnabled={multiEnabled}
+                        onToggleMulti={toggleMulti}
+                        mvp={mvp}
+                      />
+                      {added.length > 0 && (
+                        <SubscriptionPricing
+                          monthlyPrice={subMonthlyPrice} setMonthlyPrice={setSubMonthlyPrice}
+                          annualEnabled={subAnnualEnabled} setAnnualEnabled={setSubAnnualEnabled}
+                          annualDiscount={subAnnualDiscount} setAnnualDiscount={setSubAnnualDiscount}
+                        />
+                      )}
+                    </>
+                  ) : typeCfg.firstStep === "single" && !bundleMode ? (
                     <SingleProductSetupStep
                       item={added[0] ?? null}
                       billingModel={billingModel}
@@ -1264,12 +1367,18 @@ export default function CoachProductNew() {
                       onItemsChange={setOfferingItems}
                       onConfigured={markOfferingConfigured}
                     />
-                  ) : typeCfg.firstStep === "sessions" ? (
+                  ) : typeCfg.firstStep === "sessions" && !bundleMode ? (
                     // Sessions type: each session carries its own date/time, and
                     // cohorts (tabs) re-run the whole set of sessions on new dates.
                     <SessionsSetupStep
+                      mode={sessionMode}
+                      onChangeMode={setSessionMode}
                       sessions={previewItems}
-                      cohorts={primaryPricing ? (cohortsByOption[primaryPricing.id] ?? []) : []}
+                      cohorts={sessionCohorts}
+                      multiCohorts={multiCohorts}
+                      onToggleMultiCohorts={toggleMultiCohorts}
+                      activeCohortId={activeCohortId}
+                      onSelectCohort={setActiveCohortId}
                       onAddSession={() => primaryPricing && addOfferingToOption(primaryPricing.id, "workshop")}
                       onRemoveSession={(id) => primaryPricing && removeOfferingFromOption(primaryPricing.id, id)}
                       onConfigChange={updateOfferingConfig}
@@ -1362,8 +1471,30 @@ export default function CoachProductNew() {
                 price={previewPrice}
                 cover={thumbnail}
                 multiOption={pricingOptions.length > 1}
-                joinLabel={multiEnabled ? "Select an option" : buttonText}
+                cohorts={cohortPreview}
+                activeCohortId={activeCohortId}
+                joinLabel={cohortPreview ? "Select a cohort" : multiEnabled ? "Select an option" : buttonText}
               />
+
+
+              {/* "Make it a bundle" upsell — single-product and sessions flows can
+                  convert into the bundle builder in place. Hidden on the bundle and
+                  subscription flows (and once already converted). Mirrors the
+                  bundle builder's "Make it a bundle" row language + icon. */}
+              {typeCfg.firstStep !== "bundle" && typeCfg.firstStep !== "subscription" && !bundleMode && (
+                <button
+                  type="button"
+                  onClick={() => { setBundleMode(true); setStep("offerings"); }}
+                  className="mt-3 flex w-full items-center justify-between gap-3 rounded-2xl border border-gray-stroke bg-white p-4 text-left transition-colors hover:border-[#c9c9c9]"
+                >
+                  <span className="min-w-0">
+                    <MaskIcon src={packageBoxOpenIcon} className="block h-[26px] w-[26px] text-gray-light" />
+                    <span className="mt-3 block text-[15px] font-semibold text-gray-dark">Make it a bundle</span>
+                    <span className="mt-0.5 block text-[14px] leading-snug text-gray-light">Add another product to this offering.</span>
+                  </span>
+                  <svg className="h-5 w-5 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                </button>
+              )}
             </motion.aside>
           )}
         </AnimatePresence>
@@ -1407,6 +1538,35 @@ export default function CoachProductNew() {
                   ))}
                 </div>
               </div>
+
+              {/* Flow switcher — jump to another creation flow for the same category */}
+              <div className="mt-1 border-t border-gray-stroke pt-2">
+                <span className="block px-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-light">Flow</span>
+                {FLOW_SWITCHER.map((f) => {
+                  const active = (type ?? "package") === f.id;
+                  return (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => { setAdminOpen(false); if (!active) navigate(`/my-leland/manage/${category}/new-product/${f.id}`); }}
+                      className={`flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-[14px] transition-colors ${active ? "font-semibold text-gray-dark" : "font-medium text-gray-dark hover:bg-gray-hover"}`}
+                    >
+                      {f.name}
+                      {active && (
+                        <svg className="h-4 w-4 shrink-0 text-gray-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                      )}
+                    </button>
+                  );
+                })}
+                {/* …or over to the guided flow. */}
+                <button
+                  type="button"
+                  onClick={() => { setAdminOpen(false); navigate(`/my-leland/manage/${category}/new-guided`); }}
+                  className="flex w-full items-center rounded-lg px-2 py-1.5 text-left text-[14px] font-medium text-gray-dark transition-colors hover:bg-gray-hover"
+                >
+                  Guided flow
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -1431,13 +1591,14 @@ export default function CoachProductNew() {
 
 type OfferingExtras = {
   price: string; setPrice: (v: string) => void;
+  visibility: string; setVisibility: (v: string) => void;
   subcategories: string; setSubcategories: (v: string) => void;
   lelandPlus: boolean; setLelandPlus: (v: boolean) => void;
 };
 
 function ProductStep({
   name, setName, headline, setHeadline, thumbnail, setThumbnail,
-  buttonText, setButtonText, hideIdentity = false, offeringExtras, mvp,
+  buttonText, setButtonText, hideIdentity = false, sessionsType = false, offeringExtras, coachingTime, mvp,
 }: {
   name: string; setName: (v: string) => void;
   headline: string; setHeadline: (v: string) => void;
@@ -1447,37 +1608,50 @@ function ProductStep({
   // description double as the offering's — so the name/headline fields are
   // hidden here to avoid asking for the same thing twice.
   hideIdentity?: boolean;
+  // Sessions (Group Session) type: the offering's own identity is always set
+  // here as a Title + a multi-line Description (the Description is stored in the
+  // headline slot, which the preview/page read).
+  sessionsType?: boolean;
   // Offering-level settings surfaced on Details for the sessions type (price,
   // subcategories, Leland+ recording) — they apply to the whole offering, not
   // to each individual session.
   offeringExtras?: OfferingExtras;
+  // Hourly flow: the coaching-time product's delivery + expiration prompts live
+  // on Details (below the thumbnail) rather than on the Time setup step.
+  coachingTime?: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void };
   mvp: boolean;
 }) {
   const selectedSubs = offeringExtras ? (offeringExtras.subcategories || "").split(",").filter(Boolean) : [];
-  const toggleSub = (s: string) => {
-    if (!offeringExtras) return;
-    const set = new Set(selectedSubs);
-    if (set.has(s)) set.delete(s); else set.add(s);
-    offeringExtras.setSubcategories([...set].join(","));
-  };
   return (
     <div className="flex flex-col gap-12">
       <section>
         <h2 className="text-[22px] font-semibold text-gray-dark">Create your offering</h2>
         <p className="mt-0.5 text-[15px] text-gray-light">
-          {hideIdentity ? "Your session's title and description are used for this offering. Add a cover image below." : "Describe your offering."}
+          {sessionsType ? "Give your offering a title and description — this is what buyers see." : hideIdentity ? "Your session's title and description are used for this offering. Add a cover image below." : "Describe your offering."}
         </p>
         <div className="mt-5 flex flex-col gap-5">
-          {!hideIdentity && (
+          {sessionsType ? (
+            <>
+              <CharField label="Title" required value={name} onChange={setName} placeholder="Name your offering" max={80} />
+              <div>
+                <label className="mb-2.5 block text-[15px] font-semibold text-gray-dark">Description</label>
+                <textarea value={headline} onChange={(e) => setHeadline(e.target.value)} rows={3} placeholder="What will attendees learn?" autoComplete="off" className={`${configInputClass} resize-none`} />
+              </div>
+            </>
+          ) : !hideIdentity && (
             <>
               <CharField label="Name" required value={name} onChange={setName} placeholder="My offering name" max={80} />
               <CharField label="Headline" value={headline} onChange={setHeadline} placeholder="A short subheadline for my offering here." max={72} />
             </>
           )}
           <div>
-            <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Thumbnail</label>
+            <label className="mb-2.5 block text-[15px] font-semibold text-gray-dark">Thumbnail</label>
             <ImageUploadField value={thumbnail} onChange={setThumbnail} label="Add a thumbnail image" hint="Recommended 1200 × 630" />
           </div>
+          {/* Hourly flow: delivery + expiration moved here from the Time step. */}
+          {coachingTime && (
+            <CoachingDeliveryExpirationFields config={coachingTime.config} onChange={coachingTime.onChange} />
+          )}
         </div>
       </section>
 
@@ -1485,29 +1659,42 @@ function ProductStep({
       {offeringExtras && (
         <section>
           <h2 className="text-[22px] font-semibold text-gray-dark">Pricing & visibility</h2>
-          <p className="mt-0.5 text-[15px] text-gray-light">Set one price for the offering and how it's discovered.</p>
+          <p className="mt-0.5 text-[15px] text-gray-light">Set the price and who can find this offering.</p>
           <div className="mt-5 flex flex-col gap-5">
             <div>
-              <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Price</label>
+              <label className="mb-2.5 block text-[15px] font-semibold text-gray-dark">Price</label>
               <PriceField value={offeringExtras.price} onChange={offeringExtras.setPrice} />
             </div>
+            {/* Visibility — the two-card radio chooser used across the builder. */}
             <div>
-              <label className="mb-2 block text-[14px] font-medium text-gray-light">Subcategories</label>
-              <div className="flex flex-wrap gap-2">
-                {MBA_SUBCATEGORIES.map((s) => {
-                  const active = selectedSubs.includes(s);
+              <label className="mb-2.5 block text-[15px] font-semibold text-gray-dark">Visibility</label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { key: "public", label: "Public", desc: "Appears in search and on your profile" },
+                  { key: "private", label: "Private", desc: "Only reachable with a direct link" },
+                ].map((opt) => {
+                  const active = (offeringExtras.visibility || "public") === opt.key;
                   return (
                     <button
-                      key={s}
+                      key={opt.key}
                       type="button"
-                      onClick={() => toggleSub(s)}
-                      className={`rounded-full border px-3.5 py-1.5 text-[14px] font-medium transition-colors ${active ? "border-gray-dark bg-gray-dark text-white" : "border-gray-stroke text-gray-dark hover:border-[#c9c9c9]"}`}
+                      onClick={() => offeringExtras.setVisibility(opt.key)}
+                      className={`flex items-center justify-between gap-3 rounded-xl px-4 py-3.5 text-left transition-colors ${active ? "border-[1.5px] border-gray-dark" : "border border-gray-stroke hover:border-[#c9c9c9]"}`}
                     >
-                      {s}
+                      <span className="min-w-0">
+                        <span className="block text-[15px] font-semibold text-gray-dark">{opt.label}</span>
+                        <span className="block text-[13px] text-gray-light">{opt.desc}</span>
+                      </span>
+                      <RadioDot active={active} />
                     </button>
                   );
                 })}
               </div>
+            </div>
+            {/* Subcategories — a compact multi-select instead of the chip wall. */}
+            <div>
+              <label className="mb-2.5 block text-[15px] font-semibold text-gray-dark">Subcategories</label>
+              <MultiSelect values={selectedSubs} onChange={(v) => offeringExtras.setSubcategories(v.join(","))} options={MBA_SUBCATEGORIES} placeholder="Select subcategories" />
             </div>
             <ToggleRow
               label="Upload recording to Leland+"
@@ -1531,8 +1718,8 @@ function ProductStep({
 // A cohort gives every group session in the offering a date + time. Slots are
 // keyed by the group session's product id.
 type CohortSlot = { date: string; time: string };
-type BuilderCohort = { id: number; label: string; slots: Record<number, CohortSlot> };
-const newCohort = (id: number): BuilderCohort => ({ id, label: "", slots: {} });
+export type BuilderCohort = { id: number; label: string; slots: Record<number, CohortSlot> };
+export const newCohort = (id: number): BuilderCohort => ({ id, label: "", slots: {} });
 
 // Subscription offerings don't run in cohorts — they keep a rolling calendar.
 // Each group session carries its own list of upcoming occurrences (a date +
@@ -1599,7 +1786,7 @@ function TierTabs({ options, activeId, onSelect }: { options: PricingOption[]; a
 function NoTierSessions() {
   return (
     <div className="rounded-xl bg-gray-hover px-4 py-8 text-center text-[15px] text-gray-light">
-      No group sessions in this tier.
+      No workshops in this tier.
     </div>
   );
 }
@@ -1639,8 +1826,8 @@ function SchedulingStep({
         <h2 className="text-[22px] font-semibold text-gray-dark">Scheduling</h2>
         <p className="mt-0.5 text-[15px] text-gray-light">
           {multiEnabled
-            ? "Each tier that includes live group sessions runs in its own cohorts. Buyers pick a cohort for their tier when they purchase."
-            : "Your offering includes live group sessions, so it runs in cohorts. Buyers pick a cohort when they purchase."}
+            ? "Each tier that includes live workshops runs in its own cohorts. Buyers pick a cohort for their tier when they purchase."
+            : "Your offering includes live workshops, so it runs in cohorts. Buyers pick a cohort when they purchase."}
         </p>
       </section>
 
@@ -1683,7 +1870,7 @@ function CohortSessionRow({ item, slot, onChange }: { item: OfferingItem; slot: 
     <div className="flex items-center gap-3 px-4 py-4">
       <CalendarIcon day={dayLabel} dim={!date} />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[15px] font-semibold text-gray-dark">{item.config.name || "Group Session"}</p>
+        <p className="truncate text-[15px] font-semibold text-gray-dark">{item.config.name || "Workshop"}</p>
         {editing
           ? (duration && <p className="text-[14px] text-gray-light">{duration}</p>)
           : <p className="text-[14px] text-gray-light">{dateText} · {timeText}</p>}
@@ -1862,7 +2049,7 @@ function SubscriptionSchedulingStep({
                 <img src={videoIcon} alt="" className="h-[26px] w-[26px]" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[16px] font-semibold text-gray-dark">{item.config.name || "Group Session"}</p>
+                <p className="truncate text-[16px] font-semibold text-gray-dark">{item.config.name || "Workshop"}</p>
                 {duration && <p className="text-[14px] text-gray-light">{duration}</p>}
               </div>
               <span className="shrink-0 rounded-full bg-gray-hover px-2.5 py-1 text-[12px] font-medium text-gray-light">
@@ -2667,7 +2854,7 @@ function PricingRollup({ products, option, onChange, recurring, onChangeBillingM
 // When `bare` (the single-option default), renders as two flat labeled sections
 // ("Add products" and "Pricing"). Otherwise wraps in card chrome with an
 // editable option name — used when there are multiple options.
-function PricingOptionCard({ option, index, products, available, comingSoon = [], bare, canDelete, mvp, recurring, onChangeBillingModel, lockBilling = false, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct, onToggleFreeProduct }: {
+function PricingOptionCard({ option, index, products, available, comingSoon = [], bare, canDelete, mvp, recurring, hidePricing = false, onChangeBillingModel, lockBilling = false, onRemove, onChange, onAddProduct, onRemoveProduct, onConfigureProduct, onToggleFreeProduct }: {
   option: PricingOption;
   index: number;
   products: OfferingItem[];
@@ -2677,6 +2864,9 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
   canDelete: boolean;
   mvp: boolean;
   recurring: boolean;
+  // When set, the built-in "Pricing" roll-up is omitted — the host supplies its
+  // own pricing section (e.g. the subscription's monthly + annual discount).
+  hidePricing?: boolean;
   onChangeBillingModel: (m: BillingModel) => void;
   lockBilling?: boolean;
   onRemove: () => void;
@@ -2717,8 +2907,8 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
                 <MaskIcon src={packageBoxOpenIcon} className="h-[26px] w-[26px] text-gray-light" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[15px] font-semibold text-gray-dark">Make it a bundle</span>
-                <span className="block text-[15px] text-gray-light">Add another product to this offering.</span>
+                <span className="block text-[15px] font-semibold text-gray-dark">Add another product</span>
+                <span className="block text-[15px] text-gray-light">Bundle it together into one offering.</span>
               </span>
               <AddProductMenu available={available} onAdd={onAddProduct} />
             </div>
@@ -2729,7 +2919,7 @@ function PricingOptionCard({ option, index, products, available, comingSoon = []
           )
         )}
 
-        {v2 ? (
+        {hidePricing ? null : v2 ? (
           // v2: a separate "Pricing" section (like v1), surfaced once a product
           // has been configured. The roll-up replaces v1's single price field.
           anyConfigured && (
@@ -3090,91 +3280,74 @@ function BillingModelSelector({ model, onChange, className = "" }: { model: Bill
   );
 }
 
-// The first tab for the Subscription type. A subscription grants recurring access
-// to a selection of the coach's EXISTING offerings — so rather than building new
-// products, the coach picks offerings from their catalog, or creates a new one
-// (which leaves this flow for the product picker).
-function SubscriptionSetupStep({ selected, onChange, onCreateNew }: { selected: string[]; onChange: (slugs: string[]) => void; onCreateNew: () => void }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onDown = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false); };
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [menuOpen]);
-
-  const selectedOfferings = selected
-    .map((s) => OFFERINGS.find((o) => o.slug === s))
-    .filter((o): o is Offering => Boolean(o));
-  const remaining = OFFERINGS.filter((o) => !selected.includes(o.slug));
-  const add = (slug: string) => { onChange([...selected, slug]); setMenuOpen(false); };
-  const remove = (slug: string) => onChange(selected.filter((s) => s !== slug));
-
+// The subscription's pricing section — rendered below the product list (which is
+// the bundle builder, reused via OfferingsStep with its roll-up hidden). The
+// coach sets a flat monthly price and can offer a discounted annual plan; the
+// annual price + savings are derived from the monthly price and the discount %.
+function SubscriptionPricing({ monthlyPrice, setMonthlyPrice, annualEnabled, setAnnualEnabled, annualDiscount, setAnnualDiscount }: {
+  monthlyPrice: string; setMonthlyPrice: (v: string) => void;
+  annualEnabled: boolean; setAnnualEnabled: (v: boolean) => void;
+  annualDiscount: string; setAnnualDiscount: (v: string) => void;
+}) {
+  const monthly = Number(monthlyPrice || 0);
+  const discPct = Math.min(100, Math.max(0, Number(annualDiscount || 0)));
+  const annualFull = monthly * 12;
+  const annualPrice = annualFull * (1 - discPct / 100);
+  const savings = annualFull - annualPrice;
   return (
-    <div>
-      <h2 className="text-[22px] font-semibold text-gray-dark">Choose what's included</h2>
-      <p className="mt-1.5 text-[15px] leading-snug text-gray-light">
-        Members get access to the offerings you include for as long as they stay subscribed. Add an existing offering, or create a new one.
-      </p>
-
-      {selectedOfferings.length > 0 && (
-        <div className="mt-6 flex flex-col gap-3">
-          {selectedOfferings.map((o) => (
-            <div key={o.slug} className="flex items-center gap-3 rounded-2xl border border-gray-stroke bg-white p-3">
-              {o.image
-                ? <img src={o.image} alt="" className="h-12 w-[72px] shrink-0 rounded-lg object-cover" />
-                : <div className="h-12 w-[72px] shrink-0 rounded-lg bg-gray-hover" />}
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[15px] font-semibold text-gray-dark">{o.title}</p>
-                <p className="truncate text-[14px] text-gray-light">{o.headline}</p>
-              </div>
-              <span className="shrink-0 text-[14px] font-semibold text-gray-dark">{o.price}</span>
-              <Button size="sm" variant="ghost" iconOnly aria-label={`Remove ${o.title}`} className="shrink-0" onClick={() => remove(o.slug)}>
-                <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-              </Button>
-            </div>
-          ))}
+    <section className="mt-14">
+      <h2 className="text-[22px] font-semibold text-gray-dark">Pricing</h2>
+      <p className="mt-0.5 text-[15px] text-gray-light">Set your monthly price, and offer a discount to members who pay for a year up front.</p>
+      <div className="mt-5 flex flex-col gap-5">
+        <div>
+          <label className="mb-2.5 block text-[15px] font-semibold text-gray-dark">Monthly price</label>
+          <div className="flex items-center gap-2.5">
+            <div className="flex-1"><PriceField value={monthlyPrice} onChange={setMonthlyPrice} /></div>
+            <span className="shrink-0 text-[15px] text-gray-light">/ month</span>
+          </div>
         </div>
-      )}
 
-      {/* Add: 1) select an existing offering (dropdown), or 2) create a new one. */}
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <div className="relative" ref={menuRef}>
-          <Button size="md" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={() => setMenuOpen((o) => !o)} disabled={remaining.length === 0}>
-            Select an offering
-            <svg className={`h-4 w-4 text-gray-light transition-transform ${menuOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-          </Button>
-          <AnimatePresence>
-            {menuOpen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.97, y: -4 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.97, y: -4 }}
-                transition={{ duration: 0.15 }}
-                className="absolute left-0 top-full z-30 mt-2 max-h-[340px] w-[360px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border border-gray-stroke bg-white p-1.5 shadow-lg"
-              >
-                {remaining.map((o) => (
-                  <button key={o.slug} type="button" onClick={() => add(o.slug)} className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-gray-hover">
-                    {o.image
-                      ? <img src={o.image} alt="" className="h-9 w-[54px] shrink-0 rounded-md object-cover" />
-                      : <div className="h-9 w-[54px] shrink-0 rounded-md bg-gray-hover" />}
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[14px] font-semibold text-gray-dark">{o.title}</span>
-                      <span className="block truncate text-[13px] text-gray-light">{o.price}</span>
+        {/* Annual billing — a clickable card with a visual toggle; when on, the
+            discount input + the computed annual price reveal. */}
+        <div className="overflow-hidden rounded-2xl border border-gray-stroke bg-white">
+          <button type="button" role="switch" aria-checked={annualEnabled} onClick={() => setAnnualEnabled(!annualEnabled)} className="flex w-full items-center justify-between gap-3 p-4 text-left">
+            <span className="min-w-0">
+              <span className="block text-[15px] font-semibold text-gray-dark">Offer annual billing</span>
+              <span className="mt-0.5 block text-[14px] leading-snug text-gray-light">Let members pay for a year up front at a discount.</span>
+            </span>
+            <span aria-hidden className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${annualEnabled ? "bg-[#222222]" : "bg-[#d9d9d9]"}`}>
+              <span className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${annualEnabled ? "translate-x-4" : ""}`} />
+            </span>
+          </button>
+          <AnimatePresence initial={false}>
+            {annualEnabled && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={offeringTransition} className="overflow-hidden">
+                <div className="flex flex-col gap-4 border-t border-gray-stroke p-4">
+                  <div>
+                    <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Annual discount</label>
+                    <div className="flex items-center gap-2.5">
+                      <div className="relative w-[120px]">
+                        <input inputMode="decimal" value={annualDiscount} placeholder="0" onChange={(e) => setAnnualDiscount(e.target.value.replace(/[^0-9]/g, ""))} className={`${configInputClass} pr-8`} />
+                        <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[15px] text-gray-light">%</span>
+                      </div>
+                      <span className="text-[14px] text-gray-light">off the monthly rate</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 rounded-xl bg-gray-hover px-4 py-3">
+                    <span className="text-[15px] font-semibold text-gray-dark">
+                      {monthly > 0 ? `$${formatMoney(annualPrice)} / year` : "Set a monthly price"}
                     </span>
-                  </button>
-                ))}
+                    {monthly > 0 && discPct > 0 && (
+                      <span className="text-[14px] text-gray-light">Save ${formatMoney(savings)} a year</span>
+                    )}
+                  </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-        <Button size="md" variant="secondary" rounded="rounded-full" className="font-semibold" onClick={onCreateNew}>
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-          Create a new offering
-        </Button>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -3187,10 +3360,10 @@ function SubscriptionSetupStep({ selected, onChange, onCreateNew }: { selected: 
 const singleSetupCopy: Record<string, { title: string; subtitle: string }> = {
   "coaching-time": { title: "Set up your coaching", subtitle: "Choose how much time buyers get and how it's priced." },
   content: { title: "Set up your content", subtitle: "Upload your file and add the details." },
-  workshop: { title: "Set up your group session", subtitle: "Name it and set a price — you'll schedule dates next." },
+  workshop: { title: "Set up your workshop", subtitle: "Name it and set a price — you'll schedule dates next." },
   "paid-livestream": { title: "Set up your livestream", subtitle: "It's free to attend — just add the details and schedule it." },
 };
-function SingleProductSetupStep({ item, billingModel, onConfigChange, onItemsChange, onConfigured }: { item: OfferingItem | null; billingModel: BillingModel; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void }) {
+export function SingleProductSetupStep({ item, billingModel, onConfigChange, onItemsChange, onConfigured, showCoachingDeliveryExpiration = false }: { item: OfferingItem | null; billingModel: BillingModel; showCoachingDeliveryExpiration?: boolean; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void }) {
   const v2 = useV2();
   const complete = item ? isConfigComplete(item, v2) : false;
   // Collection / Course are built in their own modal (General info + an ordered
@@ -3272,52 +3445,11 @@ function SingleProductSetupStep({ item, billingModel, onConfigChange, onItemsCha
           onChange={(patch) => onConfigChange(item.id, patch)}
           lockedCoachingMode={billingModel === "recurring" ? "set" : null}
           lockedCoachingReason={billingModel === "recurring" ? "subscription" : "format"}
+          // The Hourly flow moves these two prompts to the Details step; flows
+          // without that step (the guided flow) opt back in.
+          showCoachingDeliveryExpiration={showCoachingDeliveryExpiration}
         />
       </div>
-    </div>
-  );
-}
-
-// Cohort tabs — mirrors the bundle builder's OptionTabs (OptionTabs), but for
-// scheduling cohorts: each tab is one run of the whole set of sessions on its own
-// dates. The "+" adds a cohort; hovering a tab (when there's more than one)
-// reveals a remove control.
-function CohortTabs({ cohorts, activeId, onSelect, onAdd, onRemove }: { cohorts: BuilderCohort[]; activeId: number; onSelect: (id: number) => void; onAdd: () => void; onRemove: (id: number) => void }) {
-  return (
-    <div className="flex items-center gap-1 overflow-x-auto border-b border-gray-stroke">
-      {cohorts.map((c, i) => {
-        const active = c.id === activeId;
-        const label = c.label || `Cohort ${i + 1}`;
-        return (
-          <div key={c.id} className="group relative flex shrink-0 items-center">
-            <button
-              type="button"
-              onClick={() => onSelect(c.id)}
-              className={`flex items-center border-b-2 py-2.5 pl-1 text-[15px] transition-colors ${cohorts.length > 1 ? "pr-7" : "pr-3"} ${active ? "border-gray-dark font-semibold text-gray-dark" : "border-transparent font-medium text-gray-light hover:text-gray-dark"}`}
-            >
-              <span className="max-w-[160px] truncate">{label}</span>
-            </button>
-            {cohorts.length > 1 && (
-              <button
-                type="button"
-                onClick={() => onRemove(c.id)}
-                aria-label={`Remove ${label}`}
-                className="absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-gray-extra-light opacity-0 transition-opacity hover:text-gray-dark group-hover:opacity-100"
-              >
-                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-              </button>
-            )}
-          </div>
-        );
-      })}
-      <button
-        type="button"
-        onClick={onAdd}
-        aria-label="Add cohort"
-        className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
-      >
-        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-      </button>
     </div>
   );
 }
@@ -3328,9 +3460,9 @@ function CohortTabs({ cohorts, activeId, onSelect, onAdd, onRemove }: { cohorts:
 // tab (they're offering-level), so they're intentionally absent here.
 function SessionCard({ item, index, isProgram, canRemove, slot, onConfigChange, onSlotChange, onRemove }: { item: OfferingItem; index: number; isProgram: boolean; canRemove: boolean; slot: CohortSlot | undefined; onConfigChange: (patch: Record<string, string>) => void; onSlotChange: (patch: Partial<CohortSlot>) => void; onRemove: () => void }) {
   return (
-    <div className="rounded-2xl border border-gray-stroke p-5">
+    <div className="rounded-2xl border border-gray-stroke bg-white p-5 shadow-[0_1px_3px_0_rgba(16,24,40,0.10),0_1px_2px_0_rgba(16,24,40,0.06)]">
       <div className="flex items-center justify-between">
-        <span className="text-[15px] font-semibold text-gray-dark">{isProgram ? `Session ${index + 1}` : "Session"}</span>
+        <span className="leland-eyebrow text-gray-light">{isProgram ? `Session ${index + 1}` : "Session"}</span>
         {canRemove && (
           <Button size="sm" variant="ghost" iconOnly aria-label="Remove session" onClick={onRemove}>
             <MaskIcon src={trashIcon} className="h-[18px] w-[18px]" />
@@ -3339,26 +3471,26 @@ function SessionCard({ item, index, isProgram, canRemove, slot, onConfigChange, 
       </div>
       <div className="mt-4 flex flex-col gap-5">
         <div>
-          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Name</label>
+          <label className="mb-1.5 block text-[15px] font-semibold text-gray-dark">Name</label>
           <input value={item.config.name ?? ""} onChange={(e) => onConfigChange({ name: e.target.value })} placeholder="Name your session" autoComplete="off" className={configInputClass} />
         </div>
         <div>
-          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Description</label>
+          <label className="mb-1.5 block text-[15px] font-semibold text-gray-dark">Description</label>
           <textarea value={item.config.description ?? ""} onChange={(e) => onConfigChange({ description: e.target.value })} rows={3} placeholder="What will attendees learn?" autoComplete="off" className={`${configInputClass} resize-none`} />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Duration</label>
-          <Select value={item.config.duration ?? "30"} onChange={(v) => onConfigChange({ duration: v })} options={LIVESTREAM_DURATIONS} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Date</label>
+            <label className="mb-1.5 block text-[15px] font-semibold text-gray-dark">Date</label>
             <input type="date" value={slot?.date ?? ""} onChange={(e) => onSlotChange({ date: e.target.value })} className={configInputClass} />
           </div>
           <div>
-            <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Time</label>
+            <label className="mb-1.5 block text-[15px] font-semibold text-gray-dark">Time</label>
             <input type="time" value={slot?.time ?? ""} onChange={(e) => onSlotChange({ time: e.target.value })} className={configInputClass} />
           </div>
+        </div>
+        <div>
+          <label className="mb-1.5 block text-[15px] font-semibold text-gray-dark">Duration</label>
+          <Select value={item.config.duration ?? "30"} onChange={(v) => onConfigChange({ duration: v })} options={LIVESTREAM_DURATIONS} />
         </div>
       </div>
     </div>
@@ -3367,104 +3499,209 @@ function SessionCard({ item, index, isProgram, canRemove, slot, onConfigChange, 
 
 // The first tab for the "Live group learning" type. The coach adds one session
 // for a one-off, or several to build a program; each session carries its own
-// date & time. Cohorts (tabs, like the bundle builder's tiers) re-run the whole
-// set of sessions on a fresh schedule.
-function SessionsSetupStep({ sessions, cohorts, onAddSession, onRemoveSession, onConfigChange, onConfigured, onAddCohort, onRemoveCohort, onUpdateCohort }: { sessions: OfferingItem[]; cohorts: BuilderCohort[]; onAddSession: () => void; onRemoveSession: (id: number) => void; onConfigChange: (id: number, patch: Record<string, string>) => void; onConfigured: (id: number) => void; onAddCohort: () => void; onRemoveCohort: (id: number) => void; onUpdateCohort: (id: number, patch: Partial<BuilderCohort>) => void }) {
-  // A session is "set up" once it has a name — price is offering-level now, so
-  // completeness no longer depends on it.
+// date & time. The "Multiple cohorts" toggle (in the sidebar) re-runs the whole
+// set of sessions on fresh dates; a pill row here picks which cohort is edited.
+export function SessionsSetupStep({ mode, onChangeMode, sessions, cohorts, multiCohorts, onToggleMultiCohorts, activeCohortId, onSelectCohort, onAddSession, onRemoveSession, onConfigChange, onConfigured, onAddCohort, onRemoveCohort, onUpdateCohort }: { mode: "single" | "multi"; onChangeMode: (m: "single" | "multi") => void; sessions: OfferingItem[]; cohorts: BuilderCohort[]; multiCohorts: boolean; onToggleMultiCohorts: () => void; activeCohortId: number; onSelectCohort: (id: number) => void; onAddSession: () => void; onRemoveSession: (id: number) => void; onConfigChange: (id: number, patch: Record<string, string>) => void; onConfigured: (id: number) => void; onAddCohort: () => void; onRemoveCohort: (id: number) => void; onUpdateCohort: (id: number, patch: Partial<BuilderCohort>) => void }) {
+  const singleMode = mode === "single";
+  // A session is "set up" once it has a name. In single mode the session carries
+  // no title of its own (the offering's lives on Details), so it's complete as
+  // soon as it exists — price/identity are offering-level.
   useEffect(() => {
     for (const s of sessions) {
-      if (s.config.name && !s.configured) onConfigured(s.id);
+      if ((singleMode || s.config.name) && !s.configured) onConfigured(s.id);
     }
-  }, [sessions, onConfigured]);
+  }, [sessions, singleMode, onConfigured]);
 
-  // Multiple cohorts off by default (mirrors the bundle builder's "Enable tiers"
-  // toggle). Off = one implicit cohort, no tab bar; on = the cohort tab bar.
-  // Seeded offerings that already have more than one cohort start enabled.
-  const [multiCohorts, setMultiCohorts] = useState(cohorts.length > 1);
-  const [activeCohortId, setActiveCohortId] = useState<number>(cohorts[0]?.id ?? 0);
+  // Switching mode inline: multi starts with the single session already present
+  // (the coach adds more via the button below); switching back to a single
+  // session drops the extras so only the first remains.
+  const chooseMode = (next: "single" | "multi") => {
+    if (next === mode) return;
+    if (next === "single") {
+      sessions.slice(1).forEach((s) => onRemoveSession(s.id));
+    }
+    onChangeMode(next);
+  };
+
+  // The cohort currently being edited. The "Multiple cohorts" toggle and the
+  // add/remove controls live in the sidebar + the pill row below; off = the one
+  // implicit cohort.
   const activeCohort = multiCohorts
     ? (cohorts.find((c) => c.id === activeCohortId) ?? cohorts[0])
     : cohorts[0];
-  const isProgram = sessions.length > 1;
+  // In program (multi) mode the cards are always numbered ("Session 1", …) even
+  // before a second is added, so it reads as a sequence you're building.
+  const isProgram = !singleMode;
 
   const setSlot = (sessionId: number, patch: Partial<CohortSlot>) => {
     if (!activeCohort) return;
     onUpdateCohort(activeCohort.id, { slots: { ...activeCohort.slots, [sessionId]: { ...(activeCohort.slots[sessionId] ?? { date: "", time: "" }), ...patch } } });
   };
 
-  const handleToggleMulti = () => {
-    if (multiCohorts) {
-      // Collapse back to the first cohort, discarding the extras.
-      cohorts.slice(1).forEach((c) => onRemoveCohort(c.id));
-      setActiveCohortId(cohorts[0]?.id ?? 0);
-      setMultiCohorts(false);
-    } else {
-      setMultiCohorts(true);
-    }
-  };
-
   return (
     <div>
-      <h2 className="text-[22px] font-semibold text-gray-dark">Set up your sessions</h2>
+      <h2 className="text-[22px] font-semibold text-gray-dark">{singleMode ? "Set up your session" : "Set up your sessions"}</h2>
       <p className="mt-1.5 text-[15px] leading-snug text-gray-light">
-        Add one session for a one-off, or several to build a program.
+        {singleMode ? "Set how long your session runs and when it takes place." : "Title and schedule each session in your program."}
       </p>
 
-      {/* Cohort tabs (when enabled) + the "Multiple cohorts" toggle — mirrors the
-          bundle builder's tier bar. */}
-      <div className="mt-6">
-        <div className={`flex items-end justify-between gap-4 ${multiCohorts ? "border-b border-gray-stroke" : ""}`}>
-          <div className="min-w-0 flex-1">
-            {multiCohorts && (
-              <CohortTabs
-                cohorts={cohorts}
-                activeId={activeCohort?.id ?? 0}
-                onSelect={setActiveCohortId}
-                onAdd={onAddCohort}
-                onRemove={onRemoveCohort}
-              />
-            )}
-          </div>
-          <div className="flex shrink-0 items-center gap-2.5 pb-2.5">
-            <span className="group relative flex">
-              <span className={`cursor-help text-[14px] font-medium underline decoration-dotted underline-offset-2 transition-colors ${multiCohorts ? "text-gray-light" : "text-gray-extra-light"}`}>
-                Multiple cohorts
-              </span>
-              <span role="tooltip" className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 hidden w-max max-w-[260px] rounded-lg bg-gray-dark px-3 py-2 text-[12px] font-medium leading-snug text-white shadow-[0_4px_16px_rgba(16,24,40,0.18)] group-hover:block">
-                Run the same set of sessions multiple times on different dates. Buyers pick a cohort when they enroll.
-              </span>
-            </span>
-            <Toggle checked={multiCohorts} onChange={handleToggleMulti} size="sm" />
-          </div>
+      {/* Session count — a persistent two-card choice (mirrors the content flow's
+          "How do you want to add content?"), switchable anytime. */}
+      <div className="mt-12">
+        <h3 className="mb-2.5 block text-[15px] font-semibold text-gray-dark">How many sessions?</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { value: "single" as const, label: "Single session", sub: "A one-off workshop or class", icon: videoIcon },
+            { value: "multi" as const, label: "Multiple sessions", sub: "A program of several sessions", icon: myCoursesIcon },
+          ].map((opt) => {
+            const active = mode === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => chooseMode(opt.value)}
+                className={`flex w-full flex-col items-center gap-2 rounded-xl border-[1.5px] bg-white px-4 py-5 text-center transition-colors ${active ? "border-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"}`}
+              >
+                <MaskIcon src={opt.icon} className="h-[26px] w-[26px] text-gray-dark" />
+                <span className="flex flex-col gap-0.5">
+                  <span className="text-[15px] font-semibold text-gray-dark">{opt.label}</span>
+                  <span className="text-[14px] leading-snug text-gray-light">{opt.sub}</span>
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-5">
-        {sessions.map((s, i) => (
-          <SessionCard
-            key={s.id}
-            item={s}
-            index={i}
-            isProgram={isProgram}
-            canRemove={sessions.length > 1}
-            slot={activeCohort?.slots[s.id]}
-            onConfigChange={(patch) => onConfigChange(s.id, patch)}
-            onSlotChange={(patch) => setSlot(s.id, patch)}
-            onRemove={() => onRemoveSession(s.id)}
-          />
-        ))}
-      </div>
+      {/* Run multiple cohorts — a full-width gray banner on its own between the
+          session-count section and the schedule. Toggling it reveals the cohort
+          selector row (and the cohorts in the preview). */}
+      <button type="button" onClick={onToggleMultiCohorts} className="mt-12 flex w-full items-center gap-2.5 rounded-xl bg-gray-hover px-4 py-3.5 text-left transition-colors hover:bg-[#222222]/[0.08]">
+        <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] border transition-colors ${multiCohorts ? "border-gray-dark bg-gray-dark" : "border-gray-stroke bg-white"}`}>
+          {multiCohorts && (
+            <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+          )}
+        </span>
+        <span className="text-[14px] leading-snug">
+          <span className="font-semibold text-gray-light">Run multiple cohorts</span>
+          <span className="font-normal text-gray-extra-light"> — offer the same sessions again on different dates</span>
+        </span>
+      </button>
 
-      <Button size="md" variant="secondary" rounded="rounded-full" className="mt-4 font-semibold" onClick={onAddSession}>
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-        Add another session
-      </Button>
+      {/* Cohort selector — a row of buttons that picks which cohort's schedule
+          you're editing. Shown (and animated in) only when "Multiple cohorts" is
+          on; the toggle itself lives in the sidebar. */}
+      <AnimatePresence initial={false}>
+        {multiCohorts && (
+          <motion.div
+            key="cohort-selector"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={offeringTransition}
+            className="overflow-hidden"
+          >
+            <div className="mt-12">
+              <h3 className="mb-2.5 block text-[15px] font-semibold text-gray-dark">Select a cohort to edit</h3>
+              <div className="flex flex-wrap items-stretch gap-2.5">
+                {cohorts.map((c, i) => {
+                  const active = c.id === (activeCohort?.id ?? 0);
+                  const label = c.label || `Cohort ${i + 1}`;
+                  const dates = Object.values(c.slots).map((s) => s.date).filter(Boolean).sort();
+                  const iso = dates[0] ?? "";
+                  const day = iso ? String(Number(iso.slice(8, 10))) : "–";
+                  return (
+                    <div key={c.id} className="relative">
+                      <button
+                        type="button"
+                        onClick={() => onSelectCohort(c.id)}
+                        className={`flex h-[68px] min-w-[225px] items-center gap-3 rounded-xl border-[1.5px] px-4 text-left transition-colors ${cohorts.length > 1 ? "pr-9" : ""} ${active ? "border-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"}`}
+                      >
+                        <CalendarIcon day={day} dim={!iso} size="sm" />
+                        <span className="min-w-0">
+                          <span className="block text-[15px] font-semibold text-gray-dark">{label}</span>
+                          <span className="block text-[14px] text-gray-light">{iso ? `Starts ${shortDate(iso)}` : "Date not set"}</span>
+                        </span>
+                      </button>
+                      {cohorts.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => onRemoveCohort(c.id)}
+                          aria-label={`Remove ${label}`}
+                          className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full text-gray-extra-light transition-colors hover:bg-gray-hover hover:text-gray-dark"
+                        >
+                          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+                <button
+                  type="button"
+                  onClick={onAddCohort}
+                  aria-label="Add cohort"
+                  className="flex h-[68px] w-[68px] shrink-0 items-center justify-center rounded-xl bg-gray-hover text-gray-light transition-colors hover:bg-[#222222]/10 hover:text-gray-dark"
+                >
+                  <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Single session: the duration + schedule sit as plain sections (like the
+          Details tab), not inside a session card. Programs keep one card per
+          session so they read as a stack. */}
+      {singleMode ? (
+        sessions[0] && (
+          <div className="mt-12 flex flex-col gap-5">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1.5 block text-[15px] font-semibold text-gray-dark">Date</label>
+                <input type="date" value={activeCohort?.slots[sessions[0].id]?.date ?? ""} onChange={(e) => setSlot(sessions[0].id, { date: e.target.value })} className={configInputClass} />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-[15px] font-semibold text-gray-dark">Time</label>
+                <input type="time" value={activeCohort?.slots[sessions[0].id]?.time ?? ""} onChange={(e) => setSlot(sessions[0].id, { time: e.target.value })} className={configInputClass} />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[15px] font-semibold text-gray-dark">Duration</label>
+              <Select value={sessions[0].config.duration ?? "30"} onChange={(v) => onConfigChange(sessions[0].id, { duration: v })} options={LIVESTREAM_DURATIONS} />
+            </div>
+          </div>
+        )
+      ) : (
+        // Program: the session cards sit inside a gray container so each white
+        // card stands out against it, with a clear add button at the bottom.
+        <div className="mt-12 rounded-3xl bg-gray-hover p-4">
+          <div className="flex flex-col gap-4">
+            {sessions.map((s, i) => (
+              <SessionCard
+                key={s.id}
+                item={s}
+                index={i}
+                isProgram={isProgram}
+                canRemove={sessions.length > 1}
+                slot={activeCohort?.slots[s.id]}
+                onConfigChange={(patch) => onConfigChange(s.id, patch)}
+                onSlotChange={(patch) => setSlot(s.id, patch)}
+                onRemove={() => onRemoveSession(s.id)}
+              />
+            ))}
+          </div>
+          <Button size="lg" variant="dark" rounded="rounded-lg" className="mt-4 font-semibold" onClick={onAddSession}>
+            <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+            Add session
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
 
-function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, billingModel, onChangeBillingModel, lockBilling = false, pricingOptions, onAddPricingOption, onRemovePricingOption, onUpdatePricingOption, onAddProductToOption, onRemoveProductFromOption, multiEnabled, onToggleMulti, mvp }: { added: OfferingItem[]; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; billingModel: BillingModel; onChangeBillingModel: (m: BillingModel) => void; lockBilling?: boolean; pricingOptions: PricingOption[]; onAddPricingOption: () => number; onRemovePricingOption: (id: number) => void; onUpdatePricingOption: (id: number, patch: Partial<PricingOption>) => void; onAddProductToOption: (optionId: number, slug: string) => number; onRemoveProductFromOption: (optionId: number, itemId: number) => void; multiEnabled: boolean; onToggleMulti: () => void; mvp: boolean }) {
+function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, billingModel, onChangeBillingModel, lockBilling = false, hidePricing = false, pricingOptions, onAddPricingOption, onRemovePricingOption, onUpdatePricingOption, onAddProductToOption, onRemoveProductFromOption, multiEnabled, onToggleMulti, mvp }: { added: OfferingItem[]; onConfigChange: (id: number, patch: Record<string, string>) => void; onItemsChange: (id: number, items: CollectionItem[]) => void; onConfigured: (id: number) => void; billingModel: BillingModel; onChangeBillingModel: (m: BillingModel) => void; lockBilling?: boolean; hidePricing?: boolean; pricingOptions: PricingOption[]; onAddPricingOption: () => number; onRemovePricingOption: (id: number) => void; onUpdatePricingOption: (id: number, patch: Partial<PricingOption>) => void; onAddProductToOption: (optionId: number, slug: string) => number; onRemoveProductFromOption: (optionId: number, itemId: number) => void; multiEnabled: boolean; onToggleMulti: () => void; mvp: boolean }) {
   // When MVP is on: Agent / Private group are hidden entirely, while Course and
   // Livestream are shown as non-clickable "coming soon" options. Collection is
   // fully available — it reuses buckets built on the Content page.
@@ -3605,6 +3842,7 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, bil
         canDelete={false}
         mvp={mvp}
         recurring={billingModel === "recurring"}
+        hidePricing={hidePricing}
         onChangeBillingModel={onChangeBillingModel}
         lockBilling={lockBilling}
         onRemove={() => onRemovePricingOption(opt.id)}
@@ -3619,9 +3857,15 @@ function OfferingsStep({ added, onConfigChange, onItemsChange, onConfigured, bil
 
   return (
     <div>
-      {/* Persistent offering-level header — kept across single and multi. */}
-      <h2 className="text-[22px] font-semibold text-gray-dark">{billingModel === "recurring" ? "Build your subscription" : "Build your offering"}</h2>
-      <p className="mt-0.5 text-[15px] text-gray-light">The products you add will show up as a single {billingModel === "recurring" ? "subscription" : "offering"} on your profile.</p>
+      {/* Persistent offering-level header — kept across single and multi. Empty,
+          it reads as a continuation of the type picker ("select your first
+          product"); once products are added it describes the result. */}
+      <h2 className="text-[22px] font-semibold text-gray-dark">{added.length === 0
+        ? "Select your first product"
+        : billingModel === "recurring" ? "Build your subscription" : "Build your offering"}</h2>
+      <p className="mt-0.5 text-[15px] text-gray-light">{added.length === 0
+        ? "Start with one product, then build it into a full offering."
+        : `The products you add will show up as a single ${billingModel === "recurring" ? "subscription" : "offering"} on your profile.`}</p>
 
       {!v2 ? (
         // v1 (legacy): options stack as cards, added via the button below.
@@ -3883,45 +4127,50 @@ function ProductPicker({ items, available, comingSoon = [], addVariant = "grid",
 }) {
   const v2 = useV2();
 
-  // v2 flat list: the initial "add a product" rows and the added rows live in a
-  // single slug-keyed AnimatePresence, so the chosen product's row persists
-  // (morphing Add → its configured state) while the others collapse away.
+  // v2: the empty "pick a product" state mirrors the type-select grid (compact
+  // icon-tile + name cards, two-up) so landing here from the type picker reads as
+  // the same screen with a new question. Once a product is added, the builder's
+  // configured rows take over.
   if (v2 && addVariant === "grid") {
+    if (items.length === 0) {
+      return (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {available.map((o) => (
+            <button
+              key={o.slug}
+              type="button"
+              onClick={() => onAdd(o.slug)}
+              className="flex items-center gap-3 rounded-2xl border-[1.5px] border-gray-stroke bg-white p-4 text-left transition-colors hover:border-gray-dark"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-hover text-gray-dark">
+                <MaskIcon src={o.icon} className="h-[22px] w-[22px]" />
+              </span>
+              <span className="min-w-0 text-[16px] font-semibold text-gray-dark">{o.label}</span>
+            </button>
+          ))}
+          {comingSoon.map((o) => (
+            <div
+              key={o.slug}
+              className="flex items-center gap-3 rounded-2xl border-[1.5px] border-gray-stroke bg-white p-4 opacity-60"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-hover text-gray-dark">
+                <MaskIcon src={o.icon} className="h-[22px] w-[22px]" />
+              </span>
+              <span className="min-w-0 flex-1 text-[16px] font-semibold text-gray-dark">{o.label}</span>
+              <span className="shrink-0 rounded-md bg-gray-hover px-2 py-1 text-[10px] font-medium uppercase tracking-[0.05em] text-gray-light">Coming soon</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
     return (
-      <div className={`flex flex-col ${items.length === 0 ? "gap-3" : ""}`}>
+      <div className="flex flex-col">
         <AnimatePresence initial={false} mode="popLayout">
-          {items.length === 0
-            ? [
-                ...available.map((o) => (
-                  <motion.div key={o.slug} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} transition={offeringTransition} className="overflow-hidden">
-                    <div
-                      onClick={() => onAdd(o.slug)}
-                      className="flex group cursor-pointer items-center gap-3 rounded-[20px] border border-gray-stroke bg-white px-4 py-4 transition-colors hover:border-gray-dark"
-                    >
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center">
-                        <img src={o.icon} alt="" className="h-[26px] w-[26px]" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[15px] font-semibold text-gray-dark">{o.label}</span>
-                        <span className="block text-[15px] text-gray-light">{offeringAddDescription[o.slug] ?? o.blurb}</span>
-                      </span>
-                      <Button iconOnly size="md" variant="secondary" aria-label={`Add ${o.label}`} onClick={(e) => { e.stopPropagation(); onAdd(o.slug); }} className="transition-colors !bg-transparent group-hover:!bg-gray-hover">
-                        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-                      </Button>
-                    </div>
-                  </motion.div>
-                )),
-                ...comingSoon.map((o) => (
-                  <motion.div key={o.slug} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} transition={offeringTransition} className="overflow-hidden">
-                    <ComingSoonProductCard o={o} />
-                  </motion.div>
-                )),
-              ]
-            : items.map((item, i) => (
-                <motion.div key={item.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} transition={offeringTransition} className="overflow-hidden">
-                  <AddedOfferingRow item={item} onRemove={() => onRemove(item.id)} onConfigure={() => onConfigure(item.id)} onToggleFree={() => onToggleFree(item.id)} isLast={i === items.length - 1} />
-                </motion.div>
-              ))}
+          {items.map((item, i) => (
+            <motion.div key={item.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }} transition={offeringTransition} className="overflow-hidden">
+              <AddedOfferingRow item={item} onRemove={() => onRemove(item.id)} onConfigure={() => onConfigure(item.id)} onToggleFree={() => onToggleFree(item.id)} isLast={i === items.length - 1} />
+            </motion.div>
+          ))}
         </AnimatePresence>
       </div>
     );
@@ -4259,22 +4508,15 @@ export function ConfigModal({ item, lockedCoachingMode = null, lockedCoachingRea
   const o = item ? offeringBySlug[item.slug] : null;
   const complete = item ? isConfigComplete(item, v2) : false;
   const prompt = item ? configPrompts[item.slug] : undefined;
-  // Content's two-column editor uses a wider layout — so the modal grows to
-  // accommodate it. It's reached only once an asset is uploaded; the upload
-  // prompt (source === "upload" but no asset yet) stays compact like the rest.
-  const wide = !!item && item.slug === "content" && ((item.config.source === "upload" && !!item.config.assetName) || item.config.editing === "true");
-  // The upload prompt (source === "upload" but no asset yet) is a gate before the
-  // editor — there's nothing to save yet, so hide the footer action.
-  const uploadPrompt = !!item && item.slug === "content" && item.config.source === "upload" && !item.config.assetName;
-  // The editor's Back button lives in the footer; bumping this asks ContentFields
-  // to run its staged back-to-library transition.
-  const [backSignal, setBackSignal] = useState(0);
-  // Track scroll so the library's sticky search can gain a shadow and the close
-  // button can hide once the user scrolls past the top.
+  // Content's reuse "Edit" pane uses a wider two-column layout — so the modal
+  // grows to accommodate it. The main content flow is a single progressive
+  // column that stays at the standard width.
+  const wide = !!item && item.slug === "content" && item.config.editing === "true";
+  // Track scroll so the close button can hide once the user scrolls past the top.
   const [scrolled, setScrolled] = useState(false);
-  const isLibrary = !!item && item.slug === "content" && item.config.source !== "upload";
+  const isLibrary = !!item && item.slug === "content" && item.config.source === "reuse";
   // Reset when the view or item changes so a stale scroll state doesn't linger.
-  useEffect(() => { setScrolled(false); }, [wide, uploadPrompt, item?.id]);
+  useEffect(() => { setScrolled(false); }, [wide, item?.id]);
 
   return createPortal(
     <AnimatePresence>
@@ -4295,7 +4537,7 @@ export function ConfigModal({ item, lockedCoachingMode = null, lockedCoachingRea
             transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1], layout: { duration: 0.42, ease: [0, 0, 0.2, 1] } }}
             onClick={(e) => e.stopPropagation()}
             style={{ borderRadius: 24 }}
-            className={`relative flex w-full flex-col overflow-hidden bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)] ${wide ? "max-w-[1180px]" : "max-w-[600px]"} ${item?.slug === "content" && !wide ? "h-[85vh]" : item?.slug === "coaching-time" ? "h-[850px] max-h-[calc(100vh-2rem)]" : "max-h-[85vh]"}`}
+            className={`relative flex w-full flex-col overflow-hidden bg-white shadow-[0_20px_60px_rgba(16,24,40,0.28)] ${wide ? "max-w-[1180px]" : "max-w-[600px]"} ${item?.slug === "coaching-time" ? "h-[850px] max-h-[calc(100vh-2rem)]" : "max-h-[85vh]"}`}
           >
             {/* Close — circular gray, top-right. Fades out once the library is
                 scrolled so it doesn't collide with the sticky search bar. */}
@@ -4303,13 +4545,10 @@ export function ConfigModal({ item, lockedCoachingMode = null, lockedCoachingRea
               <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
             </button>
 
-            {/* Scrollable content. pt lives on the inner wrappers (not here) so the
-                library's sticky search can pin flush to the top. The upload prompt
-                has no footer, so it gets a matching bottom padding. */}
-            <div onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)} className={`flex-1 overflow-y-auto px-7 ${uploadPrompt ? "pb-7" : item.slug === "coaching-time" ? "pb-28" : "pb-1"}`}>
-              {/* Header — for content, each view (library / upload) renders its
-                  own header inside ContentFields so it animates with that view's
-                  content rather than morphing across the modal resize. */}
+            {/* Scrollable content. pt lives on the inner wrappers (not here). */}
+            <div onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)} className={`flex-1 overflow-y-auto px-7 ${item.slug === "coaching-time" ? "pb-28" : "pb-1"}`}>
+              {/* Header — content renders its own header inside ContentFields so it
+                  sits with the progressive sections; other types get it here. */}
               {item.slug !== "content" && (
                 <div className="pt-8">
                   <h2 className="pr-10 font-serif text-[28px] leading-tight text-gray-dark">Configure {o.label.toLowerCase()}</h2>
@@ -4319,40 +4558,30 @@ export function ConfigModal({ item, lockedCoachingMode = null, lockedCoachingRea
 
               {/* Fields */}
               <div className={item.slug === "content" ? "pt-8" : "mt-3"}>
-                <OfferingConfigFields slug={item.slug} config={item.config} onChange={onChange} lockedCoachingMode={lockedCoachingMode} lockedCoachingReason={lockedCoachingReason} backSignal={backSignal} scrolled={scrolled} uploadOnly={uploadOnly} onCancel={onClose} />
+                <OfferingConfigFields slug={item.slug} config={item.config} onChange={onChange} lockedCoachingMode={lockedCoachingMode} lockedCoachingReason={lockedCoachingReason} scrolled={scrolled} uploadOnly={uploadOnly} onCancel={onClose} />
               </div>
             </div>
 
             {/* Soft white fade so content dissolves under the floating Save
                 button rather than ending in a hard edge. */}
-            {!uploadPrompt && item.slug === "coaching-time" && (
+            {item.slug === "coaching-time" && (
               <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-28 bg-gradient-to-t from-white via-white/85 to-transparent" />
             )}
 
-            {/* Actions — hidden on the upload prompt, which has nothing to save.
-                Coaching time floats its Save button over the scrolling content so
-                nothing is cut off by an opaque footer. The editor shows Back (far
-                left) and Save (far right), equal size. */}
-            {!uploadPrompt && (
-              item.slug === "coaching-time" ? (
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 px-7 pb-7">
-                  <Button size="lg" variant="primary" rounded="rounded-full" className="pointer-events-auto w-full !py-[18px] font-semibold shadow-[0_6px_16px_rgba(16,24,40,0.10)]" disabled={!complete} onClick={onSave}>
-                    {saveLabel}
-                  </Button>
-                </div>
-              ) : (
-              <div className="flex items-center justify-between gap-3 px-7 pb-7 pt-1">
-                {wide && (
-                  <Button size="lg" variant="secondary" rounded="rounded-full" onClick={() => setBackSignal((n) => n + 1)}>
-                    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                    Back
-                  </Button>
-                )}
-                <Button size="lg" variant="primary" rounded="rounded-full" className={wide ? "" : "w-full"} disabled={!complete} onClick={onSave}>
+            {/* Actions — Coaching time floats its Save over the scrolling content;
+                everything else gets a full-width Save in the footer. */}
+            {item.slug === "coaching-time" ? (
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 px-7 pb-7">
+                <Button size="lg" variant="primary" rounded="rounded-full" className="pointer-events-auto w-full !py-[18px] font-semibold shadow-[0_6px_16px_rgba(16,24,40,0.10)]" disabled={!complete} onClick={onSave}>
                   {saveLabel}
                 </Button>
               </div>
-              )
+            ) : (
+              <div className="flex items-center justify-between gap-3 px-7 pb-7 pt-1">
+                <Button size="lg" variant="primary" rounded="rounded-full" className="w-full" disabled={!complete} onClick={onSave}>
+                  {saveLabel}
+                </Button>
+              </div>
             )}
           </motion.div>
         </motion.div>
@@ -4364,10 +4593,10 @@ export function ConfigModal({ item, lockedCoachingMode = null, lockedCoachingRea
 
 // Dispatches to the fields component for the offering type. Add a case here
 // alongside a configDefaults entry to configure another type.
-function OfferingConfigFields({ slug, config, onChange, lockedCoachingMode = null, lockedCoachingReason = "format", backSignal = 0, scrolled = false, uploadOnly = false, onCancel }: { slug: string; config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedCoachingMode?: "set" | "range" | null; lockedCoachingReason?: "format" | "subscription"; backSignal?: number; scrolled?: boolean; uploadOnly?: boolean; onCancel?: () => void }) {
+function OfferingConfigFields({ slug, config, onChange, lockedCoachingMode = null, lockedCoachingReason = "format", showCoachingDeliveryExpiration = true, scrolled = false, uploadOnly = false, onCancel }: { slug: string; config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedCoachingMode?: "set" | "range" | null; lockedCoachingReason?: "format" | "subscription"; showCoachingDeliveryExpiration?: boolean; scrolled?: boolean; uploadOnly?: boolean; onCancel?: () => void }) {
   const v2 = useV2();
-  if (slug === "coaching-time") return <CoachingTimeFields config={config} onChange={onChange} lockedMode={lockedCoachingMode} lockReason={lockedCoachingReason} />;
-  if (slug === "content") return <ContentFields config={config} onChange={onChange} priced={v2} backSignal={backSignal} scrolled={scrolled} uploadOnly={uploadOnly} onCancel={onCancel} />;
+  if (slug === "coaching-time") return <CoachingTimeFields config={config} onChange={onChange} lockedMode={lockedCoachingMode} lockReason={lockedCoachingReason} showDeliveryExpiration={showCoachingDeliveryExpiration} />;
+  if (slug === "content") return <ContentFields config={config} onChange={onChange} priced={v2} uploadOnly={uploadOnly} onCancel={onCancel} />;
   if (slug === "paid-livestream") return <PaidLivestreamFields config={config} onChange={onChange} />;
   if (slug === "workshop") return <WorkshopFields config={config} onChange={onChange} />;
   return <PlaceholderFields label={offeringBySlug[slug]?.label ?? "This product"} />;
@@ -4475,7 +4704,7 @@ function WorkshopFields({ config, onChange }: { config: Record<string, string>; 
     <div className="flex flex-col gap-5">
       <div>
         <label className="mb-1.5 block text-[14px] font-medium text-gray-light">Name</label>
-        <input value={config.name ?? ""} onChange={(e) => onChange({ name: e.target.value })} placeholder="Name your group session" autoComplete="off" className={configInputClass} />
+        <input value={config.name ?? ""} onChange={(e) => onChange({ name: e.target.value })} placeholder="Name your workshop" autoComplete="off" className={configInputClass} />
       </div>
 
       <div>
@@ -4547,8 +4776,8 @@ function WorkshopFields({ config, onChange }: { config: Record<string, string>; 
           <div className="overflow-hidden">
             <div className="pt-4">
               <label className="block text-[14px] font-medium text-gray-dark">Pre-event message <span className="font-normal">(optional)</span></label>
-              <p className="mb-2 mt-0.5 text-[14px] text-gray-light">Shared with attendees in reminder emails before the group session starts.</p>
-              <textarea value={config.preEventMessage ?? ""} onChange={(e) => onChange({ preEventMessage: e.target.value })} rows={3} placeholder="Anything attendees should know or prepare before the group session…" autoComplete="off" className={`${configInputClass} resize-none`} />
+              <p className="mb-2 mt-0.5 text-[14px] text-gray-light">Shared with attendees in reminder emails before the workshop starts.</p>
+              <textarea value={config.preEventMessage ?? ""} onChange={(e) => onChange({ preEventMessage: e.target.value })} rows={3} placeholder="Anything attendees should know or prepare before the workshop…" autoComplete="off" className={`${configInputClass} resize-none`} />
             </div>
           </div>
         </div>
@@ -5429,62 +5658,25 @@ export function ContentMetadataFields({
 
 /* ---------- Content config (upload new / reuse existing) ---------- */
 
-function ContentFields({ config, onChange, priced = false, backSignal = 0, scrolled = false, uploadOnly = false, onCancel }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; priced?: boolean; backSignal?: number; scrolled?: boolean; uploadOnly?: boolean; onCancel?: () => void }) {
+function ContentFields({ config, onChange, priced = false, uploadOnly = false, onCancel }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; priced?: boolean; uploadOnly?: boolean; onCancel?: () => void }) {
   // Editing a reused item is persisted in config so ConfigModal can widen the
   // modal to the same two-column layout the upload editor uses.
   const editing = config.editing === "true";
   const [query, setQuery] = useState("");
 
-  // The active mode (persisted in config so parent helpers can read it). The
-  // two modes keep independent data so switching tabs never bleeds across.
-  const source: "upload" | "reuse" = config.source === "upload" ? "upload" : "reuse";
-  const setSource = (t: "upload" | "reuse") => onChange({ source: t });
-
-  // Three views:
-  //   library — browse/reuse existing content (narrow)
-  //   prompt  — "upload your asset" gate; you must upload before editing (narrow)
-  //   editor  — the full two-column details editor (wide)
-  // The editor is only reachable once an asset exists.
+  // The active source (persisted in config so parent helpers can read it). Starts
+  // unset so the coach first picks a path from the toggle; the two modes keep
+  // independent data so switching never bleeds across. Upload-only hosts have no
+  // library, so they're forced to the upload path (the toggle is hidden).
+  const source: "upload" | "reuse" | "" = config.source === "upload" ? "upload" : config.source === "reuse" ? "reuse" : "";
+  const effSource = uploadOnly ? "upload" : source;
   const uploaded = Boolean(config.assetName);
-  const view: "library" | "prompt" | "editor" = source === "reuse" ? "library" : uploaded ? "editor" : "prompt";
 
-  // View changes are staged so a size change never overlaps content: the
-  // outgoing view animates out first, then we commit the state change (which may
-  // resize the modal), then the incoming view animates in — delayed past the
-  // resize when the size changed (`delayedView` names that view).
-  const [exiting, setExiting] = useState(false);
-  const [delayedView, setDelayedView] = useState<string | null>(null);
-  const pendingRef = useRef<{ commit: () => void; delay: string | null } | null>(null);
-  const beginTransition = (commit: () => void, delay: string | null) => {
-    pendingRef.current = { commit, delay };
-    setDelayedView(null);
-    setExiting(true);
-  };
-  const handleExitComplete = () => {
-    const p = pendingRef.current;
-    pendingRef.current = null;
-    setExiting(false);
-    if (p) { setDelayedView(p.delay); p.commit(); }
-  };
-  const enterDelay = (key: string) => (delayedView === key ? 0.42 : 0);
-
-  // Transitions. Only prompt↔editor change the modal size, so only those delay
-  // the incoming view past the resize. For the demo, "uploading" is a click.
-  // Clear any stale asset so "Upload new" always starts at the prompt rather
-  // than jumping straight to the editor (which is gated on an asset existing).
-  const goToPrompt = () => beginTransition(() => onChange({ source: "upload", assetName: "" }), null);          // library → prompt
-  const uploadAsset = () => beginTransition(() => onChange({ assetName: "my-asset.pdf" }), "editor");         // prompt → editor (grows)
-  const backToLibrary = () => beginTransition(() => setSource("reuse"), null);                                // prompt → library
-  // editor → library (shrinks); in upload-only mode there's no library, so it
-  // returns to the upload prompt instead.
-  const backFromEditor = () =>
-    uploadOnly
-      ? beginTransition(() => onChange({ assetName: "" }), "prompt")
-      : beginTransition(() => onChange({ source: "reuse", assetName: "" }), "library");
-  // The editor's Back button lives in the modal footer; it bumps `backSignal`.
-  useEffect(() => {
-    if (backSignal > 0 && view === "editor") backFromEditor();
-  }, [backSignal]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Progressive disclosure: pick a source, then the relevant sections reveal
+  // below the persistent toggle — mirroring the Hourly flow's format toggle.
+  const chooseUpload = () => onChange({ source: "upload" });
+  const chooseReuse = () => onChange({ source: "reuse" });
+  const uploadAsset = () => onChange({ source: "upload", assetName: "my-asset.pdf" }); // stands in for a real upload
 
   const q = query.trim().toLowerCase();
   const results = q
@@ -5513,162 +5705,135 @@ function ContentFields({ config, onChange, priced = false, backSignal = 0, scrol
   );
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* mode="wait" holds the incoming view until the outgoing one has fully
-          animated out. Size-changing steps (prompt↔editor) commit inside
-          `handleExitComplete` so the modal resizes only after the old view is
-          gone, and the new view's entrance is delayed to clear the resize. */}
-      <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
-        {exiting ? null : view === "editor" ? (
-          <motion.div
-            key="editor"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.26, ease: [0, 0, 0.2, 1], delay: enterDelay("editor") } }}
-            exit={{ opacity: 0, y: 8, transition: { duration: 0.16, ease: [0.4, 0, 1, 1] } }}
-            className="@container"
-          >
-            <div className="flex flex-col gap-6 @3xl:grid @3xl:grid-cols-[minmax(0,360px)_minmax(0,1fr)] @3xl:items-start @3xl:gap-10">
-              {/* Left column — header + asset upload, sticky as a group while the
-                  right column scrolls (Back now lives in the footer). top-8 matches
-                  the content wrapper's pt-8 so it doesn't jump when it sticks. */}
-              <div className="@3xl:sticky @3xl:top-8">
-                <h2 className="font-serif text-[28px] leading-tight text-gray-dark">Upload new content</h2>
-                <p className="mt-1.5 text-[15px] text-gray-light">Add your file and fill in the details below.</p>
-                <div className="mt-6">
-                  <UploadedAssetField name={config.assetName ?? ""} onReplace={(name) => onChange({ source: "upload", assetName: name })} />
-                </div>
-              </div>
-              {/* Right column — the rest of the upload line-items */}
-              <div className="flex flex-col gap-5">
-                {renderMetadata("")}
-              </div>
-            </div>
-          </motion.div>
-        ) : view === "prompt" ? (
-          <motion.div
-            key="prompt"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.26, ease: [0, 0, 0.2, 1], delay: enterDelay("prompt") } }}
-            exit={{ opacity: 0, y: 8, transition: { duration: 0.16, ease: [0.4, 0, 1, 1] } }}
-            className="flex min-h-[calc(85vh-60px)] flex-col"
-          >
-            {/* The whole area is the drop target. You must upload an asset before
-                you can edit its details — clicking anywhere (or the link) stands
-                in for a real upload in this prototype.
-                Dashed border drawn as an inline SVG so the dash length is fully
-                controllable. currentColor = gray-extra-light, at 50% opacity. */}
+    <div className="flex flex-col gap-6">
+      {/* Content renders its own header (the step/modal skip theirs for content). */}
+      <div>
+        <h2 className="pr-10 font-serif text-[28px] leading-tight text-gray-dark">Configure content</h2>
+        <p className="mt-1.5 text-[15px] text-gray-light">Upload a new file or choose from your existing content.</p>
+      </div>
+
+      {/* Source toggle — persistent; picking one progressively reveals its
+          section(s) below (mirrors the Hourly flow's format toggle). Hidden for
+          upload-only hosts, which have no library to choose from. */}
+      {!uploadOnly && (
+        <div>
+          <h3 className="mb-2.5 block text-[15px] font-semibold text-gray-dark">How do you want to add content?</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { value: "upload" as const, label: "Upload new", sub: "Add a new file from your computer", icon: uploadIcon, onClick: chooseUpload },
+              { value: "reuse" as const, label: "Choose existing", sub: "Reuse content you've already added", icon: stackIcon, onClick: chooseReuse },
+            ].map((opt) => {
+              const active = source === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={opt.onClick}
+                  className={`flex w-full flex-col items-center gap-2 rounded-xl border-[1.5px] bg-white px-4 py-5 text-center transition-colors ${active ? "border-gray-dark" : "border-gray-stroke hover:border-[#c9c9c9]"}`}
+                >
+                  <MaskIcon src={opt.icon} className="h-[26px] w-[26px] text-gray-dark" />
+                  <span className="flex flex-col gap-0.5">
+                    <span className="text-[15px] font-semibold text-gray-dark">{opt.label}</span>
+                    <span className="text-[14px] leading-snug text-gray-light">{opt.sub}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Upload path — a compact drop zone until a file is added, then the asset
+          field + its details reveal below. */}
+      {effSource === "upload" && (
+        <div>
+          <h3 className="mb-2.5 block text-[15px] font-semibold text-gray-dark">Your file</h3>
+          {uploaded ? (
+            <UploadedAssetField name={config.assetName ?? ""} onReplace={(name) => onChange({ source: "upload", assetName: name })} />
+          ) : (
+            // The whole area is the drop target; clicking stands in for a real
+            // upload in this prototype. Dashed border is an inline SVG so the dash
+            // length is fully controllable.
             <button
               type="button"
               onClick={uploadAsset}
-              className="relative flex flex-1 flex-col items-center justify-center rounded-2xl px-6 py-10 text-center"
+              className="relative flex w-full flex-col items-center justify-center rounded-2xl px-6 py-12 text-center"
             >
               <svg aria-hidden="true" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible text-gray-extra-light opacity-50">
                 <rect x="0" y="0" width="100%" height="100%" rx="16" ry="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="7 6" />
               </svg>
               <MaskIcon src={uploadIcon} className="h-8 w-8 text-gray-dark" />
-              <span className="mt-4 font-serif text-[28px] leading-tight text-gray-dark">Drag your resource here</span>
+              <span className="mt-4 font-serif text-[24px] leading-tight text-gray-dark">Drag your resource here</span>
               <span className="mt-1.5 text-[15px] text-gray-light">PNG, JPG, GIF, MP4, MOV, PDF</span>
-              <span className="mt-8 text-[15px] font-medium text-gray-dark underline decoration-dotted underline-offset-[3px]">Upload from your device</span>
+              <span className="mt-6 text-[15px] font-medium text-gray-dark underline decoration-dotted underline-offset-[3px]">Upload from your device</span>
             </button>
-            {/* Cancel — returns to the library, or closes the modal in the
-                upload-only variant (no library to return to). */}
-            <Button size="lg" variant="secondary" rounded="rounded-full" className="mt-4 w-full" onClick={() => (uploadOnly ? onCancel?.() : backToLibrary())}>
-              Cancel
-            </Button>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="library"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { duration: 0.2, ease: [0, 0, 0.2, 1], delay: enterDelay("library") } }}
-            exit={{ opacity: 0, y: -6, transition: { duration: 0.16, ease: [0.4, 0, 1, 1] } }}
-          >
-            {/* Header — this view's own; fades in/out with its content */}
-            <div className="mb-4">
-              <h2 className="pr-10 font-serif text-[28px] leading-tight text-gray-dark">Configure content</h2>
-              <p className="mt-1.5 text-[15px] text-gray-light">Upload your file and add the details.</p>
-            </div>
-            {/* Sticky search — full-bleed white bar so rows scroll behind it.
-                Gains a subtle shadow once the list is scrolled. */}
-            <div className={`sticky top-0 z-[1] -mx-7 bg-white px-7 pb-3 pt-3 transition-shadow ${scrolled ? "shadow-[0_8px_16px_-10px_rgba(16,24,40,0.35)]" : ""}`}>
-              <div className="relative">
-                <svg className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search your content…"
-                  autoComplete="off"
-                  className="w-full rounded-full border border-transparent bg-gray-hover px-4 py-3 pl-11 text-[15px] text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
-                />
-              </div>
-            </div>
+          )}
+        </div>
+      )}
+      {effSource === "upload" && uploaded && renderMetadata("")}
 
-            <div className="mt-3 flex flex-col gap-3 pb-4">
-              {/* Upload new — separate card at the top; opens the upload prompt */}
-              <button
-                type="button"
-                onClick={goToPrompt}
-                className="flex items-center gap-3 rounded-2xl bg-gray-hover px-3 py-2.5 text-left transition-colors hover:bg-[#ededed]"
-              >
-                <span className="flex h-11 w-[68px] shrink-0 items-center justify-center rounded-[6px] bg-[#222222]/5 text-gray-dark">
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[15px] font-semibold text-gray-dark">Upload new</span>
-                  <span className="block text-[13px] text-gray-light">Add a new file from your computer</span>
-                </span>
-                <svg className="h-4 w-4 shrink-0 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+      {/* Reuse path — search + the existing-content list, revealed once "Choose
+          existing" is picked. No "Upload new" row here; that's the toggle above. */}
+      {effSource === "reuse" && (
+        <div>
+          <h3 className="mb-2.5 block text-[15px] font-semibold text-gray-dark">Choose a resource</h3>
+          <div className="relative">
+            <svg className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search your content…"
+              autoComplete="off"
+              className="w-full rounded-full border border-transparent bg-gray-hover px-4 py-3 pl-11 text-[15px] text-gray-dark outline-none transition-colors placeholder:text-[#B1B1B1] focus:border-gray-dark"
+            />
+          </div>
+
+          {/* Existing resources — one card, one row each, inset dividers. */}
+          {results.length === 0 ? (
+            <p className="py-8 text-center text-[14px] text-gray-light">No content matches “{query}”.</p>
+          ) : (
+            <div className="mt-3 flex flex-col overflow-hidden rounded-2xl border border-gray-stroke">
+              {results.map((c, i) => {
+                const selected = config.libraryId === c.id;
+                const offerings = Math.max(1, Math.round(c.views / 2500));
+                return (
+                  <Fragment key={c.id}>
+                    {i > 0 && <div className="mx-5 border-t border-gray-stroke" />}
+                    <button
+                      type="button"
+                      onClick={() => toggleLibrary(c)}
+                      className={`flex w-full items-center gap-4 px-5 py-4 text-left transition-colors ${selected ? "bg-gray-hover" : "hover:bg-gray-hover"}`}
+                    >
+                      <img src={c.thumb} alt="" className="h-11 w-[68px] shrink-0 rounded-[6px] object-cover" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[15px] font-semibold text-gray-dark">{c.title}</span>
+                        <span className="block truncate text-[13px] text-gray-light">Added to {offerings} {offerings === 1 ? "offering" : "offerings"} · {formatViews(c.views)} views</span>
+                      </span>
+                      <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border transition-colors ${selected ? "border-gray-dark bg-gray-dark" : "border-gray-stroke bg-white"}`}>
+                        {selected && <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+                      </span>
+                    </button>
+                  </Fragment>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Selected-asset indicator — revealed once a resource is picked. */}
+          {selectedLib && (
+            <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-gray-stroke bg-gray-hover px-4 py-3">
+              <span className="flex min-w-0 items-center gap-2 text-[15px] text-gray-light">
+                <MaskIcon src={attachIcon} className="h-[18px] w-[18px] shrink-0 text-gray-light" />
+                <span className="truncate">Selected: {config.r_title || selectedLib.title}</span>
+              </span>
+              <button type="button" onClick={openEdit} className="flex shrink-0 items-center gap-1.5 text-[15px] text-gray-light transition-colors hover:text-gray-dark">
+                <MaskIcon src={editIcon} className="h-4 w-4" />
+                <span className="underline underline-offset-2">Edit</span>
               </button>
-
-              {/* Existing resources — combined into a single card, one row each.
-                  Full-width rows with inset dividers (mirrors the products card). */}
-              {results.length === 0 ? (
-                <p className="py-8 text-center text-[14px] text-gray-light">No content matches “{query}”.</p>
-              ) : (
-                <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-stroke">
-                  {results.map((c, i) => {
-                    const selected = config.libraryId === c.id;
-                    const offerings = Math.max(1, Math.round(c.views / 2500));
-                    return (
-                      <Fragment key={c.id}>
-                        {i > 0 && <div className="mx-5 border-t border-gray-stroke" />}
-                        <button
-                          type="button"
-                          onClick={() => toggleLibrary(c)}
-                          className={`flex w-full items-center gap-4 px-5 py-4 text-left transition-colors ${selected ? "bg-gray-hover" : "hover:bg-gray-hover"}`}
-                        >
-                          <img src={c.thumb} alt="" className="h-11 w-[68px] shrink-0 rounded-[6px] object-cover" />
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate text-[15px] font-semibold text-gray-dark">{c.title}</span>
-                            <span className="block truncate text-[13px] text-gray-light">Added to {offerings} {offerings === 1 ? "offering" : "offerings"} · {formatViews(c.views)} views</span>
-                          </span>
-                          <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border transition-colors ${selected ? "border-gray-dark bg-gray-dark" : "border-gray-stroke bg-white"}`}>
-                            {selected && <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
-                          </span>
-                        </button>
-                      </Fragment>
-                    );
-                  })}
-                </div>
-              )}
             </div>
-
-            {/* Selected-asset indicator — a sticky bar pinned just above the Save CTA */}
-            {selectedLib && (
-              <div className="sticky bottom-0 -mx-7 -mb-1 flex items-center justify-between gap-3 border-t border-gray-stroke bg-white px-7 pb-2 pt-3">
-                <span className="flex min-w-0 items-center gap-2 text-[15px] text-gray-light">
-                  <MaskIcon src={attachIcon} className="h-[18px] w-[18px] shrink-0 text-gray-light" />
-                  <span className="truncate">Selected: {config.r_title || selectedLib.title}</span>
-                </span>
-                <button type="button" onClick={openEdit} className="flex shrink-0 items-center gap-1.5 text-[15px] text-gray-light transition-colors hover:text-gray-dark">
-                  <MaskIcon src={editIcon} className="h-4 w-4" />
-                  <span className="underline underline-offset-2">Edit</span>
-                </button>
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </div>
+      )}
 
       {/* Edit screen — fills the (now wide) modal box via absolute inset-0 and
           mirrors the upload editor's two-column layout so they feel like one
@@ -5736,7 +5901,43 @@ function TimeField({ value, onChange, label }: { value: string; onChange: (v: st
   );
 }
 
-function CoachingTimeFields({ config, onChange, lockedMode = null, lockReason = "format" }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedMode?: "set" | "range" | null; lockReason?: "format" | "subscription" }) {
+// The delivery-format + expiration prompts for a coaching-time product. Shared
+// by the inline setup and the bundle config modal; the Hourly flow renders these
+// on its Details step instead (showDeliveryExpiration=false here).
+function CoachingDeliveryExpirationFields({ config, onChange, isSubscription = false, headerClass = "mb-2.5 block text-[15px] font-semibold text-gray-dark" }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; isSubscription?: boolean; headerClass?: string }) {
+  return (
+    <>
+      {/* Delivery format. */}
+      <div>
+        <h3 className={headerClass}>How will this time be delivered?</h3>
+        <Select
+          value={config.delivery ?? ""}
+          onChange={(v) => onChange({ delivery: v })}
+          options={deliveryFormats}
+          placeholder="Select an option"
+          triggerClassName="py-3 pl-4 pr-3 text-[15px]"
+        />
+      </div>
+
+      {/* Expiration term — defaults to 3 months; applies to one-time and
+          subscription alike. */}
+      <div>
+        <h3 className={headerClass}>When does this coaching time expire?</h3>
+        <Select
+          value={config.expiration ?? DEFAULT_EXPIRATION}
+          onChange={(v) => onChange({ expiration: v })}
+          options={EXPIRATION_OPTIONS}
+          triggerClassName="py-3 pl-4 pr-3 text-[15px]"
+        />
+        {isSubscription && (
+          <p className="mt-2 text-[14px] leading-snug text-gray-light">Note that this time will roll over for subscriptions.</p>
+        )}
+      </div>
+    </>
+  );
+}
+
+function CoachingTimeFields({ config, onChange, lockedMode = null, lockReason = "format", showDeliveryExpiration = true }: { config: Record<string, string>; onChange: (patch: Record<string, string>) => void; lockedMode?: "set" | "range" | null; lockReason?: "format" | "subscription"; showDeliveryExpiration?: boolean }) {
   // Explanation shown on the disabled format option when it's locked.
   const lockTooltip = lockReason === "subscription"
     ? "A range of hours isn't available on subscription offerings."
@@ -5745,7 +5946,9 @@ function CoachingTimeFields({ config, onChange, lockedMode = null, lockReason = 
   // "subscription" for recurring offerings.
   const isSubscription = lockReason === "subscription";
   const v2 = useV2();
-  // All sections show at once — nothing is gated behind filling in a prior one.
+  // Progressive disclosure: only the time-format picker shows until a format is
+  // chosen; the Amount of time, Pricing, Delivery and Expiration sections all
+  // reveal once `mode` is set.
   // When another coaching-time in the offering already fixed the mode, this one
   // is locked to match it — keep the stored mode in sync and disable the toggle.
   const mode: "set" | "range" | null = lockedMode ?? (config.mode === "range" ? "range" : config.mode === "set" ? "set" : null);
@@ -5848,8 +6051,9 @@ function CoachingTimeFields({ config, onChange, lockedMode = null, lockReason = 
         </>
       )}
 
-      {/* Pricing (set mode) — sync to the hourly rate or enter a custom price. */}
-      {v2 && mode === "set" && (
+      {/* Pricing (set mode) — sync to the hourly rate or enter a custom price.
+          Progressive disclosure: only reveals once an amount of time is entered. */}
+      {v2 && mode === "set" && Boolean(config.hours || config.minutes) && (
         <div>
           <h3 className={sectionHeader}>Pricing</h3>
           {/* Pricing-mode toggle — same card treatment as the time format toggle:
@@ -5896,39 +6100,18 @@ function CoachingTimeFields({ config, onChange, lockedMode = null, lockReason = 
         </div>
       )}
 
-      {/* Delivery format. */}
-      <div>
-        <h3 className={sectionHeader}>How will this time be delivered?</h3>
-        <Select
-          value={config.delivery ?? ""}
-          onChange={(v) => onChange({ delivery: v })}
-          options={deliveryFormats}
-          placeholder="Select an option"
-          triggerClassName="py-3 pl-4 pr-3 text-[15px]"
-        />
-      </div>
-
-      {/* Expiration term — defaults to 3 months; applies to one-time and
-          subscription alike. */}
-      <div>
-        <h3 className={sectionHeader}>When does this coaching time expire?</h3>
-        <Select
-          value={config.expiration ?? DEFAULT_EXPIRATION}
-          onChange={(v) => onChange({ expiration: v })}
-          options={EXPIRATION_OPTIONS}
-          triggerClassName="py-3 pl-4 pr-3 text-[15px]"
-        />
-        {isSubscription && (
-          <p className="mt-2 text-[14px] leading-snug text-gray-light">Note that this time will roll over for subscriptions.</p>
-        )}
-      </div>
+      {/* Delivery + expiration — gated behind the format like the sections above.
+          The Hourly flow hides these here and renders them on its Details step. */}
+      {showDeliveryExpiration && mode && (
+        <CoachingDeliveryExpirationFields config={config} onChange={onChange} isSubscription={isSubscription} headerClass={sectionHeader} />
+      )}
     </div>
   );
 }
 
 /* ---------- Step 3: Customer-facing page ---------- */
 
-function PageStep({
+export function PageStep({
   name, headline, pricingMode, paidType, interval, price, description, setDescription,
   sections, onAddSection, onUpdateSection, onRemoveSection, onReorderSections,
 }: {
@@ -6416,7 +6599,7 @@ function ReviewPicker({ open, chosen, onSelect, onClose }: { open: boolean; chos
 
 /* ---------- Live preview card ---------- */
 
-function ProductPreview({ name, headline, pricingMode, paidType, interval, price, cover, multiOption, joinLabel }: { name: string; headline: string; pricingMode: "free" | "paid"; paidType: "recurring" | "one-time"; interval: string; price: string; cover: string | null; multiOption: boolean; joinLabel: string }) {
+export function ProductPreview({ name, headline, pricingMode, paidType, interval, price, cover, multiOption, cohorts = null, activeCohortId, joinLabel }: { name: string; headline: string; pricingMode: "free" | "paid"; paidType: "recurring" | "one-time"; interval: string; price: string; cover: string | null; multiOption: boolean; cohorts?: { id: number; label: string; day: string; date: string }[] | null; activeCohortId?: number; joinLabel: string }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-stroke bg-white shadow-[0_1px_3px_rgba(16,24,40,0.06)]">
       <img src={cover || coverImage9} alt="" className={`aspect-[1200/630] w-full object-cover ${cover ? "" : "opacity-25"}`} />
@@ -6434,6 +6617,36 @@ function ProductPreview({ name, headline, pricingMode, paidType, interval, price
             ${formatMoney(Number(price))} <span className="font-normal text-gray-light">{paidType === "recurring" ? intervalSuffix(interval) : "one-time"}</span>
           </p>
         )}
+
+        {/* Cohort options a buyer would choose between — the one being edited is
+            highlighted to tie the preview to the Sessions tab's selector. Animates
+            in/out as "Run multiple cohorts" is toggled. */}
+        <AnimatePresence initial={false}>
+          {cohorts && cohorts.length > 0 && (
+            <motion.div
+              key="cohorts"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={offeringTransition}
+              className="overflow-hidden"
+            >
+              <div className="mt-3 flex flex-col gap-1.5">
+                <p className="text-[13px] font-medium text-gray-extra-light">Cohorts</p>
+                {cohorts.map((c) => {
+                  const active = c.id === activeCohortId;
+                  return (
+                    <div key={c.id} className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 transition-colors ${active ? "bg-gray-hover" : ""}`}>
+                      <CalendarIcon day={c.day} dim={c.date === "Dates TBD"} size="xs" />
+                      <span className="min-w-0 flex-1 truncate text-[14px] font-semibold text-gray-dark">{c.label}</span>
+                      <span className="shrink-0 text-[13px] text-gray-light">{c.date === "Dates TBD" ? c.date : `Starts ${c.date}`}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <Button size="lg" variant="primary" rounded="rounded-full" className="mt-3 w-full text-[15px]">
           {joinLabel}

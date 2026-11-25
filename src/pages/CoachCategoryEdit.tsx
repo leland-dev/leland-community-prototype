@@ -739,7 +739,7 @@ export function SubscriptionRowCard({ plan, onOpen }: { plan: SubscriptionPlan; 
 function CategoryV2Sections({ category }: { category: string | undefined }) {
   const navigate = useNavigate();
   const data = categoryData[category ?? ""];
-  const goNew = () => navigate(`/my-leland/manage/${category}/new`);
+  const goNew = () => navigate(`/my-leland/manage/${category}/new-guided`);
   const onPreview = (o: Offering) => navigate(`/offering/${o.slug}`);
   const onEdit = (o: Offering) => navigate(`/my-leland/manage/${category}/new-product?edit=${o.slug}`);
 
@@ -957,7 +957,7 @@ function CategoryV3Content({ category }: { category: string | undefined }) {
       <section className={boxClass}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-[18px] font-semibold text-gray-dark">Live group sessions</h2>
-          <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new`)}>
+          <Button size="sm" variant="secondary" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new-guided`)}>
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
             Add
           </Button>
@@ -1013,7 +1013,7 @@ function CategoryV3Content({ category }: { category: string | undefined }) {
                 )}
               </AnimatePresence>
             </div>
-            <Button size="sm" variant="dark" rounded="rounded-full" className="font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new`)}>
+            <Button size="sm" variant="dark" rounded="rounded-full" className="font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new-guided`)}>
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
               New
             </Button>
@@ -1154,7 +1154,7 @@ function CategoryV4Content({ category }: { category: string | undefined }) {
               )}
             </AnimatePresence>
           </div>
-          <Button size="sm" variant="dark" rounded="rounded-full" className="font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new`)}>
+          <Button size="sm" variant="dark" rounded="rounded-full" className="font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new-guided`)}>
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
             New
           </Button>
@@ -1261,7 +1261,7 @@ function OfferingsSection({ category, gridClass }: { category: string | undefine
         {/* Add-new tile — leads the coach's own offerings. */}
         {showYours && (
           <button
-            onClick={() => navigate(`/my-leland/manage/${category}/new`)}
+            onClick={() => navigate(`/my-leland/manage/${category}/new-guided`)}
             style={dashedBorderStyle}
             className="group relative flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-2xl bg-gray-hover transition-colors hover:bg-[#eeeeee]"
           >
@@ -1965,7 +1965,7 @@ function V5OfferingsPanel({ category }: { category: string | undefined }) {
           <h2 className="text-[20px] font-semibold text-gray-dark">Offerings</h2>
           <p className="mt-1 text-[14px] text-gray-light">Hourly coaching, content, and bundles clients can buy outright.</p>
         </div>
-        <Button size="sm" variant="dark" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new`)}>
+        <Button size="sm" variant="dark" rounded="rounded-full" className="shrink-0 font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new-guided`)}>
           <PlusIcon />
           New
         </Button>
@@ -2167,7 +2167,7 @@ function CategoryV5Content(props: {
     <>
       {/* Primary actions — new product + edit this category's listing. */}
       <div className="mt-8 flex flex-wrap items-center gap-3">
-        <Button size="lg" variant="dark" rounded="rounded-full" className="font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new`)}>
+        <Button size="lg" variant="dark" rounded="rounded-full" className="font-semibold" onClick={() => navigate(`/my-leland/manage/${category}/new-guided`)}>
           <PlusIcon className="h-5 w-5" />
           New
         </Button>
